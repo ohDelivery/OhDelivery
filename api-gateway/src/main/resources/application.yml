@@ -1,0 +1,24 @@
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+
+server:
+  port: 8080
+
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: order-service
+#          uri: lb://order-service
+#          predicates:
+#            - Path=/api/orders/**, /order-service/v3/api-docs
+#      discovery:
+#        locator:
+#          enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka/
