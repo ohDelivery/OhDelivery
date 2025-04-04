@@ -2,3 +2,4 @@ rootProject.name = 'oh-delivery'
 
 include 'discovery-server'
 include 'api-gateway'
+include 'user-service'
