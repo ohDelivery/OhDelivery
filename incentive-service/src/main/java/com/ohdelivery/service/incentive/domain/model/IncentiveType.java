@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum PaidStatus {
-	PAID("지급 완료"),
-	NOT_PAID("미지급");
+public enum IncentiveType {
+	DAILY_DISTANCE("누적 거리 기반"),
+	PER_DELIVERY_TIME("예상 소요 시간 내 도착");
 
 	private final String value;
+
 }
