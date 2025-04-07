@@ -1,11 +1,15 @@
 spring:
   application:
     name: user-service
-
-server:
-  port: 19091
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
