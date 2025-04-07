@@ -1,15 +1,13 @@
-package com.ohdelivery.service.user;
+package com.ohdelivery.service.incentive;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
-@SpringBootApplication(scanBasePackages = {"com.ohdelivery.service.user", "com.ohdelivery.common"})
-public class UserServiceApplication {
-
+@SpringBootApplication
+public class IncentiveServiceApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(UserServiceApplication.class, args);
+		SpringApplication.run(IncentiveServiceApplication.class, args);
 	}
-
 }
