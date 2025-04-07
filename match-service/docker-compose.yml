@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  match-db:
+    image: postgres:15
+    container_name: match-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: match_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - matchdb_data:/var/lib/postgresql/data
+    networks:
+      - match-network
+
+volumes:
+  matchdb_data:
+
+networks:
+  match-network:
+    driver: bridge
