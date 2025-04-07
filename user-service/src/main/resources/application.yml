@@ -1,9 +1,13 @@
 spring:
   application:
     name: user-service
-
-server:
-  port: 19091
+  config:
+    import: configserver:http://localhost:18080
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
 
 eureka:
   client:
