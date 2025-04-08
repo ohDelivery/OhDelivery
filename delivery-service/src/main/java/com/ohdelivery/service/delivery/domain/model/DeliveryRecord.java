@@ -13,7 +13,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @Entity
-@Table(name = "p_delivery")
+@Table(name = "p_delivery_record")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryRecord {
