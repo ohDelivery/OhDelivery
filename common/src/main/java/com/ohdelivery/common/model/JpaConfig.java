@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.matching.infrastructure.config;
+package com.ohdelivery.common.model;
 
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
