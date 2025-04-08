@@ -9,8 +9,11 @@ import com.ohdelivery.service.delivery.domain.model.Delivery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +27,7 @@ public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
+    // TODO RoleCheck 추가하기
     @PostMapping
     @Operation(summary = "배달 생성하기")
     public ResponseEntity<ApiResponse<DeliveryResponse>> createdDelivery(
@@ -38,4 +42,22 @@ public class DeliveryController {
             )
         );
     }
+
+    // TODO RoleCheck 추가하기
+    @GetMapping("/{deliveryId}")
+    @Operation(summary = "배달 조회하기")
+    public ResponseEntity<DeliveryResponse> getDelivery(
+        @PathVariable UUID deliveryId) {
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+
+//        return ResponseEntity.ok(
+//            ApiResponse.success(
+//                SuccessCode.COMMON_SUCCESS.getCode().toString(),
+//                SuccessCode.COMMON_SUCCESS.getMessage(),
+//                new DeliveryResponse(delivery)
+//            )
+//        );
+        return ResponseEntity.ok(new DeliveryResponse(delivery));
+    }
+
 }
