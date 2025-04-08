@@ -6,6 +6,7 @@ import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,16 @@ public class RiderServiceImpl implements RiderService {
         request.getLongitude()
     );
 
+    riderRepository.save(rider);
+  }
+
+  @Override
+  public void deleteRider(UUID id) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
+    LocalDateTime now = LocalDateTime.now();
+    String createdBy = "system";
+    rider.delete(now, createdBy);
     riderRepository.save(rider);
   }
 }

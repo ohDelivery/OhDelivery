@@ -11,4 +11,6 @@ public interface RiderService {
   GetRiderResponse getRider(UUID id);
 
   void updateRider(UUID id, UpdateRiderRequest request);
+
+  void deleteRider(UUID id);
 }
