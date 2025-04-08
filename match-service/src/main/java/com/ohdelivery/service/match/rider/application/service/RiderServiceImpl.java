@@ -3,6 +3,8 @@ package com.ohdelivery.service.match.rider.application.service;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
+import com.ohdelivery.service.match.rider.presentation.GetRiderResponse;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,5 +25,18 @@ public class RiderServiceImpl implements RiderService {
     );
     riderRepository.save(rider);
     return rider.getId();
+  }
+
+  @Override
+  public GetRiderResponse getRider(UUID id) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+    return new GetRiderResponse(
+        rider.getId(),
+        rider.getRiderId(),
+        rider.getStatus().toString(),
+        rider.getLatitude(),
+        rider.getLongitude()
+    );
   }
 }
