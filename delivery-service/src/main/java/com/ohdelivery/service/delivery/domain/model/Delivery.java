@@ -54,4 +54,8 @@ public class Delivery extends BaseEntity {
 
     @Column(name = "payment_amount", nullable = false)
     private Integer paymentAmount;
+
+    public void complete() {
+        this.status = DeliveryStatus.DELIVERED;
+    }
 }

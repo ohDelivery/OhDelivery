@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,4 +61,13 @@ public class DeliveryController {
         return ResponseEntity.ok(new DeliveryResponse(delivery));
     }
 
+    // TODO RoleCheck 추가하기
+    @PutMapping("/{deliveryId}/complete")
+    @Operation(summary = "배달 완료 처리하기")
+    public ResponseEntity<Void> completeDelivery(
+        @PathVariable UUID deliveryId) {
+        deliveryService.completeDelivery(deliveryId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

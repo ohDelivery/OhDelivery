@@ -36,4 +36,8 @@ public class DeliveryRecord {
 
     @Column(name = "delivered_at", nullable = false)
     private LocalDateTime deliveredAt;
+
+    public void complete() {
+        this.deliveredAt = LocalDateTime.now();
+    }
 }

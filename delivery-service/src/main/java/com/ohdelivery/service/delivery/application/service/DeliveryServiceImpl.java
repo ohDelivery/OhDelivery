@@ -3,6 +3,8 @@ package com.ohdelivery.service.delivery.application.service;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.exception.DeliveryNotFoundException;
 import com.ohdelivery.service.delivery.domain.model.Delivery;
+import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
+import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepository;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryRecordRepository deliveryRecordRepository;
 
     @Override
     @Transactional
@@ -27,5 +30,22 @@ public class DeliveryServiceImpl implements DeliveryService {
     public Delivery getDelivery(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId)
             .orElseThrow(DeliveryNotFoundException::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DeliveryRecord getDeliveryRecord(UUID deliveryId) {
+        return deliveryRecordRepository.findByDeliveryId(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
+    }
+
+    @Override
+    @Transactional
+    public void completeDelivery(UUID deliveryId) {
+        Delivery delivery = getDelivery(deliveryId);
+        delivery.complete();
+
+        DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
+        deliveryRecord.complete();
     }
 }
