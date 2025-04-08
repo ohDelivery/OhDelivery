@@ -6,5 +6,7 @@ import java.util.UUID;
 
 public interface DeliveryRecordRepository {
 
+    DeliveryRecord save(DeliveryRecord deliveryRecord);
+
     Optional<DeliveryRecord> findByDeliveryId(UUID deliveryId);
 }
