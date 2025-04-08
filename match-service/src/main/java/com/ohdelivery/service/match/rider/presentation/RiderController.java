@@ -1,0 +1,25 @@
+package com.ohdelivery.service.match.rider.presentation;
+
+import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
+import com.ohdelivery.service.match.rider.application.service.RiderService;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/riders")
+@RequiredArgsConstructor
+public class RiderController {
+  private final RiderService riderService;
+
+  @PostMapping
+  public ResponseEntity<UUID> create(@RequestBody CreateRiderRequest request) {
+    UUID id = riderService.createRider(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(id);
+  }
+}
