@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: match-service
+#  config:
+#    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+#  cloud:
+#    config:
+#      discovery:
+#        enabled: true
+#        service-id: config-server
+  datasource:
+    url: jdbc:postgresql://localhost:5432/match_db
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 개발 중이면 update / 운영은 validate or none 권장
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    format-sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090
