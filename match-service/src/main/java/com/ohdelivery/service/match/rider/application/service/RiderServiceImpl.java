@@ -1,6 +1,7 @@
 package com.ohdelivery.service.match.rider.application.service;
 
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
@@ -30,7 +31,7 @@ public class RiderServiceImpl implements RiderService {
   @Override
   public GetRiderResponse getRider(UUID id) {
     Rider rider = riderRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
     return new GetRiderResponse(
         rider.getId(),
         rider.getRiderId(),
@@ -38,5 +39,20 @@ public class RiderServiceImpl implements RiderService {
         rider.getLatitude(),
         rider.getLongitude()
     );
+  }
+
+  @Override
+  public void updateRider(UUID id, UpdateRiderRequest request) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
+    rider = new Rider(
+        rider.getId(),
+        request.getRider_id(),
+        request.getStatus(),
+        request.getLatitude(),
+        request.getLongitude()
+    );
+
+    riderRepository.save(rider);
   }
 }
