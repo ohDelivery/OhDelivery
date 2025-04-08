@@ -1,7 +1,7 @@
 package com.ohdelivery.service.match.rider.application.service;
 
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
-import com.ohdelivery.service.match.rider.presentation.GetRiderResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import java.util.UUID;
 
 public interface RiderService {

@@ -1,6 +1,7 @@
 package com.ohdelivery.service.match.rider.presentation;
 
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

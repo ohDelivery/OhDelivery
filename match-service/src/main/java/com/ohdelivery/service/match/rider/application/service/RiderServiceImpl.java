@@ -3,7 +3,7 @@ package com.ohdelivery.service.match.rider.application.service;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
-import com.ohdelivery.service.match.rider.presentation.GetRiderResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

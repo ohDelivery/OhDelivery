@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.rider.presentation;
+package com.ohdelivery.service.match.rider.application.dto.response;
 
 import java.util.UUID;
 import lombok.Getter;
