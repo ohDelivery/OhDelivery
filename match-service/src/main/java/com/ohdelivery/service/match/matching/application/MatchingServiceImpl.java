@@ -9,6 +9,7 @@ import com.ohdelivery.service.match.matching.domain.vo.DeliveryInfo;
 import com.ohdelivery.service.match.matching.domain.vo.PayInfo;
 import com.ohdelivery.service.match.matching.domain.vo.RiderInfo;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class MatchingServiceImpl implements MatchingService{
             .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
 
         matching = new Matching(
+                matching.getId(),
             new RiderInfo(request.getRiderId()),
             new PayInfo(request.getAssignedFee()),
             new DeliveryInfo(
@@ -76,6 +78,12 @@ public class MatchingServiceImpl implements MatchingService{
 
     @Override
     public void deleteMatching(UUID id) {
-        matchingRepository.deleteById(id);
+        Matching matching = matchingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+        // TODO : BaseEntity의 delete메서드 매개변수 넣는 이유 물어보기
+        LocalDateTime now = LocalDateTime.now();
+        String createdBy = "system";
+        matching.delete(now,createdBy);
+        matchingRepository.save(matching);
     }
 }

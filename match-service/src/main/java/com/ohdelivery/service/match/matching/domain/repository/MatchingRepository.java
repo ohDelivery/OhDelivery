@@ -9,6 +9,4 @@ import org.springframework.stereotype.Repository;
 public interface MatchingRepository {
     Matching save(Matching matching);
     Optional<Matching> findById(UUID id);
-
-    void deleteById(UUID id);
 }

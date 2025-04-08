@@ -20,11 +20,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
 
     @Override
     public Optional<Matching> findById(UUID id) {
-        return jpaMatchingRepository.findById(id);
+        return jpaMatchingRepository.findByIdAndDeletedAtIsNull(id);
     }
 
-    @Override
-    public void deleteById(UUID id) {
-        jpaMatchingRepository.deleteById(id);
-    }
 }
