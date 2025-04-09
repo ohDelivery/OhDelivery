@@ -33,3 +33,7 @@ springdoc:
       name: delivery-service
       url: /delivery-service/v3/api-docs
     use-root-path: true
+
+logging:
+  level:
+    com.example.gateway: DEBUG
