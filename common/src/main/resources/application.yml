@@ -1,3 +1,7 @@
 spring:
   application:
     name: common
+  kafka:
+    url: ${KAFKA_URL}
+  config:
+    import: optional:file:.env[.properties]
