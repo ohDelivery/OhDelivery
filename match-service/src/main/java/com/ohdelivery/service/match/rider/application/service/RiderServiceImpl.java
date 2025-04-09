@@ -5,7 +5,7 @@ import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderReq
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class RiderServiceImpl implements RiderService {
   @Override
   public GetRiderResponse getRider(UUID id) {
     Rider rider = riderRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
+        .orElseThrow(() -> new RiderNotFoundException());
     return new GetRiderResponse(
         rider.getId(),
         rider.getRiderId(),
@@ -45,7 +45,7 @@ public class RiderServiceImpl implements RiderService {
   @Override
   public void updateRider(UUID id, UpdateRiderRequest request) {
     Rider rider = riderRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
+        .orElseThrow(() -> new RiderNotFoundException());
     rider = new Rider(
         rider.getId(),
         request.getRider_id(),
@@ -60,7 +60,7 @@ public class RiderServiceImpl implements RiderService {
   @Override
   public void deleteRider(UUID id) {
     Rider rider = riderRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Rider not found"));
+        .orElseThrow(() -> new RiderNotFoundException());
     LocalDateTime now = LocalDateTime.now();
     String createdBy = "system";
     rider.delete(now, createdBy);
