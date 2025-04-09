@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class AlarmExceptionHandler {
 
   @ExceptionHandler(AlarmException.class)
-  public ResponseEntity<ApiResponse<String>> handlerBaseExceptionException(AlarmException e) {
+  public ResponseEntity<ApiResponse<String>> handlerAlarmExceptionException(AlarmException e) {
     AlarmErrorCode code = e.getErrorCode();
     return ResponseEntity
         .status(code.getHttpStatus())
