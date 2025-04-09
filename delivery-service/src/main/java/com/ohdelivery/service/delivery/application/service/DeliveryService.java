@@ -18,4 +18,6 @@ public interface DeliveryService {
         LocalDateTime acceptedAt);
 
     DeliveryRecord getDeliveryRecord(UUID deliveryId);
+
+    void updateFee(UUID deliveryId, Integer fee);
 }

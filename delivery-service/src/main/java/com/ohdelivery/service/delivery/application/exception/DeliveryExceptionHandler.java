@@ -1,5 +1,6 @@
 package com.ohdelivery.service.delivery.application.exception;
 
+import com.ohdelivery.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -12,19 +13,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class DeliveryExceptionHandler extends ResponseEntityExceptionHandler {
 
-//    @ExceptionHandler(value = DeliveryNotFoundException.class)
-//    public ResponseEntity<ApiResponse<String>> notFoundException(HttpServletRequest req,
-//        DeliveryNotFoundException e) {
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-//            ApiResponse.fail(HttpStatus.NOT_FOUND, e.getMessage())
-//        );
-//    }
-
     @ExceptionHandler(value = DeliveryNotFoundException.class)
-    public ResponseEntity<String> notFoundException(HttpServletRequest req,
+    public ResponseEntity<ApiResponse<String>> notFoundException(HttpServletRequest req,
         DeliveryNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-            "실패;"
+            ApiResponse.fail(HttpStatus.NOT_FOUND, e.getMessage())
         );
     }
+
 }

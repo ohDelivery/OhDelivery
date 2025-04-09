@@ -1,5 +1,6 @@
 package com.ohdelivery.service.delivery.domain.model;
 
+import com.ohdelivery.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -20,7 +21,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class DeliveryRecord {
+public class DeliveryRecord extends BaseEntity {
 
     @Id
     @Column(name = "delivery_id", nullable = false)
@@ -41,14 +42,14 @@ public class DeliveryRecord {
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
 
-    public void complete() {
-        this.deliveredAt = LocalDateTime.now();
-    }
-
     public DeliveryRecord(UUID deliveryId, UUID riderId, Integer fee, LocalDateTime acceptedAt) {
         this.deliveryId = deliveryId;
         this.riderId = riderId;
         this.fee = fee;
         this.acceptedAt = acceptedAt;
+    }
+
+    public void complete() {
+        this.deliveredAt = LocalDateTime.now();
     }
 }

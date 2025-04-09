@@ -51,10 +51,18 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee,
         LocalDateTime acceptedAt) {
         DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee, acceptedAt);
 
         return deliveryRecordRepository.save(deliveryRecord);
+    }
+
+    @Override
+    @Transactional
+    public void updateFee(UUID deliveryId, Integer fee) {
+        Delivery delivery = getDelivery(deliveryId);
+        delivery.updateFee(fee);
     }
 }
