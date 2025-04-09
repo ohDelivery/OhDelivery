@@ -1,8 +1,10 @@
 package com.ohdelivery.service.match.matching.application.dto.response;
 
 import java.util.UUID;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public class GetMatchingResponse {
     private final UUID id;
