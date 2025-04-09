@@ -14,6 +14,10 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: delivery-service
+          uri: lb://delivery-service
+          predicates:
+            - Path=/deliveries/**, /delivery-service/v3/api-docs
       discovery:
         locator:
           enabled: true
@@ -22,3 +26,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090/eureka/
+
+springdoc:
+  swagger-ui:
+    urls[0]:
+      name: delivery-service
+      url: /delivery-service/v3/api-docs
+    use-root-path: true
