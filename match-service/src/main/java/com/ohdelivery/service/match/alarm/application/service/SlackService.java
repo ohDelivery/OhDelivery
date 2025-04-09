@@ -78,12 +78,10 @@ public class SlackService {
   }
 
   // slack 응답 검증
-  private <T> void validateSlackResponse(T response) {
-    if (response instanceof ChatPostMessageResponse
-        && !((ChatPostMessageResponse) response).isOk()) {
+  private <T> void validateSlackResponse(T res) {
+    if (res instanceof ChatPostMessageResponse cpmRes && cpmRes.isOk()) {
       throw new AlarmException(AlarmErrorCode.SLACK_MESSAGE_SEND_FAILED);
-    } else if (response instanceof ConversationsOpenResponse
-        && !((ConversationsOpenResponse) response).isOk()) {
+    } else if (res instanceof ConversationsOpenResponse coRes && coRes.isOk()) {
       throw new AlarmException(AlarmErrorCode.SLACK_CHANNEL_OPEN_FAILED);
     }
   }
