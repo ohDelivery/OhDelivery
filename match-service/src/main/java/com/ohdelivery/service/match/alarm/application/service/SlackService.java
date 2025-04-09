@@ -1,5 +1,6 @@
 package com.ohdelivery.service.match.alarm.application.service;
 
+import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
 import com.ohdelivery.service.match.alarm.application.exception.AlarmErrorCode;
 import com.ohdelivery.service.match.alarm.application.exception.AlarmException;
 import com.slack.api.Slack;
@@ -24,7 +25,7 @@ public class SlackService {
   private String slackToken;
   private final Slack slack = Slack.getInstance();
 
-  public void sendSlackMessage(String slackEmail, String message)
+  public SlackResponse sendSlackMessage(String slackEmail, String message)
       throws IOException, SlackApiException {
     // 사용자 slack ID 조회
     String slackId = getSlackUserIdByEmail(slackEmail);
@@ -37,6 +38,8 @@ public class SlackService {
 
     // response 검증
     validateSlackResponse(response);
+
+    return SlackResponse.toResponse(slackId, dmChannelId, response.getTs());
   }
 
   // Slack 사용자 이메일로 사용자 ID 조회
@@ -79,9 +82,9 @@ public class SlackService {
 
   // slack 응답 검증
   private <T> void validateSlackResponse(T res) {
-    if (res instanceof ChatPostMessageResponse cpmRes && cpmRes.isOk()) {
+    if (res instanceof ChatPostMessageResponse cpmRes && !cpmRes.isOk()) {
       throw new AlarmException(AlarmErrorCode.SLACK_MESSAGE_SEND_FAILED);
-    } else if (res instanceof ConversationsOpenResponse coRes && coRes.isOk()) {
+    } else if (res instanceof ConversationsOpenResponse coRes && !coRes.isOk()) {
       throw new AlarmException(AlarmErrorCode.SLACK_CHANNEL_OPEN_FAILED);
     }
   }
