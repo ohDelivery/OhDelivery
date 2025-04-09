@@ -4,5 +4,5 @@ import com.ohdelivery.service.match.alarm.domain.model.AlarmRider;
 
 public interface AlarmRiderRepository {
 
-  void save(AlarmRider alarmRider);
+  AlarmRider save(AlarmRider alarmRider);
 }

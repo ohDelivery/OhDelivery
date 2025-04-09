@@ -32,12 +32,13 @@ public class Alarm extends BaseEntity {
   private String message;
 
   @OneToMany(mappedBy = "alarm", fetch = FetchType.LAZY)
-  private List<AlarmRider> alarmRider = new ArrayList<>();
+  private List<AlarmRider> alarmRider;
 
   public static Alarm toEntity(UUID deliveryId, String message) {
     return Alarm.builder()
         .deliveryId(deliveryId)
         .message(message)
+        .alarmRider(new ArrayList<>())
         .build();
   }
 }
