@@ -22,7 +22,7 @@ public class MatchingEventConsumer {
         groupId = KafkaConfig.DELIVERY_GROUP_ID,
         containerFactory = "completeMatchingConsumerFactory"
     )
-    public void testDelivery(@Payload CompleteMatchingEvent event) {
+    public void handleCompleteMatchingEvent(@Payload CompleteMatchingEvent event) {
         deliveryService.completeMatching(event.getDeliveryId(), event.getRiderId());
     }
 }
