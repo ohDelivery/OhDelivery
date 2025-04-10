@@ -7,6 +7,7 @@ import com.ohdelivery.service.user.domain.model.User;
 import com.ohdelivery.service.user.domain.repository.UserRepository;
 import com.ohdelivery.service.user.presentation.response.UserAuthResponse;
 import com.ohdelivery.service.user.presentation.response.UserLoginResponse;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,6 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        userRepository.findById(id).delete();
+        userRepository.findById(id).delete(LocalDateTime.now(), String.valueOf(id));
     }
 }

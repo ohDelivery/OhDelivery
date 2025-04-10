@@ -1,5 +1,6 @@
 package com.ohdelivery.service.user.domain.model;
 
+import com.ohdelivery.common.model.BaseEntity;
 import com.ohdelivery.common.passport.RoleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_user")
 @Entity
-public class User {
+public class User extends BaseEntity {
 
     @Column(unique = true, updatable = false, nullable = false)
     String username;
@@ -34,8 +35,6 @@ public class User {
     RoleType role;
     @Column(nullable = false)
     String slackId;
-    @Column(nullable = false)
-    Boolean isDeleted;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -47,12 +46,6 @@ public class User {
                 .password(password)
                 .role(roleType)
                 .slackId(slackId)
-                .isDeleted(false)
                 .build();
     }
-
-    public void delete() {
-        this.isDeleted = true;
-    }
-
 }
