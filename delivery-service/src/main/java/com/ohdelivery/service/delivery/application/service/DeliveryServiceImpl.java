@@ -8,6 +8,7 @@ import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepositor
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
 import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
+import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,23 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public Delivery createDelivery(CreateDeliveryRequest request) {
-        LocationInfo locationInfo = shortedPathService.getLocation(request.getStoreAddress());
+        LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
+        LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
 
-        Double storeX = locationInfo.getLongitude();
-        Double storeY = locationInfo.getLatitude();
+        Double storeX = storeLocation.getLongitude();
+        Double storeY = storeLocation.getLatitude();
         log.info("Store location: longitude = {}, latitude = {}", storeX, storeY);
 
-        Delivery delivery = request.toDelivery(0, 0);
+        Double targetX = targetLocation.getLongitude();
+        Double targetY = targetLocation.getLatitude();
+        log.info("Target location: longitude = {}, latitude = {}", targetX, targetY);
+
+        PathInfo path = shortedPathService.getPath(storeLocation, targetLocation);
+        log.info("Path: {}", path.getPath());
+
+        // TODO 배달 생성 이벤트 던지기
+
+        Delivery delivery = request.toDelivery(path.getDistance(), path.getDistance());
         return deliveryRepository.save(delivery);
     }
 
@@ -52,6 +63,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
         deliveryRecord.complete();
+
+        // TODO 배달 완료 이벤트 던지기
     }
 
     @Override

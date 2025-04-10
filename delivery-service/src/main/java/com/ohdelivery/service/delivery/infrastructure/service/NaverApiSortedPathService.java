@@ -1,8 +1,10 @@
 package com.ohdelivery.service.delivery.infrastructure.service;
 
 import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
+import com.ohdelivery.service.delivery.infrastructure.dto.DirectionsResponse;
 import com.ohdelivery.service.delivery.infrastructure.dto.GeocodeResponse;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
+import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
 import com.ohdelivery.service.delivery.infrastructure.exception.InvalidAddressException;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +51,38 @@ public class NaverApiSortedPathService implements ShortedPathService {
             .block();
 
         return LocationInfo.fromGeocodeResponse(geocodeResponse);
+    }
+
+    @Override
+    public PathInfo getPath(LocationInfo startLocation, LocationInfo goalLocation) {
+        StringBuffer start = new StringBuffer()
+            .append(startLocation.getLongitude())
+            .append(",")
+            .append(startLocation.getLatitude());
+
+        StringBuffer goal = new StringBuffer()
+            .append(goalLocation.getLongitude())
+            .append(",")
+            .append(goalLocation.getLatitude());
+
+        DirectionsResponse directionsResponse = webClient.get()
+            .uri(uriBuilder -> {
+                try {
+                    return new URIBuilder(directionsUrl)
+                        .addParameter("start", start.toString())
+                        .addParameter("goal", goal.toString())
+                        .build();
+                } catch (URISyntaxException e) {
+                    log.error(e.getMessage());
+                    throw new InvalidAddressException();
+                }
+            })
+            .header(HEADER_KEY_ID, keyId)
+            .header(HEADER_KEY, keySecret)
+            .retrieve()
+            .bodyToMono(DirectionsResponse.class)
+            .block();
+
+        return PathInfo.from(directionsResponse);
     }
 }
