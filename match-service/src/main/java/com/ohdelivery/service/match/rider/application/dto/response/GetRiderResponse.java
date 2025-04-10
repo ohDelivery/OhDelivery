@@ -13,4 +13,15 @@ public class GetRiderResponse {
   private final String status;
   private final double latitude;
   private final double longitude;
+
+  public static GetRiderResponse from(Rider rider){
+    return new GetRiderResponse(
+        rider.getId(),
+        rider.getRiderId(),
+        rider.getSlackId(),
+        rider.getStatus().toString(),
+        rider.getLatitude(),
+        rider.getLongitude()
+    );
+  }
 }
