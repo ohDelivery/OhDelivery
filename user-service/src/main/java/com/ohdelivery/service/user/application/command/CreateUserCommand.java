@@ -16,6 +16,6 @@ public class CreateUserCommand {
     String name;
     String password;
     RoleType role;
-    String slackEmail;
+    String slackId;
 
 }

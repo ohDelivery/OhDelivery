@@ -46,7 +46,7 @@ public class UserService {
                 command.getName(),
                 passwordEncoder.encode(command.getPassword()),
                 command.getRole(),
-                command.getSlackEmail()
+                command.getSlackId()
         ));
     }
 

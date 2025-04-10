@@ -10,7 +10,7 @@ public class CreateUserRequest {
     String name;
     String password;
     RoleType role;
-    String slackEmail;
+    String slackId;
 
     public CreateUserCommand toCommand() {
         return CreateUserCommand.builder()
@@ -18,7 +18,7 @@ public class CreateUserRequest {
                 .name(name)
                 .password(password)
                 .role(role)
-                .slackEmail(slackEmail)
+                .slackId(slackId)
                 .build();
     }
 }

@@ -32,21 +32,21 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     RoleType role;
-    @Column(nullable = true)
-    String slackEmail;
+    @Column(nullable = false)
+    String slackId;
     @Column(nullable = false)
     Boolean isDeleted;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    public static User create(String username, String name, String password, RoleType roleType, String slackEmail) {
+    public static User create(String username, String name, String password, RoleType roleType, String slackId) {
         return User.builder()
                 .username(username)
                 .name(name)
                 .password(password)
                 .role(roleType)
-                .slackEmail(slackEmail)
+                .slackId(slackId)
                 .isDeleted(false)
                 .build();
     }
