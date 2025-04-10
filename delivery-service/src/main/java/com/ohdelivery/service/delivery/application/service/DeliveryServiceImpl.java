@@ -1,6 +1,7 @@
 package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
+import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.exception.DeliveryNotFoundException;
 import com.ohdelivery.service.delivery.domain.model.Delivery;
@@ -93,6 +94,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     public void updateFee(UUID deliveryId, Integer fee) {
         Delivery delivery = getDelivery(deliveryId);
         delivery.updateFee(fee);
+
+        deliveryEventProducer.publishUpdateDeliveryEvent(
+            new UpdateDeliveryEvent(delivery.getId(), delivery.getFee()));
     }
 
     @Override
