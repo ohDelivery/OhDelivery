@@ -21,4 +21,11 @@ public class DeliveryExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(value = DeliveryInvalidStatusException.class)
+    public ResponseEntity<ApiResponse<String>> notFoundException(HttpServletRequest req,
+        DeliveryInvalidStatusException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ApiResponse.fail(HttpStatus.BAD_REQUEST, e.getMessage())
+        );
+    }
 }
