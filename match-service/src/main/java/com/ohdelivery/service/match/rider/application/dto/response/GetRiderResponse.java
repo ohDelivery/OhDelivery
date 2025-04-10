@@ -11,8 +11,8 @@ public class GetRiderResponse {
   private final Integer rider_id;
   private final String slack_id;
   private final String status;
-  private final double latitude;
-  private final double longitude;
+  private final Double latitude;
+  private final Double longitude;
 
   public static GetRiderResponse from(Rider rider){
     return new GetRiderResponse(
