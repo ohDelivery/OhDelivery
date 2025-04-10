@@ -13,13 +13,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService{
     private final MatchingRepository matchingRepository;
+    private final MatchingEventPublisher matchingEventPublisher;
 
     @Override
+    @Transactional
     public UUID createMatching(CreateMatchingRequest request) {
         RiderInfo riderInfo = new RiderInfo(request.getRiderId());
 
@@ -35,6 +38,7 @@ public class MatchingServiceImpl implements MatchingService{
 
         Matching matching = new Matching(riderInfo, payInfo, deliveryInfo);
         matchingRepository.save(matching);
+        matchingEventPublisher.matchingCompletedEvent("matching.completed",matching);
         return matching.getId();
     }
 
