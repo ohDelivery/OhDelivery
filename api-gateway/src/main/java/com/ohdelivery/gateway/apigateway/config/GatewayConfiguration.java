@@ -43,13 +43,15 @@ public class GatewayConfiguration {
         TokenFilter tokenFilter = tokenFilter();
         AuthenticationFilter authenticationFilter = jwtAuthFilter();
 
-        addRoute(
-                builder,
-                ServiceConstants.USER_SERVICE.getServiceName(),
-                ServiceConstants.USER_SERVICE.getServiceUri(),
-                new GatewayFilter[]{tokenFilter, authenticationFilter},
-                ServiceConstants.USER_SERVICE.getApiPaths()
-        );
+        for (ServiceConstants serviceConstant : ServiceConstants.values()) {
+            addRoute(
+                    builder,
+                    serviceConstant.getServiceName(),
+                    serviceConstant.getServiceUri(),
+                    new GatewayFilter[]{tokenFilter, authenticationFilter},
+                    serviceConstant.getApiPaths()
+            );
+        }
 
         return builder.build();
     }
