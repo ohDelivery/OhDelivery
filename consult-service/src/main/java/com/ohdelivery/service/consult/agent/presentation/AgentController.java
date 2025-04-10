@@ -3,10 +3,12 @@ package com.ohdelivery.service.consult.agent.presentation;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.consult.agent.application.dto.request.CreateAgentRequest;
+import com.ohdelivery.service.consult.agent.application.dto.request.UpdateAgentRequest;
 import com.ohdelivery.service.consult.agent.application.dto.response.AgentResponse;
 import com.ohdelivery.service.consult.agent.application.service.AgentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,18 @@ public class AgentController {
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.CREATED_SUCCESS.getCode().toString(),
         SuccessCode.CREATED_SUCCESS.getMessage(),
+        response
+    ));
+  }
+
+  @PatchMapping
+  public ResponseEntity<ApiResponse<AgentResponse>> updateAgent(
+      @RequestBody UpdateAgentRequest request) {
+    AgentResponse response = agentService.updateAgent(request);
+
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
         response
     ));
   }

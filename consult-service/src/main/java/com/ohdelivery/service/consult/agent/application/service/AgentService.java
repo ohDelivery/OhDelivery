@@ -1,7 +1,10 @@
 package com.ohdelivery.service.consult.agent.application.service;
 
 import com.ohdelivery.service.consult.agent.application.dto.request.CreateAgentRequest;
+import com.ohdelivery.service.consult.agent.application.dto.request.UpdateAgentRequest;
 import com.ohdelivery.service.consult.agent.application.dto.response.AgentResponse;
+import com.ohdelivery.service.consult.agent.application.exception.AgentErrorCode;
+import com.ohdelivery.service.consult.agent.application.exception.AgentException;
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
@@ -22,5 +25,17 @@ public class AgentService {
     Agent agent = request.toEntity(AgentStatus.OFFLINE);
     agentRepository.save(agent);
     return AgentResponse.toDto(agent);
+  }
+
+  @Transactional
+  public AgentResponse updateAgent(UpdateAgentRequest request) {
+    Agent agent = findAgent(request.getAgentId());
+    agent.updateStatus(request.getStatus());
+    return AgentResponse.toDto(agent);
+  }
+
+  private Agent findAgent(Long agentId) {
+    return agentRepository.findByAgentId(agentId)
+        .orElseThrow(() -> new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND));
   }
 }
