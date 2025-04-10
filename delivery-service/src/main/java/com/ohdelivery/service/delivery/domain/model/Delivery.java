@@ -72,6 +72,10 @@ public class Delivery extends BaseEntity {
         this.fee = fee;
     }
 
+    public void updateWaitingForCooking() {
+        this.status = DeliveryStatus.WAITING_FOR_COOKING;
+    }
+
     public CreateDeliveryEvent toCreateDeliveryEvent() {
         return CreateDeliveryEvent.builder()
             .deliveryId(this.getId())

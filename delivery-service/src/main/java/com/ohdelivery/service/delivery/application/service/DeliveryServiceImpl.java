@@ -11,7 +11,6 @@ import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
 import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
 import com.ohdelivery.service.delivery.infrastructure.messaging.DeliveryEventProducer;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,9 +82,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee,
-        LocalDateTime acceptedAt) {
-        DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee, acceptedAt);
+    public DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
+        DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
 
         return deliveryRecordRepository.save(deliveryRecord);
     }
@@ -95,6 +93,15 @@ public class DeliveryServiceImpl implements DeliveryService {
     public void updateFee(UUID deliveryId, Integer fee) {
         Delivery delivery = getDelivery(deliveryId);
         delivery.updateFee(fee);
+    }
+
+    @Override
+    @Transactional
+    public void completeMatching(UUID deliveryId, UUID riderId) {
+        Delivery delivery = getDelivery(deliveryId);
+        delivery.updateWaitingForCooking();
+
+        createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
     }
 
     private CompleteDeliveryEvent createCompleteDeliveryEvent(Delivery delivery,
