@@ -9,6 +9,7 @@ import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
 import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
 import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
+import com.ohdelivery.service.delivery.infrastructure.messaging.DeliveryEventProducer;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRecordRepository deliveryRecordRepository;
     private final ShortedPathService shortedPathService;
+    private final DeliveryEventProducer deliveryEventProducer;
 
     @Override
     @Transactional
@@ -42,10 +44,12 @@ public class DeliveryServiceImpl implements DeliveryService {
         PathInfo path = shortedPathService.getPath(storeLocation, targetLocation);
         log.info("Path: {}", path.getPath());
 
-        // TODO 배달 생성 이벤트 던지기
+        Delivery saveDelivery = deliveryRepository.save(
+            request.toDelivery(path.getDistance(), path.getDistance()));
 
-        Delivery delivery = request.toDelivery(path.getDistance(), path.getDistance());
-        return deliveryRepository.save(delivery);
+        deliveryEventProducer.publishCreateDeliveryEvent(saveDelivery);
+
+        return saveDelivery;
     }
 
     @Override
