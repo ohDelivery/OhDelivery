@@ -34,6 +34,12 @@ public class AgentService {
     return AgentResponse.toDto(agent);
   }
 
+  @Transactional(readOnly = true)
+  public AgentResponse getAgent(Long agentId) {
+    Agent agent = findAgent(agentId);
+    return AgentResponse.toDto(agent);
+  }
+
   private Agent findAgent(Long agentId) {
     return agentRepository.findByAgentId(agentId)
         .orElseThrow(() -> new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND));

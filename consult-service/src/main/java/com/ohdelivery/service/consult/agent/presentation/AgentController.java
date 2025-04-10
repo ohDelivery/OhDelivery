@@ -8,6 +8,7 @@ import com.ohdelivery.service.consult.agent.application.dto.response.AgentRespon
 import com.ohdelivery.service.consult.agent.application.service.AgentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,17 @@ public class AgentController {
       @PathVariable Long agentId,
       @RequestBody UpdateAgentRequest request) {
     AgentResponse response = agentService.updateAgent(agentId, request);
+
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
+    ));
+  }
+
+  @GetMapping("/{agentId}")
+  public ResponseEntity<ApiResponse<AgentResponse>> getAgent(@PathVariable Long agentId) {
+    AgentResponse response = agentService.getAgent(agentId);
 
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
