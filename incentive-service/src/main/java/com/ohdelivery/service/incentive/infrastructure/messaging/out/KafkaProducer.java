@@ -1,4 +1,4 @@
-package com.ohdelivery.service.incentive.infrastructure.messaging;
+package com.ohdelivery.service.incentive.infrastructure.messaging.out;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
