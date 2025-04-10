@@ -6,6 +6,5 @@ import lombok.Getter;
 @Getter
 public class UpdateAgentRequest {
 
-  private Long agentId;
   private AgentStatus status;
 }

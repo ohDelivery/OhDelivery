@@ -9,6 +9,7 @@ import com.ohdelivery.service.consult.agent.application.service.AgentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,10 +34,11 @@ public class AgentController {
     ));
   }
 
-  @PatchMapping
+  @PatchMapping("/{agentId}")
   public ResponseEntity<ApiResponse<AgentResponse>> updateAgent(
+      @PathVariable Long agentId,
       @RequestBody UpdateAgentRequest request) {
-    AgentResponse response = agentService.updateAgent(request);
+    AgentResponse response = agentService.updateAgent(agentId, request);
 
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),

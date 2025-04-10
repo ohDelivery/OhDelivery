@@ -28,8 +28,8 @@ public class AgentService {
   }
 
   @Transactional
-  public AgentResponse updateAgent(UpdateAgentRequest request) {
-    Agent agent = findAgent(request.getAgentId());
+  public AgentResponse updateAgent(Long agentId, UpdateAgentRequest request) {
+    Agent agent = findAgent(agentId);
     agent.updateStatus(request.getStatus());
     return AgentResponse.toDto(agent);
   }
