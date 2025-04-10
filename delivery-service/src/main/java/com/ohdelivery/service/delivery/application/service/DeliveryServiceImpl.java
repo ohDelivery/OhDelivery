@@ -1,5 +1,6 @@
 package com.ohdelivery.service.delivery.application.service;
 
+import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.exception.DeliveryNotFoundException;
 import com.ohdelivery.service.delivery.domain.model.Delivery;
@@ -47,7 +48,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery saveDelivery = deliveryRepository.save(
             request.toDelivery(path.getDistance(), path.getDistance()));
 
-        deliveryEventProducer.publishCreateDeliveryEvent(saveDelivery);
+        deliveryEventProducer.publishCreateDeliveryEvent(saveDelivery.toCreateDeliveryEvent());
 
         return saveDelivery;
     }
@@ -68,7 +69,9 @@ public class DeliveryServiceImpl implements DeliveryService {
         DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
         deliveryRecord.complete();
 
-        // TODO 배달 완료 이벤트 던지기
+        CompleteDeliveryEvent completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
+            deliveryRecord);
+        deliveryEventProducer.publishCompleteDeliveryEvent(completeDeliveryEvent);
     }
 
     @Override
@@ -92,5 +95,22 @@ public class DeliveryServiceImpl implements DeliveryService {
     public void updateFee(UUID deliveryId, Integer fee) {
         Delivery delivery = getDelivery(deliveryId);
         delivery.updateFee(fee);
+    }
+
+    private CompleteDeliveryEvent createCompleteDeliveryEvent(Delivery delivery,
+        DeliveryRecord deliveryRecord) {
+        return CompleteDeliveryEvent.builder()
+            .deliveryId(delivery.getId())
+            .storeAddress(delivery.getOrderInfo().getStoreAddress())
+            .targetAddress(delivery.getTargetAddress())
+            .expectedTime(delivery.getPathInfo().getExpectedTime())
+            .shortedDistance(delivery.getPathInfo().getShortedDistance())
+            .fee(delivery.getFee())
+            .paymentType(delivery.getPaymentType().toString())
+            .paymentAmount(delivery.getPaymentAmount())
+            .acceptedAt(deliveryRecord.getAcceptedAt())
+            .departedAt(deliveryRecord.getDepartedAt())
+            .deliveredAt(deliveryRecord.getDeliveredAt())
+            .build();
     }
 }
