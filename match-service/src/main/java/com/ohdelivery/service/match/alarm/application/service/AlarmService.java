@@ -37,6 +37,7 @@ public class AlarmService {
     alarmRepository.save(alarm);
 
     // 가용 범위 내 라이더에게 알림
+    // slack으로 알림 -> 추후 웹소켓으로 변경 계획 있음
     notifyRidersWithinDistance(storeLat, storeLong, message);
   }
 

@@ -1,13 +1,20 @@
 spring:
   application:
     name: match-service
-#  config:
-#    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
-#  cloud:
-#    config:
-#      discovery:
-#        enabled: true
-#        service-id: config-server
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+
+  #  config:
+  #    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  #  cloud:
+  #    config:
+  #      discovery:
+  #        enabled: true
+  #        service-id: config-server
   datasource:
     url: jdbc:postgresql://localhost:5432/match_db
     username: postgres
@@ -27,3 +34,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090
+
+message:
+  exchange: alarm
+  queue: alarm.match
+
+slack:
+  token: ${SLACK_TOKEN}
