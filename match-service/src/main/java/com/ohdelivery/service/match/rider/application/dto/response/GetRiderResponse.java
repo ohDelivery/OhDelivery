@@ -1,5 +1,6 @@
 package com.ohdelivery.service.match.rider.application.dto.response;
 
+import com.ohdelivery.service.match.rider.domain.model.Rider;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
