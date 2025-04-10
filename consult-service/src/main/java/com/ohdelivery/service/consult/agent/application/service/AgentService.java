@@ -8,6 +8,7 @@ import com.ohdelivery.service.consult.agent.application.exception.AgentException
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,14 @@ public class AgentService {
   public AgentResponse getAgent(Long agentId) {
     Agent agent = findAgent(agentId);
     return AgentResponse.toDto(agent);
+  }
+  
+  @Transactional(readOnly = true)
+  public List<AgentResponse> getAgents() {
+    List<Agent> agents = agentRepository.findAll();
+    return agents.stream()
+        .map(AgentResponse::toDto)
+        .toList();
   }
 
   private Agent findAgent(Long agentId) {

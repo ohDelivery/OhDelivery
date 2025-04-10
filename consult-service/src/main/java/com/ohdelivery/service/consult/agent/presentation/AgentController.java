@@ -6,6 +6,7 @@ import com.ohdelivery.service.consult.agent.application.dto.request.CreateAgentR
 import com.ohdelivery.service.consult.agent.application.dto.request.UpdateAgentRequest;
 import com.ohdelivery.service.consult.agent.application.dto.response.AgentResponse;
 import com.ohdelivery.service.consult.agent.application.service.AgentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,17 @@ public class AgentController {
   @GetMapping("/{agentId}")
   public ResponseEntity<ApiResponse<AgentResponse>> getAgent(@PathVariable Long agentId) {
     AgentResponse response = agentService.getAgent(agentId);
+
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
+    ));
+  }
+
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<AgentResponse>>> getAgents() {
+    List<AgentResponse> response = agentService.getAgents();
 
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
