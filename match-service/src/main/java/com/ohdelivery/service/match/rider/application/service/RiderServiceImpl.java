@@ -21,14 +21,7 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   public UUID createRider(CreateRiderRequest request) {
-    validateRiderStatus(request.getStatus());
-    Rider rider = new Rider(
-        request.getRider_id(),
-        request.getSlack_id(),
-        request.getStatus(),
-        request.getLatitude(),
-        request.getLongitude()
-    );
+    Rider rider = request.toRider();
     riderRepository.save(rider);
     return rider.getId();
   }
