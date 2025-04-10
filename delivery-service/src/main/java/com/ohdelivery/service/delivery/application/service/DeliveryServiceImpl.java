@@ -6,22 +6,33 @@ import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepository;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
+import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
+import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRecordRepository deliveryRecordRepository;
+    private final ShortedPathService shortedPathService;
 
     @Override
     @Transactional
     public Delivery createDelivery(CreateDeliveryRequest request) {
+        LocationInfo locationInfo = shortedPathService.getLocation(request.getStoreAddress());
+
+        Double storeX = locationInfo.getLongitude();
+        Double storeY = locationInfo.getLatitude();
+        log.info("Store location: longitude = {}, latitude = {}", storeX, storeY);
+
         Delivery delivery = request.toDelivery(0, 0);
         return deliveryRepository.save(delivery);
     }
