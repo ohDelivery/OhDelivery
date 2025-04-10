@@ -8,7 +8,7 @@ import com.ohdelivery.service.match.matching.domain.repository.MatchingRepositor
 import com.ohdelivery.service.match.matching.domain.vo.DeliveryInfo;
 import com.ohdelivery.service.match.matching.domain.vo.PayInfo;
 import com.ohdelivery.service.match.matching.domain.vo.RiderInfo;
-import jakarta.persistence.EntityNotFoundException;
+import com.ohdelivery.service.match.matching.application.exception.MatchingNotFoundException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class MatchingServiceImpl implements MatchingService{
     @Override
     public GetMatchingResponse getMatching(UUID id) {
         Matching matching = matchingRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+            .orElseThrow(() -> new MatchingNotFoundException());
 
         return new GetMatchingResponse(
             matching.getId(),
@@ -58,7 +58,7 @@ public class MatchingServiceImpl implements MatchingService{
     @Override
     public void updateMatching(UUID id, UpdateMatchingRequest request) {
         Matching matching = matchingRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+            .orElseThrow(() -> new MatchingNotFoundException());
 
         matching = new Matching(
                 matching.getId(),
@@ -79,7 +79,7 @@ public class MatchingServiceImpl implements MatchingService{
     @Override
     public void deleteMatching(UUID id) {
         Matching matching = matchingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Matching not found"));
+                .orElseThrow(() -> new MatchingNotFoundException());
         // TODO : BaseEntity의 delete메서드 매개변수 넣는 이유 물어보기
         LocalDateTime now = LocalDateTime.now();
         String createdBy = "system";
