@@ -9,6 +9,7 @@ import com.ohdelivery.service.consult.agent.application.service.AgentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,6 +69,16 @@ public class AgentController {
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage(),
         response
+    ));
+  }
+
+  @DeleteMapping("/{agentId}")
+  public ResponseEntity<ApiResponse<Void>> deleteAgent(@PathVariable Long agentId) {
+    agentService.deleteAgent(agentId);
+
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage()
     ));
   }
 }

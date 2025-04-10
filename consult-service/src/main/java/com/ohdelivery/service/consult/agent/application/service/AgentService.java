@@ -8,6 +8,7 @@ import com.ohdelivery.service.consult.agent.application.exception.AgentException
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,17 +41,25 @@ public class AgentService {
     Agent agent = findAgent(agentId);
     return AgentResponse.toDto(agent);
   }
-  
+
   @Transactional(readOnly = true)
   public List<AgentResponse> getAgents() {
-    List<Agent> agents = agentRepository.findAll();
+    List<Agent> agents = agentRepository.findAllAndDeletedAtIsNull();
     return agents.stream()
         .map(AgentResponse::toDto)
         .toList();
   }
 
+  @Transactional
+  public void deleteAgent(Long agentId) {
+    Agent agent = findAgent(agentId);
+
+    // todo: deletedBy -> 로그인한 유저 id로 변경
+    agent.delete(LocalDateTime.now(), agentId.toString());
+  }
+
   private Agent findAgent(Long agentId) {
-    return agentRepository.findByAgentId(agentId)
+    return agentRepository.findByAgentIdAndDeletedAtIsNull(agentId)
         .orElseThrow(() -> new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND));
   }
 }
