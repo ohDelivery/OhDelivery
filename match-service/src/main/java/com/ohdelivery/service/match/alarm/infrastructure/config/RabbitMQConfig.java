@@ -35,7 +35,7 @@ public class RabbitMQConfig {
   }
 
   @Bean
-  public Binding bindingProduct() {
+  public Binding bindingMatch() {
     return BindingBuilder.bind(queueMatch()).to(exchange()).with(queueMatch);
   }
 }
