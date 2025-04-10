@@ -2,16 +2,19 @@ package com.ohdelivery.service.match.rider.application.service;
 
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.model.RiderStatus;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
 import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStatusException;
+import com.ohdelivery.service.match.rider.presentation.UpdateRiderStatusRequest;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +68,15 @@ public class RiderServiceImpl implements RiderService {
     String createdBy = "system";
     rider.delete(now, createdBy);
     riderRepository.save(rider);
+  }
+
+  @Override
+  @Transactional
+  public UpdateRiderStstusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new RiderNotFoundException());
+    rider.changeStatus(request.getStatus());
+    return UpdateRiderStstusResponse.from(rider);
   }
 
   private void validateRiderStatus(RiderStatus status) {

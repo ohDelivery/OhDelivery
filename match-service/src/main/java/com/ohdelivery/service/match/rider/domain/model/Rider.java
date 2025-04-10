@@ -46,4 +46,8 @@ public class Rider extends BaseEntity {
     this.latitude = null;
     this.longitude = null;
   }
+
+  public void changeStatus(RiderStatus status) {
+    this.status=status;
+  }
 }
