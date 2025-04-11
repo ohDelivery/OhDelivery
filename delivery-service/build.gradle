@@ -18,8 +18,11 @@ dependencies {
     // webclient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    //kafka
+    // kafka
     implementation 'org.springframework.kafka:spring-kafka'
+
+    // websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     implementation project(':common')
 }

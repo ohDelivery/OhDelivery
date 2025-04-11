@@ -17,7 +17,7 @@ spring:
         - id: delivery-service
           uri: lb://delivery-service
           predicates:
-            - Path=/deliveries/**, /delivery-service/v3/api-docs
+            - Path=/deliveries/**, /delivery-service/v3/api-docs, /ws/delivery/**
       discovery:
         locator:
           enabled: true

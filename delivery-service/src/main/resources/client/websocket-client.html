@@ -1,0 +1,49 @@
+<!-- 파일 이름: websocket-client.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Test</title>
+</head>
+<body>
+<h2>WebSocket Rider 위치 전송</h2>
+<textarea id="log" cols="60" rows="10" readonly></textarea><br>
+<button onclick="connect()">Connect</button>
+<button onclick="send()">Send Location</button>
+<script>
+  let socket;
+
+  function connect() {
+    socket = new WebSocket("ws://localhost:8080/ws/delivery"); // 또는 wss://gateway-domain/ws/socket
+
+    socket.onopen = () => {
+      log("✅ 연결됨");
+    };
+
+    socket.onmessage = (event) => {
+      log("📥 서버 응답: " + event.data);
+    };
+
+    socket.onclose = () => {
+      log("❌ 연결 종료");
+    };
+  }
+
+  function send() {
+    const message = {
+      riderId: "8ec9d381-f33f-48c4-ab94-d0a3f0afe86c",
+      latitude: 37.5665,
+      longitude: 126.9780,
+      timestamp: Date.now()
+    };
+    socket.send(JSON.stringify(message));
+    log("📤 전송: " + JSON.stringify(message));
+  }
+
+  function log(msg) {
+    const logArea = document.getElementById("log");
+    logArea.value += msg + "\n";
+  }
+</script>
+</body>
+</html>
