@@ -2,7 +2,7 @@ package com.ohdelivery.service.match.rider.infrastructure.messaging;
 
 import static com.ohdelivery.common.kafka.Topic.DELETED_USER;
 import static com.ohdelivery.common.kafka.Topic.UPDATED_SLACK_ID;
-import static com.ohdelivery.service.match.rider.infrastructure.messaging.KafkaConfig.MATCH_GROUP_ID;
+import static com.ohdelivery.service.match.rider.infrastructure.messaging.RiderKafkaConfig.MATCH_GROUP_ID;
 
 import com.ohdelivery.common.kafka.dto.DeleteUserEvent;
 import com.ohdelivery.common.kafka.dto.UpdateSlackIdEvent;

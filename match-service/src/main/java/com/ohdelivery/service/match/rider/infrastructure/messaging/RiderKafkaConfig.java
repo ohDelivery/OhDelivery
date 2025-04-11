@@ -19,7 +19,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Configuration
 @Slf4j
 @EnableKafka
-public class KafkaConfig {
+public class RiderKafkaConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServerUrl;

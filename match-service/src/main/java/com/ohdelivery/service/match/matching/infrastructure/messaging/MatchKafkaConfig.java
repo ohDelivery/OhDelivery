@@ -17,7 +17,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Configuration
 @Slf4j
 @EnableKafka
-public class KafkaConfig {
+public class MatchKafkaConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServerUrl;
