@@ -27,6 +27,9 @@ public class Rider extends BaseEntity {
   @Column(name = "rider_id")
   private Integer riderId;
 
+  @Column(name = "slack_id")
+  private String slackId;
+
   @Column(name = "status")
   private RiderStatus status;
 
@@ -36,8 +39,9 @@ public class Rider extends BaseEntity {
   @Column(name = "longitude")
   private Double longitude;
 
-  public Rider(Integer riderId, RiderStatus status, double latitude, double longitude) {
+  public Rider(Integer riderId, String slackId, RiderStatus status, double latitude, double longitude) {
     this.riderId = riderId;
+    this.slackId = slackId;
     this.status = status;
     this.latitude = latitude;
     this.longitude = longitude;

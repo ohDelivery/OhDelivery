@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 public class UpdateRiderRequest {
   private Integer rider_id;
+  private String slack_id;
   private RiderStatus status;
   private double latitude;
   private double longitude;
