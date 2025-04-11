@@ -24,6 +24,7 @@ public class AgentService {
 
   @Transactional
   public AgentResponse createAgent(CreateAgentRequest request) {
+    checkExistingAgent(request.getAgentId());
     Agent agent = request.toEntity(AgentStatus.OFFLINE);
     agentRepository.save(agent);
     return AgentResponse.toDto(agent);
@@ -56,6 +57,12 @@ public class AgentService {
 
     // todo: deletedBy -> 로그인한 유저 id로 변경
     agent.delete(LocalDateTime.now(), agentId.toString());
+  }
+
+  private void checkExistingAgent(Long agentId) {
+    if (agentRepository.findByAgentIdAndDeletedAtIsNull(agentId).isPresent()) {
+      throw new AgentException(AgentErrorCode.AGENT_ID_ALREADY_EXISTS);
+    }
   }
 
   private Agent findAgent(Long agentId) {
