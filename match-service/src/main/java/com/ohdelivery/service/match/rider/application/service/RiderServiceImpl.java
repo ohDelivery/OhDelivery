@@ -25,6 +25,7 @@ public class RiderServiceImpl implements RiderService {
   private final RiderRepository riderRepository;
 
   @Override
+  @Transactional
   public UUID createRider(CreateRiderRequest request) {
     Rider rider = request.toRider();
     riderRepository.save(rider);
@@ -32,6 +33,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
+  @Transactional
   public GetRiderResponse getRider(UUID id) {
     Rider rider = riderRepository.findById(id)
         .orElseThrow(() -> new RiderNotFoundException());
@@ -46,6 +48,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
+  @Transactional
   public void updateRider(UUID id, UpdateRiderRequest request) {
     validateRiderStatus(request.getStatus());
     Rider rider = riderRepository.findById(id)
@@ -63,6 +66,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
+  @Transactional
   public void deleteRider(UUID id) {
     Rider rider = riderRepository.findById(id)
         .orElseThrow(() -> new RiderNotFoundException());
@@ -82,11 +86,29 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
+  @Transactional
   public List<GetRiderResponse> getAllRider() {
     return riderRepository.findAll()
         .stream()
         .map(GetRiderResponse::from)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional
+  public void updateSlackId(int riderId, String slackId) {
+    Rider rider = riderRepository.findByRiderId(riderId)
+        .orElseThrow(() -> new RiderNotFoundException());
+    rider.updateSlackId(slackId);
+  }
+
+  @Override
+  public void deleteRiderByRiderId(int userId) {
+    Rider rider = riderRepository.findByRiderId(userId)
+        .orElseThrow(() -> new RiderNotFoundException());
+    LocalDateTime now = LocalDateTime.now();
+    String createdBy = "system";
+    rider.delete(now, createdBy);
   }
 
   private void validateRiderStatus(RiderStatus status) {
