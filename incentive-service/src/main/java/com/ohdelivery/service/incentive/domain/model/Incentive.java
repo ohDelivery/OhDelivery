@@ -3,6 +3,9 @@ package com.ohdelivery.service.incentive.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.ohdelivery.common.model.BaseEntity;
+import com.ohdelivery.service.incentive.application.request.IncentiveRequest;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "p_incentive", schema = "INCENTIVE_SCHEMA")
-public class Incentive {
+public class Incentive extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -54,4 +57,11 @@ public class Incentive {
 			.build();
 	}
 
+	public void update(IncentiveRequest.updateIncentiveRequest request) {
+		this.userId = request.getUserId();
+		this.incentiveType = request.getIncentiveType();
+		this.amount = request.getAmount();
+		this.paidDate = request.getPaidDate();
+		this.status = request.getStatus();
+	}
 }
