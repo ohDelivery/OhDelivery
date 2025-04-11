@@ -1,6 +1,7 @@
 package com.ohdelivery.service.delivery.domain.model;
 
 
+import com.ohdelivery.common.kafka.dto.CreateDeliveryEvent;
 import com.ohdelivery.common.model.BaseEntity;
 import com.ohdelivery.service.delivery.application.exception.DeliveryInvalidStatusException;
 import jakarta.persistence.Column;
@@ -69,5 +70,25 @@ public class Delivery extends BaseEntity {
             throw new DeliveryInvalidStatusException("배달 기사가 배정 된 이후로는 배달료는 수정 할 수 없습니다!");
         }
         this.fee = fee;
+    }
+
+    public void updateWaitingForCooking() {
+        this.status = DeliveryStatus.WAITING_FOR_COOKING;
+    }
+
+    public CreateDeliveryEvent toCreateDeliveryEvent() {
+        return CreateDeliveryEvent.builder()
+            .deliveryId(this.getId())
+            .storeName(this.getOrderInfo().getStoreName())
+            .storeAddress(this.getOrderInfo().getStoreAddress())
+            .orderDetails(this.getOrderInfo().getOrderDetails())
+            .orderRequest(this.getOrderInfo().getOrderRequest())
+            .targetAddress(this.getTargetAddress())
+            .expectedTime(this.getPathInfo().getExpectedTime())
+            .shortedDistance(this.getPathInfo().getShortedDistance())
+            .fee(this.getFee())
+            .paymentType(this.getPaymentType().toString())
+            .paymentAmount(this.getPaymentAmount())
+            .build();
     }
 }

@@ -42,11 +42,11 @@ public class DeliveryRecord extends BaseEntity {
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
 
-    public DeliveryRecord(UUID deliveryId, UUID riderId, Integer fee, LocalDateTime acceptedAt) {
+    public DeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
         this.deliveryId = deliveryId;
         this.riderId = riderId;
         this.fee = fee;
-        this.acceptedAt = acceptedAt;
+        this.acceptedAt = LocalDateTime.now();
     }
 
     public void complete() {
