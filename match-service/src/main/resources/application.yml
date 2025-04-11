@@ -1,43 +1,24 @@
 spring:
   application:
     name: match-service
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin
-
-  #  config:
-  #    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
-  #  cloud:
-  #    config:
-  #      discovery:
-  #        enabled: true
-  #        service-id: config-server
-  datasource:
-    url: jdbc:postgresql://localhost:5432/match_db
-    username: postgres
-    password: 1234
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update  # 개발 중이면 update / 운영은 validate or none 권장
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-    format-sql: true
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
 
-message:
-  exchange: alarm
-  queue: alarm.match
-
-slack:
-  token: ${SLACK_TOKEN}
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    path: /delivery-service/v3/api-docs
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
