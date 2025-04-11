@@ -6,23 +6,45 @@ import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepository;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
+import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
+import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
+import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRecordRepository deliveryRecordRepository;
+    private final ShortedPathService shortedPathService;
 
     @Override
     @Transactional
     public Delivery createDelivery(CreateDeliveryRequest request) {
-        Delivery delivery = request.toDelivery(0, 0);
+        LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
+        LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
+
+        Double storeX = storeLocation.getLongitude();
+        Double storeY = storeLocation.getLatitude();
+        log.info("Store location: longitude = {}, latitude = {}", storeX, storeY);
+
+        Double targetX = targetLocation.getLongitude();
+        Double targetY = targetLocation.getLatitude();
+        log.info("Target location: longitude = {}, latitude = {}", targetX, targetY);
+
+        PathInfo path = shortedPathService.getPath(storeLocation, targetLocation);
+        log.info("Path: {}", path.getPath());
+
+        // TODO 배달 생성 이벤트 던지기
+
+        Delivery delivery = request.toDelivery(path.getDistance(), path.getDistance());
         return deliveryRepository.save(delivery);
     }
 
@@ -41,6 +63,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
         deliveryRecord.complete();
+
+        // TODO 배달 완료 이벤트 던지기
     }
 
     @Override

@@ -2,16 +2,21 @@ package com.ohdelivery.service.match.rider.application.service;
 
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
+import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
+import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStatusException;
+import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.model.RiderStatus;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
-import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
-import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
-import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStatusException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,14 +26,7 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   public UUID createRider(CreateRiderRequest request) {
-    validateRiderStatus(request.getStatus());
-    Rider rider = new Rider(
-        request.getRider_id(),
-        request.getSlack_id(),
-        request.getStatus(),
-        request.getLatitude(),
-        request.getLongitude()
-    );
+    Rider rider = request.toRider();
     riderRepository.save(rider);
     return rider.getId();
   }
@@ -72,6 +70,23 @@ public class RiderServiceImpl implements RiderService {
     String createdBy = "system";
     rider.delete(now, createdBy);
     riderRepository.save(rider);
+  }
+
+  @Override
+  @Transactional
+  public UpdateRiderStstusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new RiderNotFoundException());
+    rider.changeStatus(request.getStatus());
+    return UpdateRiderStstusResponse.from(rider);
+  }
+
+  @Override
+  public List<GetRiderResponse> getAllRider() {
+    return riderRepository.findAll()
+        .stream()
+        .map(GetRiderResponse::from)
+        .collect(Collectors.toList());
   }
 
   private void validateRiderStatus(RiderStatus status) {
