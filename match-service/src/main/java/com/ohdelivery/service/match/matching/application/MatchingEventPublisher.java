@@ -1,5 +1,8 @@
 package com.ohdelivery.service.match.matching.application;
 
+import java.util.UUID;
+
 public interface MatchingEventPublisher {
-  void matchingCompletedEvent(String key, Object event);
+
+  void matchingCompletedEvent(UUID deliveryId, UUID riderId);
 }

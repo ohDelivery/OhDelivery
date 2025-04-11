@@ -1,6 +1,10 @@
 package com.ohdelivery.service.match.matching.infrastructure.messaging;
 
+import static com.ohdelivery.common.kafka.Topic.COMPLETE_MATCHING;
+
+import com.ohdelivery.common.kafka.dto.CompleteMatchingEvent;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,12 +14,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class MatchingEventProducer implements MatchingEventPublisher {
-  private static final String MATCHING_EVENT_TOPIC = "matching-events";
+
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   @Override
-  public void matchingCompletedEvent(String key, Object event) {
+  public void matchingCompletedEvent(UUID deliveryId, UUID riderId) {
+    CompleteMatchingEvent event = new CompleteMatchingEvent(deliveryId, riderId);
     log.info("matching completed event: {}", event);
-    kafkaTemplate.send(MATCHING_EVENT_TOPIC,key,event);
+    kafkaTemplate.send(COMPLETE_MATCHING, event);
   }
 }
