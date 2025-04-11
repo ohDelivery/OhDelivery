@@ -6,7 +6,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 
 @EnableDiscoveryClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.ohdelivery.service.incentive",
+	"com.ohdelivery.common"})
 @EnableKafkaStreams
 public class IncentiveServiceApplication {
 	public static void main(String[] args) {
