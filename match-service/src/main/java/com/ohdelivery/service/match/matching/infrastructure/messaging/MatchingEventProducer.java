@@ -15,6 +15,7 @@ public class MatchingEventProducer implements MatchingEventPublisher {
 
   @Override
   public void matchingCompletedEvent(String key, Object event) {
+    log.info("matching completed event: {}", event);
     kafkaTemplate.send(MATCHING_EVENT_TOPIC,key,event);
   }
 }
