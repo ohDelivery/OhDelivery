@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // 400
     INVALID_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰을 입력했습니다."),
+
+    // 401
+    INCORRECT_PASSWORD_EXCEPTION(HttpStatus.UNAUTHORIZED, "비밀번호가 잘못 되었습니다."),
+
     //404
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저는 존재하지 않습니다."),
 
@@ -20,6 +24,8 @@ public enum ErrorCode {
 
     // 500
     INTERNAL_SERVER_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.");
+
+
     private final HttpStatus httpStatus;
     private final String message;
 }

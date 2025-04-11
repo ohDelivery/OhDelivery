@@ -1,5 +1,7 @@
 package com.ohdelivery.service.match.matching.presentation;
 
+import com.ohdelivery.common.response.ApiResponse;
+import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.matching.application.MatchingService;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.UpdateMatchingRequest;
@@ -24,28 +26,43 @@ public class MatchingController {
     private final MatchingService matchingService;
 
     @PostMapping
-    public ResponseEntity<UUID> createMatching(@RequestBody CreateMatchingRequest request) {
+    public ResponseEntity<ApiResponse<UUID>> createMatching(@RequestBody CreateMatchingRequest request) {
         UUID id = matchingService.createMatching(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success(
+                SuccessCode.CREATED_SUCCESS.getCode().toString(),
+                SuccessCode.CREATED_SUCCESS.getMessage(),
+                id
+            ));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetMatchingResponse> getMatching(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<GetMatchingResponse>> getMatching(@PathVariable UUID id) {
         GetMatchingResponse response = matchingService.getMatching(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(
+            SuccessCode.COMMON_SUCCESS.getCode().toString(),
+            SuccessCode.COMMON_SUCCESS.getMessage(),
+            response
+        ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateMatching(
+    public ResponseEntity<ApiResponse<Void>> updateMatching(
         @PathVariable UUID id,
         @RequestBody UpdateMatchingRequest request) {
         matchingService.updateMatching(id, request);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(
+            SuccessCode.COMMON_SUCCESS.getCode().toString(),
+            SuccessCode.COMMON_SUCCESS.getMessage()
+        ));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMatching(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteMatching(@PathVariable UUID id) {
         matchingService.deleteMatching(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(
+            SuccessCode.COMMON_SUCCESS.getCode().toString(),
+            SuccessCode.COMMON_SUCCESS.getMessage()
+        ));
     }
 }
