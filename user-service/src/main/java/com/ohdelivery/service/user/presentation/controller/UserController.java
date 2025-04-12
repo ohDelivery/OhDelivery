@@ -37,12 +37,22 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public void createUser(@RequestBody CreateUserRequest request) {
+    public ApiResponse<Void> createUser(@RequestBody CreateUserRequest request) {
         userService.createUser(request.toCommand());
+
+        return ApiResponse.success(
+                SuccessCode.COMMON_SUCCESS.getCode().toString(),
+                SuccessCode.COMMON_SUCCESS.getMessage()
+        );
     }
 
     @DeleteMapping
-    public void deleteUser(Long id) {
+    public ApiResponse<Void> deleteUser(Long id) {
         userService.deleteUser(id);
+
+        return ApiResponse.success(
+            SuccessCode.DELETED_SUCCESS.getCode().toString(),
+            SuccessCode.DELETED_SUCCESS.getMessage()
+        );
     }
 }
