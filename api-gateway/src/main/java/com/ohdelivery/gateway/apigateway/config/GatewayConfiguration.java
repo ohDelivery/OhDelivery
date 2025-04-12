@@ -1,6 +1,6 @@
 package com.ohdelivery.gateway.apigateway.config;
 
-import com.ohdelivery.gateway.apigateway.AuthServerClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.gateway.apigateway.constants.ServiceConstants;
 import com.ohdelivery.gateway.apigateway.filter.AuthenticationFilter;
 import com.ohdelivery.gateway.apigateway.filter.TokenFilter;
@@ -19,12 +19,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class GatewayConfiguration {
 
-    private final AuthServerClient authServiceClient;
+    private final ObjectMapper objectMapper;
     private final WebClient.Builder webClientBuilder;
 
     @Bean
     public AuthenticationFilter jwtAuthFilter() {
-        return new AuthenticationFilter(authServiceClient);
+        return new AuthenticationFilter(objectMapper);
     }
 
     @Bean
@@ -53,6 +53,21 @@ public class GatewayConfiguration {
             );
         }
 
+        addRoute(
+                builder,
+                "user-service",
+                "lb://user-service",
+                new GatewayFilter[]{},
+                new String[] {"/api/users/join"}
+        );
+        addRoute(
+                builder,
+                "auth-server",
+                "lb://auth-server",
+                new GatewayFilter[]{},
+                new String[] {"/auth/login", "/auth/validate", "/auth/logout"}
+        );
+
         return builder.build();
     }
 
@@ -64,7 +79,6 @@ public class GatewayConfiguration {
         builder.route(serviceName, routeSpec -> routeSpec
                 .path(apiPaths)
                 .filters(filterSpec -> {
-                    // 필터 배열 순회하며 추가
                     Arrays.stream(filters).forEach(filterSpec::filter);
                     return filterSpec;
                 })

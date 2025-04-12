@@ -1,7 +1,12 @@
 package com.ohdelivery.gateway.apigateway.filter;
 
+import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.AUTHORIZATION_HEADER;
+import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.BEARER_PREFIX;
+import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.PASSPORT_ATTRIBUTE;
+
 import com.ohdelivery.common.passport.Passport;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpHeaders;
@@ -15,9 +20,10 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TokenFilter implements GatewayFilter {
 
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
     private final WebClient webClient;
+
+    @Value("${auth-service.validate-url}")
+    private String validateUrl;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -31,14 +37,16 @@ public class TokenFilter implements GatewayFilter {
         String token = authorization.substring(BEARER_PREFIX.length());
 
         return webClient.post()
-                .uri("/auth/validate")
+                .uri(validateUrl)
                 .bodyValue(token)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         response -> Mono.error(new RuntimeException("인증에 실패했습니다.")))
                 .bodyToMono(Passport.class)
-                .then(chain.filter(exchange))
-                ;
+                .flatMap(passport -> {
+                    exchange.getAttributes().put(PASSPORT_ATTRIBUTE, passport);
+                    return chain.filter(exchange);
+                });
     }
 
     private Mono<Void> unauthorizedResponse(ServerHttpResponse response) {
