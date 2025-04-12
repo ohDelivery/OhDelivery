@@ -22,7 +22,7 @@ public class TokenFilter implements GatewayFilter {
 
     private final WebClient webClient;
 
-    @Value("${auth-service.validate-url}")
+    @Value("${auth-server.validate-url}")
     private String validateUrl;
 
     @Override

@@ -20,7 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class GatewayConfiguration {
 
     private final ObjectMapper objectMapper;
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Bean
     public AuthenticationFilter jwtAuthFilter() {
@@ -29,7 +29,7 @@ public class GatewayConfiguration {
 
     @Bean
     public TokenFilter tokenFilter() {
-        return new TokenFilter(webClientBuilder.build());
+        return new TokenFilter(webClient);
     }
 
     @Bean
