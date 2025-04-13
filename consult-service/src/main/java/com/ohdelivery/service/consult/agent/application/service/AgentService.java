@@ -8,6 +8,7 @@ import com.ohdelivery.service.consult.agent.application.exception.AgentException
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
+import com.ohdelivery.service.consult.agent.domain.repository.RedisAgentRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AgentService {
 
   private final AgentRepository agentRepository;
+  private final RedisAgentRepository redisAgentRepository;
 
   // todo: role check
 
@@ -27,6 +29,7 @@ public class AgentService {
     checkExistingAgent(request.getAgentId());
     Agent agent = request.toEntity(AgentStatus.OFFLINE);
     agentRepository.save(agent);
+    redisAgentRepository.save(request.getAgentId().toString());
     return AgentResponse.toDto(agent);
   }
 
@@ -34,6 +37,7 @@ public class AgentService {
   public AgentResponse updateAgent(Long agentId, UpdateAgentRequest request) {
     Agent agent = findAgent(agentId);
     agent.updateStatus(request.getStatus());
+    redisAgentRepository.updateStatus(agentId.toString(), request.getStatus().toString());
     return AgentResponse.toDto(agent);
   }
 
@@ -45,7 +49,7 @@ public class AgentService {
 
   @Transactional(readOnly = true)
   public List<AgentResponse> getAgents() {
-    List<Agent> agents = agentRepository.findAllAndDeletedAtIsNull();
+    List<Agent> agents = agentRepository.findByDeletedAtIsNull();
     return agents.stream()
         .map(AgentResponse::toDto)
         .toList();
@@ -57,6 +61,7 @@ public class AgentService {
 
     // todo: deletedBy -> 로그인한 유저 id로 변경
     agent.delete(LocalDateTime.now(), agentId.toString());
+    redisAgentRepository.delete(agentId.toString());
   }
 
   private void checkExistingAgent(Long agentId) {

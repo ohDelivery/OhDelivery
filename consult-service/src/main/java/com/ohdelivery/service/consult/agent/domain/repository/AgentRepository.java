@@ -11,7 +11,7 @@ public interface AgentRepository extends JpaRepository<Agent, UUID> {
 
   Optional<Agent> findByAgentIdAndDeletedAtIsNull(Long agentId);
 
-  List<Agent> findAllAndDeletedAtIsNull();
+  List<Agent> findByDeletedAtIsNull();
 
   List<Agent> findByStatus(AgentStatus agentStatus);
 }

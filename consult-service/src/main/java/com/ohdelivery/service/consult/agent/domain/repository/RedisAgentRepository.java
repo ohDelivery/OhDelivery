@@ -35,7 +35,7 @@ public class RedisAgentRepository {
 
     redisTemplate.opsForSet().remove(AGENT_PREFIX + oldStatus, agentId); // 기존 상태 set에서 삭제
     redisTemplate.opsForSet().add(AGENT_PREFIX + status, agentId);       // 새로운 상태 set에 추가
-    redisTemplate.opsForValue().set(AGENT_STATUS_PREFIX + key, status);       // 상담원 상태 업데이트
+    redisTemplate.opsForValue().set(key, status);                             // 상담원 상태 업데이트
   }
 
   // 특정 상태의 상담원 리스트 조회
@@ -70,6 +70,7 @@ public class RedisAgentRepository {
       index = (index + 1) % sortedAgents.size();
     }
     redisTemplate.opsForValue().set(indexKey, String.valueOf(index));
+
     return Optional.of(Long.valueOf(sortedAgents.get(index)));
   }
 
