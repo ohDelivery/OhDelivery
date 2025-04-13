@@ -1,13 +1,13 @@
-package com.ohdelivery.service.consult.agent.application.service;
+package com.ohdelivery.service.consult.matching.application.service;
 
-import com.ohdelivery.service.consult.agent.application.dto.event.AgentMatchingEvent;
-import com.ohdelivery.service.consult.agent.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.consult.agent.application.exception.AgentErrorCode;
 import com.ohdelivery.service.consult.agent.application.exception.AgentException;
-import com.ohdelivery.service.consult.agent.domain.model.AgentMatching;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
-import com.ohdelivery.service.consult.agent.domain.repository.AgentMatchingRepository;
-import com.ohdelivery.service.consult.agent.domain.repository.RedisAgentRepository;
+import com.ohdelivery.service.consult.matching.application.dto.AgentMatchingEvent;
+import com.ohdelivery.service.consult.matching.application.dto.CreateMatchingRequest;
+import com.ohdelivery.service.consult.matching.domain.model.AgentMatching;
+import com.ohdelivery.service.consult.matching.domain.repository.AgentMatchingRepository;
+import com.ohdelivery.service.consult.matching.domain.repository.RedisAgentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class MatchingService {
+public class AgentMatchingService {
 
   private final AgentMatchingRepository agentMatchingRepository;
   private final ApplicationEventPublisher eventPublisher;

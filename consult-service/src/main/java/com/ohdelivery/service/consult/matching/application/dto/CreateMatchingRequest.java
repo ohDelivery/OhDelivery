@@ -1,6 +1,6 @@
-package com.ohdelivery.service.consult.agent.application.dto.request;
+package com.ohdelivery.service.consult.matching.application.dto;
 
-import com.ohdelivery.service.consult.agent.domain.model.AgentMatching;
+import com.ohdelivery.service.consult.matching.domain.model.AgentMatching;
 import lombok.Getter;
 
 @Getter

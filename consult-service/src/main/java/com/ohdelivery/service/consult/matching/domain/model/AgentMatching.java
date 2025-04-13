@@ -1,4 +1,4 @@
-package com.ohdelivery.service.consult.agent.domain.model;
+package com.ohdelivery.service.consult.matching.domain.model;
 
 import com.ohdelivery.common.model.BaseEntity;
 import jakarta.persistence.Entity;

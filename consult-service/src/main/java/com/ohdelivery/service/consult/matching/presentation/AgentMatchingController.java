@@ -1,9 +1,9 @@
-package com.ohdelivery.service.consult.agent.presentation;
+package com.ohdelivery.service.consult.matching.presentation;
 
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
-import com.ohdelivery.service.consult.agent.application.dto.request.CreateMatchingRequest;
-import com.ohdelivery.service.consult.agent.application.service.MatchingService;
+import com.ohdelivery.service.consult.matching.application.dto.CreateMatchingRequest;
+import com.ohdelivery.service.consult.matching.application.service.AgentMatchingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/consults/matching")
 @RequiredArgsConstructor
-public class MatchingController {
+public class AgentMatchingController {
 
-  private final MatchingService matchingService;
+  private final AgentMatchingService matchingService;
 
   @PostMapping
   public ResponseEntity<ApiResponse<Void>> createMatching(

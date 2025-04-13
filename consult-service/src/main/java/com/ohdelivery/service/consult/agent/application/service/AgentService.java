@@ -8,7 +8,7 @@ import com.ohdelivery.service.consult.agent.application.exception.AgentException
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
-import com.ohdelivery.service.consult.agent.domain.repository.RedisAgentRepository;
+import com.ohdelivery.service.consult.matching.domain.repository.RedisAgentRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

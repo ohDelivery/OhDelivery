@@ -1,4 +1,4 @@
-package com.ohdelivery.service.consult.agent.application.dto.event;
+package com.ohdelivery.service.consult.matching.application.dto;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
