@@ -10,7 +10,6 @@ import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
 import com.ohdelivery.service.consult.agent.domain.repository.RedisAgentRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,32 +26,24 @@ public class AgentService {
   @Transactional
   public AgentResponse createAgent(CreateAgentRequest request) {
     checkExistingAgent(request.getAgentId());
-    Agent agent = request.toEntity(AgentStatus.OFFLINE);
+    Agent agent = request.toEntity();
     agentRepository.save(agent);
     redisAgentRepository.save(request.getAgentId().toString());
-    return AgentResponse.toDto(agent);
+    return AgentResponse.toDto(agent, AgentStatus.OFFLINE);
   }
 
   @Transactional
   public AgentResponse updateAgent(Long agentId, UpdateAgentRequest request) {
     Agent agent = findAgent(agentId);
-    agent.updateStatus(request.getStatus());
     redisAgentRepository.updateStatus(agentId.toString(), request.getStatus().toString());
-    return AgentResponse.toDto(agent);
+    return AgentResponse.toDto(agent, request.getStatus());
   }
 
   @Transactional(readOnly = true)
   public AgentResponse getAgent(Long agentId) {
     Agent agent = findAgent(agentId);
-    return AgentResponse.toDto(agent);
-  }
-
-  @Transactional(readOnly = true)
-  public List<AgentResponse> getAgents() {
-    List<Agent> agents = agentRepository.findByDeletedAtIsNull();
-    return agents.stream()
-        .map(AgentResponse::toDto)
-        .toList();
+    String status = redisAgentRepository.getStatus(agentId.toString());
+    return AgentResponse.toDto(agent, AgentStatus.valueOf(status));
   }
 
   @Transactional

@@ -29,6 +29,10 @@ public class RedisAgentRepository {
     redisTemplate.opsForValue().set(AGENT_STATUS_PREFIX + agentId, initStatus);
   }
 
+  public String getStatus(String agentId) {
+    return redisTemplate.opsForValue().get(AGENT_STATUS_PREFIX + agentId);
+  }
+
   public void updateStatus(String agentId, String status) {
     String key = AGENT_STATUS_PREFIX + agentId;
     String oldStatus = redisTemplate.opsForValue().get(key);
@@ -53,6 +57,7 @@ public class RedisAgentRepository {
     String key = AGENT_PREFIX + status;
     String indexKey = RR_INDEX_KEY_PREFIX + status;
 
+    // 상담원 리스트 조회
     Set<String> agents = redisTemplate.opsForSet().members(key);
     if (agents == null) {
       return Optional.empty();
