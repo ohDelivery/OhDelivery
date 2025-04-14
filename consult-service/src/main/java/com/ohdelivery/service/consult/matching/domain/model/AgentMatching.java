@@ -1,4 +1,4 @@
-package com.ohdelivery.service.consult.agent.domain.model;
+package com.ohdelivery.service.consult.matching.domain.model;
 
 import com.ohdelivery.common.model.BaseEntity;
 import jakarta.persistence.Entity;
@@ -16,8 +16,8 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "p_agent")
-public class Agent extends BaseEntity {
+@Table(name = "p_agent_matching")
+public class AgentMatching extends BaseEntity {
 
   @Id
   @UuidGenerator
@@ -25,4 +25,7 @@ public class Agent extends BaseEntity {
 
   private Long agentId;
 
+  private Long riderId;
+
+  private UUID chatId;
 }

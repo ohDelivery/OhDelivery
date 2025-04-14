@@ -8,8 +8,8 @@ import com.ohdelivery.service.consult.agent.application.exception.AgentException
 import com.ohdelivery.service.consult.agent.domain.model.Agent;
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
 import com.ohdelivery.service.consult.agent.domain.repository.AgentRepository;
+import com.ohdelivery.service.consult.matching.domain.repository.RedisAgentRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,36 +19,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class AgentService {
 
   private final AgentRepository agentRepository;
+  private final RedisAgentRepository redisAgentRepository;
 
   // todo: role check
 
   @Transactional
   public AgentResponse createAgent(CreateAgentRequest request) {
     checkExistingAgent(request.getAgentId());
-    Agent agent = request.toEntity(AgentStatus.OFFLINE);
+    Agent agent = request.toEntity();
     agentRepository.save(agent);
-    return AgentResponse.toDto(agent);
+    redisAgentRepository.save(request.getAgentId().toString());
+    return AgentResponse.toDto(agent, AgentStatus.OFFLINE);
   }
 
   @Transactional
   public AgentResponse updateAgent(Long agentId, UpdateAgentRequest request) {
     Agent agent = findAgent(agentId);
-    agent.updateStatus(request.getStatus());
-    return AgentResponse.toDto(agent);
+    redisAgentRepository.updateStatus(agentId.toString(), request.getStatus().toString());
+    return AgentResponse.toDto(agent, request.getStatus());
   }
 
   @Transactional(readOnly = true)
   public AgentResponse getAgent(Long agentId) {
     Agent agent = findAgent(agentId);
-    return AgentResponse.toDto(agent);
-  }
-
-  @Transactional(readOnly = true)
-  public List<AgentResponse> getAgents() {
-    List<Agent> agents = agentRepository.findAllAndDeletedAtIsNull();
-    return agents.stream()
-        .map(AgentResponse::toDto)
-        .toList();
+    String status = redisAgentRepository.getStatus(agentId.toString());
+    return AgentResponse.toDto(agent, AgentStatus.valueOf(status));
   }
 
   @Transactional
@@ -57,6 +52,7 @@ public class AgentService {
 
     // todo: deletedBy -> 로그인한 유저 id로 변경
     agent.delete(LocalDateTime.now(), agentId.toString());
+    redisAgentRepository.delete(agentId.toString());
   }
 
   private void checkExistingAgent(Long agentId) {
