@@ -31,7 +31,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     matchingRepository.save(matching);
 //    TODO : rider에서 후보 라이더들 받아오기, 좌표 정보들로 받아오게 고치기
-    List<UUID> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
+    List<String> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
 
     matchingEventPublisher.matchingCreatedEvent(
         slackIdList,

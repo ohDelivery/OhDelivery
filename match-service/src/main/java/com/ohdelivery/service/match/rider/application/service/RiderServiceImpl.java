@@ -112,7 +112,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public List<UUID> getRidersByLocation(String storeAddress) {
+  public List<String> getRidersByLocation(String storeAddress) {
     return List.of();
   }
 

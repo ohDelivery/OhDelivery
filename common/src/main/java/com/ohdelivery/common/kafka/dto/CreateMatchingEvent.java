@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateMatchingEvent {
 
-  List<UUID> slackIdList;
+  List<String> slackIdList;
   UUID matchingId;
   Integer fee;
   String storeName;

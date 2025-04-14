@@ -26,7 +26,7 @@ public class MatchingEventProducer implements MatchingEventPublisher {
   }
 
   @Override
-  public void matchingCreatedEvent(List<UUID> slackIdList, UUID id, Integer fee, String storeName,
+  public void matchingCreatedEvent(List<String> slackIdList, UUID id, Integer fee, String storeName,
       String targetAddress, String orderRequest) {
 
   }

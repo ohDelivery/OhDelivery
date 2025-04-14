@@ -7,6 +7,7 @@ public interface MatchingEventPublisher {
 
   void matchingCompletedEvent(UUID deliveryId, UUID riderId);
 
-  void matchingCreatedEvent(List<UUID> slackIdList, UUID matchingId, Integer fee, String storeName,
+  void matchingCreatedEvent(List<String> slackIdList, UUID matchingId, Integer fee,
+      String storeName,
       String targetAddress, String orderRequest);
 }
