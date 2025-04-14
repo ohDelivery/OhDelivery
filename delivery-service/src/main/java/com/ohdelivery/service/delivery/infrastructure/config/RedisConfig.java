@@ -1,6 +1,7 @@
 package com.ohdelivery.service.delivery.infrastructure.config;
 
 
+import java.util.UUID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -13,16 +14,16 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, Object> riderLocationTemplate(
+    public RedisTemplate<String, UUID> riderLocationTemplate(
         RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        RedisTemplate<String, UUID> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
         template.setKeySerializer(RedisSerializer.string());
         template.setValueSerializer(
-            new Jackson2JsonRedisSerializer<>(Object.class));
+            new Jackson2JsonRedisSerializer<>(UUID.class));
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(UUID.class));
 
         return template;
     }

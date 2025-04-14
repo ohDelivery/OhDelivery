@@ -14,7 +14,7 @@
   let socket;
 
   function connect() {
-    socket = new WebSocket("ws://localhost:8080/ws/rider"); // 또는 wss://gateway-domain/ws/socket
+    socket = new WebSocket("ws://localhost:8080/ws/delivery/rider"); // 또는 wss://gateway-domain/ws/socket
 
     socket.onopen = () => {
       log("✅ 연결됨");

@@ -1,4 +1,4 @@
-package com.ohdelivery.service.delivery.application.dto;
+package com.ohdelivery.service.delivery.application.dto.request;
 
 import java.util.UUID;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class RiderLocation {
+public class RiderLocationRequest {
 
     UUID riderId;
     Double longitude;

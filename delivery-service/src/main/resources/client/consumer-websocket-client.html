@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rider 위치 추적</title>
+</head>
+<body>
+<h2>라이더 위치</h2>
+<div id="location">로딩 중...</div>
+
+<script>
+  const socket = new WebSocket("ws://localhost:8080/ws/delivery/consumer");
+
+  socket.onopen = () => {
+    const riderId = "8ec9d381-f33f-48c4-ab94-d0a3f0afe86c"; // 추적할 라이더 ID
+    socket.send(riderId);       // 커넥션 생성 후 바로 riderId 전송
+  };
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    document.getElementById("location").innerText =
+        `위도: ${data.latitude}, 경도: ${data.longitude}`;
+  };
+</script>
+</body>
+</html>

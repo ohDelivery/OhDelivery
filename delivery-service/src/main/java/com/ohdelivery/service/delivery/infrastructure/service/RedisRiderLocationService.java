@@ -14,19 +14,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RedisRiderLocationService implements RiderLocationService {
 
-    private final RedisTemplate<String, UUID> redisTemplate;
+    private final RedisTemplate<String, UUID> riderLocationTemplate;
 
     private static final String RIDER_LOCATION_KEY = "rider:locations";
 
     @Override
     public void saveRiderLocation(UUID riderId, Double longitude, Double latitude, Long timestamp) {
-        redisTemplate.opsForGeo()
+        riderLocationTemplate.opsForGeo()
             .add(RIDER_LOCATION_KEY, new Point(longitude, latitude), riderId);
     }
 
     @Override
     public RiderLocation getRiderLocation(UUID riderId) {
-        List<Point> points = redisTemplate.opsForGeo().position(RIDER_LOCATION_KEY, riderId);
+        List<Point> points = riderLocationTemplate.opsForGeo()
+            .position(RIDER_LOCATION_KEY, riderId);
         if (points == null || points.isEmpty()) {
             throw new RiderLocationNotFoundException();
         }

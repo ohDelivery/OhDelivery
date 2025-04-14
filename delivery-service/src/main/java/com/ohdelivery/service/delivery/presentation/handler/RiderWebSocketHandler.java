@@ -1,8 +1,8 @@
 package com.ohdelivery.service.delivery.presentation.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ohdelivery.service.delivery.application.dto.RiderLocation;
-import com.ohdelivery.service.delivery.application.service.DeliveryService;
+import com.ohdelivery.service.delivery.application.dto.request.RiderLocationRequest;
+import com.ohdelivery.service.delivery.application.service.WebSocketEventService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +17,16 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class RiderWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final DeliveryService deliveryService;
+    private final WebSocketEventService webSocketEventService;
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
         throws IOException {
         String payload = message.getPayload();
-        RiderLocation location = objectMapper.readValue(payload, RiderLocation.class);
+        RiderLocationRequest location = objectMapper.readValue(payload, RiderLocationRequest.class);
 
         log.info("라이더 위치 수신: {}", location.toString());
 
-        // TODO: Redis 저장, Kafka 전송 등 처리
-        deliveryService.saveRiderLocation(location);
+        webSocketEventService.saveRiderLocation(location);
     }
 }
