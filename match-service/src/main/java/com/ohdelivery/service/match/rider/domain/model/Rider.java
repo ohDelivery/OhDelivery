@@ -21,7 +21,7 @@ public class Rider extends BaseEntity {
 
   @Id
   @GeneratedValue
-  @Column(name = "id",nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
+  @Column(name = "id", nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
   private UUID id;
 
   @Column(name = "rider_id")
@@ -48,6 +48,10 @@ public class Rider extends BaseEntity {
   }
 
   public void changeStatus(RiderStatus status) {
-    this.status=status;
+    this.status = status;
+  }
+
+  public void updateSlackId(String slackId) {
+    this.slackId = slackId;
   }
 }

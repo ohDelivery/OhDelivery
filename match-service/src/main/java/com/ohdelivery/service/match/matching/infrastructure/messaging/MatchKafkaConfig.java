@@ -17,7 +17,8 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Configuration
 @Slf4j
 @EnableKafka
-public class KafkaConfig {
+public class MatchKafkaConfig {
+
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServerUrl;
 
@@ -32,8 +33,10 @@ public class KafkaConfig {
     configProps.put(ProducerConfig.RETRIES_CONFIG, 3); // 최대 재시도 횟수
     configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000); // 재시도 간격 (ms)
 
-    configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 15000); // 서버 응답 기다리는 최대 시간 (default: 30초)
-    configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 20000); // 전체 전송 타임아웃 (배치 포함, default: 2분)
+    configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,
+        15000); // 서버 응답 기다리는 최대 시간 (default: 30초)
+    configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
+        20000); // 전체 전송 타임아웃 (배치 포함, default: 2분)
 
 //    configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384); // 배치당 최대 바이트 (default: 16KB)
 //    configProps.put(ProducerConfig.LINGER_MS_CONFIG, 5);      // 배치 대기 시간 (ms, default: 0)

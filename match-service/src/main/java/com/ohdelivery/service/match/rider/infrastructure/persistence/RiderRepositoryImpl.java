@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class RiderRepositoryImpl implements RiderRepository {
+
   private final JpaRiderRepository jpaRiderRepository;
 
   @Override
@@ -26,5 +27,10 @@ public class RiderRepositoryImpl implements RiderRepository {
   @Override
   public List<Rider> findAll() {
     return jpaRiderRepository.findAllByDeletedAtIsNull();
+  }
+
+  @Override
+  public Optional<Rider> findByRiderId(int riderId) {
+    return jpaRiderRepository.findByRiderIdAndDeletedAtIsNull(riderId);
   }
 }
