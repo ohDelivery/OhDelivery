@@ -21,7 +21,9 @@ public interface RiderService {
   UpdateRiderStstusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request);
 
   List<GetRiderResponse> getAllRider();
+  void updateSlackId(int userId, String slackId);
 
+  void deleteRiderByRiderId(int userId);
   List<UUID> getRidersByLocation(String storeAddress);
 
   boolean checkAssignAvailable(UUID riderId);
