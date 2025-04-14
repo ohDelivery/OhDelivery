@@ -1,11 +1,7 @@
 package com.ohdelivery.service.match.matching.domain;
 
 import com.ohdelivery.common.model.BaseEntity;
-import com.ohdelivery.service.match.matching.domain.vo.DeliveryInfo;
-import com.ohdelivery.service.match.matching.domain.vo.PayInfo;
-import com.ohdelivery.service.match.matching.domain.vo.RiderInfo;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,23 +19,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Matching extends BaseEntity {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "id", nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
-    private UUID id;
+  @Id
+  @GeneratedValue
+  @Column(name = "id", nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
+  private UUID id;
 
-    @Embedded
-    private RiderInfo riderInfo;
+  @Column(name = "rider_id")
+  private UUID riderId;
 
-    @Embedded
-    private PayInfo payInfo;
+  @Column(name = "deliveryId", nullable = false)
+  private UUID deliveryId;
 
-    @Embedded
-    private DeliveryInfo deliveryInfo;
+  public void assignRider(UUID riderId) {
+    this.riderId = riderId;
+  }
 
-    public Matching(RiderInfo riderInfo, PayInfo payInfo, DeliveryInfo deliveryInfo) {
-        this.riderInfo = riderInfo;
-        this.payInfo = payInfo;
-        this.deliveryInfo = deliveryInfo;
-    }
+  public static Matching create(UUID deliveryId) {
+    Matching matching = new Matching();
+    matching.deliveryId = deliveryId;
+    return matching;
+  }
+
+  public boolean isUpdatable() {
+    return this.riderId == null;
+  }
+
+
 }
