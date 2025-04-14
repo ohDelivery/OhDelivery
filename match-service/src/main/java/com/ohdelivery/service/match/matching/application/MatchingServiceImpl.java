@@ -91,7 +91,7 @@ public class MatchingServiceImpl implements MatchingService {
       matching.delete(now, createdBy);
       matchingRepository.save(matching);
     } else {
-      throw new IllegalArgumentException("Matching is not updatable");
+      throw new IllegalArgumentException("Matching is not deletable");
     }
   }
 

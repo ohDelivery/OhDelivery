@@ -31,7 +31,11 @@ public class Matching extends BaseEntity {
   private UUID deliveryId;
 
   public void assignRider(UUID riderId) {
-    this.riderId = riderId;
+    if (isUpdatable()) {
+      this.riderId = riderId;
+    } else {
+      throw new IllegalStateException("이미 라이더가 배정된 매칭입니다.");
+    }
   }
 
   public static Matching create(UUID deliveryId) {
