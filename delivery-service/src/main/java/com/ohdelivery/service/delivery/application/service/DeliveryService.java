@@ -1,6 +1,5 @@
 package com.ohdelivery.service.delivery.application.service;
 
-import com.ohdelivery.service.delivery.application.dto.RiderLocation;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
@@ -21,6 +20,4 @@ public interface DeliveryService {
     void updateFee(UUID deliveryId, Integer fee);
 
     void completeMatching(UUID deliveryId, UUID riderId);
-
-    void saveRiderLocation(RiderLocation riderLocation);
 }

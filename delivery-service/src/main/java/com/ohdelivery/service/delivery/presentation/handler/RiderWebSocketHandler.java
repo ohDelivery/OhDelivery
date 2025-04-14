@@ -14,7 +14,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DeliveryWebSocketHandler extends TextWebSocketHandler {
+public class RiderWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DeliveryService deliveryService;

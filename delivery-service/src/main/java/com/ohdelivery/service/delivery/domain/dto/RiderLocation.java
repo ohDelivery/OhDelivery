@@ -1,4 +1,4 @@
-package com.ohdelivery.service.delivery.infrastructure.dto;
+package com.ohdelivery.service.delivery.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,5 +9,4 @@ public class RiderLocation {
 
     Double longitude;
     Double latitude;
-    Long timestamp;
 }

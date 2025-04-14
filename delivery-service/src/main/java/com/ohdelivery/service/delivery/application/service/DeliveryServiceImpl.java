@@ -2,7 +2,6 @@ package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
-import com.ohdelivery.service.delivery.application.dto.RiderLocation;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
@@ -11,7 +10,7 @@ import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepository;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
-import com.ohdelivery.service.delivery.domain.service.LocationService;
+import com.ohdelivery.service.delivery.domain.service.RiderLocationService;
 import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
 import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
@@ -31,7 +30,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRecordRepository deliveryRecordRepository;
     private final ShortedPathService shortedPathService;
     private final DeliveryEventProducer deliveryEventProducer;
-    private final LocationService locationService;
+    private final RiderLocationService riderLocationService;
 
     @Override
     @Transactional
@@ -118,13 +117,6 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.updateWaitingForCooking();
 
         createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
-    }
-
-    @Override
-    public void saveRiderLocation(RiderLocation riderLocation) {
-        locationService.saveRiderLocation(
-            riderLocation.getRiderId(), riderLocation.getLongitude(),
-            riderLocation.getLatitude(), riderLocation.getTimestamp());
     }
 
     private CompleteDeliveryEvent createCompleteDeliveryEvent(Delivery delivery,
