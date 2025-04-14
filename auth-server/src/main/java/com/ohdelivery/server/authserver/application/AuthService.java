@@ -5,12 +5,15 @@ import com.ohdelivery.server.authserver.application.command.LoginCommand;
 import com.ohdelivery.server.authserver.application.dto.ResponseWrapper;
 import com.ohdelivery.server.authserver.application.dto.UserInfo;
 import com.ohdelivery.server.authserver.application.jwt.JwtProvider;
+import com.ohdelivery.server.authserver.application.jwt.exceptions.UserException.UserNotFoundException;
 import com.ohdelivery.server.authserver.domain.TokenStatus;
 import com.ohdelivery.server.authserver.domain.Tokens;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +30,10 @@ public class AuthService {
                 .uri(loginUrl)
                 .bodyValue(loginCommand)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        r -> Mono.error(new UserNotFoundException())
+                )
                 .bodyToMono(ResponseWrapper.class)
                 .block();
 

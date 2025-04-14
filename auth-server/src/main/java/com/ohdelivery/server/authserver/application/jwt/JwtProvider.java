@@ -144,7 +144,7 @@ public class JwtProvider {
             return;
         }
 
-        TokenStatus tokenStatus = TokenStatus.valueOf(redisTemplate.opsForValue().get(token));
+        TokenStatus tokenStatus = TokenStatus.valueOf(redisTemplate.opsForValue().get(blacklistRedisPrefix + token));
 
         throw new JwtInvalidException(tokenStatus.getMessage());
     }
