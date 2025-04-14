@@ -1,5 +1,6 @@
 package com.ohdelivery.common.passport;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,10 +20,13 @@ import lombok.RequiredArgsConstructor;
 public class RoleCheckAspect {
 
 	private final HttpServletRequest request;
+	private final ObjectMapper objectMapper;
 
 	@Around("@annotation(roleCheck)")
 	public Object checkRole(ProceedingJoinPoint joinPoint, RoleCheck roleCheck) throws Throwable {
-		String role = request.getHeader(PassportConstant.PASSPORT_HEADER);
+		String passportHeader = request.getHeader(PassportConstant.PASSPORT_HEADER);
+		Passport passport = objectMapper.readValue(passportHeader,Passport.class);
+
 		List<String> roleNameList = Arrays.stream(roleCheck.value()).map(RoleType::getAuthority).toList();
 		// 역할이 존재하지 않는 경우에는
 		if(roleNameList.isEmpty()) {
@@ -30,7 +34,7 @@ public class RoleCheckAspect {
 		}
 
 		// 접근권한이 존재하지 않는경우
-		if (!roleNameList.contains(role)) {
+		if (!roleNameList.contains(passport.getRoleType().getAuthority())) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
 		}
 

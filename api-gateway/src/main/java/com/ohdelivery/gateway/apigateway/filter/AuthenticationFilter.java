@@ -27,14 +27,16 @@ public class AuthenticationFilter implements GatewayFilter {
         try {
             String passportJson = objectMapper.writeValueAsString(passport);
 
-            exchange.getRequest()
-                    .mutate()
-                    .header(PASSPORT_HEADER, passportJson)
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                    .request(exchange.getRequest().mutate()
+                            .header(PASSPORT_HEADER, passportJson)
+                            .build())
                     .build();
+
+        return chain.filter(mutatedExchange);
         } catch (Exception e) {
             return Mono.error(new RuntimeException("로그인한 사용자 정보 등록에 실패했습니다.", e));
         }
 
-        return chain.filter(exchange);
     }
 }
