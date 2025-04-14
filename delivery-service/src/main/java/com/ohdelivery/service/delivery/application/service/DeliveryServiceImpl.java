@@ -48,7 +48,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery saveDelivery = deliveryRepository.save(
             request.toDelivery(path.getDistance(), path.getDistance()));
 
-        deliveryEventProducer.publishCreateDeliveryEvent(saveDelivery.toCreateDeliveryEvent());
+        deliveryEventProducer.publishCreateDeliveryEvent(
+            saveDelivery.toCreateDeliveryEvent(storeX, storeY));
 
         return saveDelivery;
     }
