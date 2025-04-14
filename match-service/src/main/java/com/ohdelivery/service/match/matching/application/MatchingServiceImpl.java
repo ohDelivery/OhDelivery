@@ -38,6 +38,7 @@ public class MatchingServiceImpl implements MatchingService {
         matching.getId(),
         request.getFee(),
         request.getStoreName(),
+        request.getStoreAddress(),
         request.getTargetAddress(),
         request.getOrderRequest()
     );

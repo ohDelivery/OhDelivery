@@ -13,6 +13,7 @@ public class CreateMatchingEvent {
   UUID matchingId;
   Integer fee;
   String storeName;
+  String storeAddress;
   String targetAddress;
   String orderRequest;
 }
