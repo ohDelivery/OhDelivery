@@ -6,7 +6,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class RiderLocationEvent {
+public class RiderLocation {
 
     UUID riderId;
     Double longitude;
