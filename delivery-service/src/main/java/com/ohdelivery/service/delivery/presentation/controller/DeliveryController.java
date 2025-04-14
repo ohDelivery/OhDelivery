@@ -7,8 +7,6 @@ import com.ohdelivery.service.delivery.application.dto.request.UpdateFeeRequest;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
 import com.ohdelivery.service.delivery.application.service.DeliveryService;
-import com.ohdelivery.service.delivery.domain.model.Delivery;
-import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,13 +34,13 @@ public class DeliveryController {
     @Operation(summary = "배달 생성하기")
     public ResponseEntity<ApiResponse<DeliveryResponse>> createdDelivery(
         @RequestBody @Valid CreateDeliveryRequest request) {
-        Delivery delivery = deliveryService.createDelivery(request);
+        DeliveryResponse deliveryResponse = deliveryService.createDelivery(request);
 
         return ResponseEntity.ok(
             ApiResponse.success(
                 SuccessCode.CREATED_SUCCESS.getCode().toString(),
                 SuccessCode.CREATED_SUCCESS.getMessage(),
-                new DeliveryResponse(delivery)
+                deliveryResponse
             )
         );
     }
@@ -52,13 +50,13 @@ public class DeliveryController {
     @Operation(summary = "배달 조회하기")
     public ResponseEntity<ApiResponse<DeliveryResponse>> getDelivery(
         @PathVariable UUID deliveryId) {
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        DeliveryResponse deliveryResponse = deliveryService.getDelivery(deliveryId);
 
         return ResponseEntity.ok(
             ApiResponse.success(
                 SuccessCode.COMMON_SUCCESS.getCode().toString(),
                 SuccessCode.COMMON_SUCCESS.getMessage(),
-                new DeliveryResponse(delivery)
+                deliveryResponse
             )
         );
     }
@@ -83,13 +81,14 @@ public class DeliveryController {
     @Operation(summary = "배달 기록 조회하기")
     public ResponseEntity<ApiResponse<DeliveryRecordResponse>> getDeliveryRecord(
         @PathVariable UUID deliveryId) {
-        DeliveryRecord deliveryRecord = deliveryService.getDeliveryRecord(deliveryId);
+        DeliveryRecordResponse deliveryRecordResponse = deliveryService.getDeliveryRecord(
+            deliveryId);
 
         return ResponseEntity.ok(
             ApiResponse.success(
                 SuccessCode.COMMON_SUCCESS.getCode().toString(),
                 SuccessCode.COMMON_SUCCESS.getMessage(),
-                new DeliveryRecordResponse(deliveryRecord)
+                deliveryRecordResponse
             )
         );
     }

@@ -3,6 +3,8 @@ package com.ohdelivery.service.delivery.application.service;
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
 import com.ohdelivery.service.delivery.application.exception.DeliveryNotFoundException;
 import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
@@ -30,7 +32,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public Delivery createDelivery(CreateDeliveryRequest request) {
+    public DeliveryResponse createDelivery(CreateDeliveryRequest request) {
         LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
         LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
 
@@ -51,23 +53,26 @@ public class DeliveryServiceImpl implements DeliveryService {
         deliveryEventProducer.publishCreateDeliveryEvent(
             saveDelivery.toCreateDeliveryEvent(storeX, storeY));
 
-        return saveDelivery;
+        return DeliveryResponse.from(saveDelivery);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Delivery getDelivery(UUID deliveryId) {
-        return deliveryRepository.findById(deliveryId)
+    public DeliveryResponse getDelivery(UUID deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(DeliveryNotFoundException::new);
+        return DeliveryResponse.from(delivery);
     }
 
     @Override
     @Transactional
     public void completeDelivery(UUID deliveryId) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.complete();
 
-        DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
+        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         deliveryRecord.complete();
 
         CompleteDeliveryEvent completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
@@ -77,23 +82,25 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryRecord getDeliveryRecord(UUID deliveryId) {
-        return deliveryRecordRepository.findByDeliveryId(deliveryId)
+    public DeliveryRecordResponse getDeliveryRecord(UUID deliveryId) {
+        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
             .orElseThrow(DeliveryNotFoundException::new);
+        return DeliveryRecordResponse.from(deliveryRecord);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
+    public DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
         DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
 
-        return deliveryRecordRepository.save(deliveryRecord);
+        return DeliveryRecordResponse.from(deliveryRecordRepository.save(deliveryRecord));
     }
 
     @Override
     @Transactional
     public void updateFee(UUID deliveryId, Integer fee) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.updateFee(fee);
 
         deliveryEventProducer.publishUpdateDeliveryEvent(
@@ -103,7 +110,8 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public void completeMatching(UUID deliveryId, UUID riderId) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.updateWaitingForCooking();
 
         createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
