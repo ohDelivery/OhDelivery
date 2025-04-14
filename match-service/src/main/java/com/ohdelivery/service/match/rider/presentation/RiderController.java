@@ -4,14 +4,19 @@ import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
+import com.ohdelivery.service.match.rider.presentation.resposne.RiderSuccessCode;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,10 +42,32 @@ public class RiderController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<GetRiderResponse>> getRider(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<GetRiderResponse>> getRider(@PathVariable("id") UUID id) {
     GetRiderResponse response = riderService.getRider(id);
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
+    ));
+  }
+
+  @GetMapping("/all")
+  public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllRider() {
+    List<GetRiderResponse> response = riderService.getAllRider();
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
+    ));
+  }
+
+  @PatchMapping("/{id}/status")
+  public ResponseEntity<ApiResponse<UpdateRiderStstusResponse>> updateRiderStatus(
+      @PathVariable("id") UUID id,
+      UpdateRiderStatusRequest request){
+    UpdateRiderStstusResponse response = riderService.updateRiderStatus(id,request);
+    return ResponseEntity.ok(ApiResponse.success(
+        RiderSuccessCode.RIDER_STATUS_CHANGE_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage(),
         response
     ));

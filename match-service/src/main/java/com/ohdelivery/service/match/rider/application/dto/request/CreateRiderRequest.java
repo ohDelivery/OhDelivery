@@ -1,5 +1,6 @@
 package com.ohdelivery.service.match.rider.application.dto.request;
 
+import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.model.RiderStatus;
 import lombok.Getter;
 
@@ -7,7 +8,11 @@ import lombok.Getter;
 public class CreateRiderRequest {
   private Integer rider_id;
   private String slack_id;
-  private RiderStatus status;
-  private double latitude;
-  private double longitude;
+
+  public Rider toRider(){
+    return new Rider(
+        this.rider_id,
+        this.slack_id
+    );
+  }
 }

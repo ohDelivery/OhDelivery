@@ -2,6 +2,7 @@ package com.ohdelivery.service.match.rider.infrastructure.persistence;
 
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class RiderRepositoryImpl implements RiderRepository {
+
   private final JpaRiderRepository jpaRiderRepository;
 
   @Override
@@ -20,5 +22,15 @@ public class RiderRepositoryImpl implements RiderRepository {
   @Override
   public Optional<Rider> findById(UUID id) {
     return jpaRiderRepository.findByIdAndDeletedAtIsNull(id);
+  }
+
+  @Override
+  public List<Rider> findAll() {
+    return jpaRiderRepository.findAllByDeletedAtIsNull();
+  }
+
+  @Override
+  public Optional<Rider> findByRiderId(int riderId) {
+    return jpaRiderRepository.findByRiderIdAndDeletedAtIsNull(riderId);
   }
 }

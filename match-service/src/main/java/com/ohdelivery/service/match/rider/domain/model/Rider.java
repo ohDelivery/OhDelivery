@@ -21,7 +21,7 @@ public class Rider extends BaseEntity {
 
   @Id
   @GeneratedValue
-  @Column(name = "id",nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
+  @Column(name = "id", nullable = false, columnDefinition = "UUID DEFAULT gen_random_uuid()")
   private UUID id;
 
   @Column(name = "rider_id")
@@ -39,11 +39,19 @@ public class Rider extends BaseEntity {
   @Column(name = "longitude")
   private Double longitude;
 
-  public Rider(Integer riderId, String slackId, RiderStatus status, double latitude, double longitude) {
+  public Rider(Integer riderId, String slackId) {
     this.riderId = riderId;
     this.slackId = slackId;
+    this.status = RiderStatus.OFFLINE;
+    this.latitude = null;
+    this.longitude = null;
+  }
+
+  public void changeStatus(RiderStatus status) {
     this.status = status;
-    this.latitude = latitude;
-    this.longitude = longitude;
+  }
+
+  public void updateSlackId(String slackId) {
+    this.slackId = slackId;
   }
 }
