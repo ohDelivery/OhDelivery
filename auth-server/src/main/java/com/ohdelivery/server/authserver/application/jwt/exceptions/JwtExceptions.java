@@ -15,6 +15,10 @@ public class JwtExceptions {
         public JwtInvalidException() {
             super(ErrorCode.INVALID_TOKEN_EXCEPTION);
         }
+
+        public JwtInvalidException(String message) {
+            super(ErrorCode.INVALID_TOKEN_EXCEPTION, message);
+        }
     }
 
 }

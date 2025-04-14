@@ -65,7 +65,7 @@ public class GatewayConfiguration {
                 "auth-server",
                 "lb://auth-server",
                 new GatewayFilter[]{},
-                new String[] {"/auth/login", "/auth/validate", "/auth/logout"}
+                new String[] {"/auth/login", "/auth/validate"}
         );
 
         return builder.build();

@@ -7,7 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ServiceConstants {
 
-    USER_SERVICE("user-service", "lb://user-service", new String[]{"/api/users"});
+    USER_SERVICE("user-service", "lb://user-service", new String[]{"/api/users"}),
+    AUTH_SERVER("auth-server", "lb://auth-server", new String[]{"/auth/logout"})
+    ;
 
     private final String serviceName;
     private final String serviceUri;

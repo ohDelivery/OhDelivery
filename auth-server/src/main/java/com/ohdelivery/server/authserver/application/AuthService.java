@@ -5,6 +5,7 @@ import com.ohdelivery.server.authserver.application.command.LoginCommand;
 import com.ohdelivery.server.authserver.application.dto.ResponseWrapper;
 import com.ohdelivery.server.authserver.application.dto.UserInfo;
 import com.ohdelivery.server.authserver.application.jwt.JwtProvider;
+import com.ohdelivery.server.authserver.domain.TokenStatus;
 import com.ohdelivery.server.authserver.domain.Tokens;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,11 +30,22 @@ public class AuthService {
                 .bodyToMono(ResponseWrapper.class)
                 .block();
 
-        return jwtProvider.createTokens(response.getData().getId().toString(), response.getData().getRole().getAuthority());
+        return jwtProvider.createTokens(
+                response.getData().getId().toString(),
+                response.getData().getRole().getAuthority()
+        );
     }
 
     public Passport validate(String token) {
         UserInfo userInfo = jwtProvider.validateToken(token);
         return new Passport(userInfo.getId(), userInfo.getRole());
+    }
+
+    public void logout(String token){
+        jwtProvider.invalidateTokens(token, TokenStatus.LOGGED_OUT);
+    }
+
+    public Tokens refreshToken(String token) {
+        return jwtProvider.checkRefreshToken(token);
     }
 }
