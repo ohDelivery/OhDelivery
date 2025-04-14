@@ -33,8 +33,6 @@ public class RiderKafkaConfig {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServerUrl);
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-    // true면 JSON 객체로 안전하게 역직렬화 가능
-    props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, MATCH_GROUP_ID);
     return props;
   }
