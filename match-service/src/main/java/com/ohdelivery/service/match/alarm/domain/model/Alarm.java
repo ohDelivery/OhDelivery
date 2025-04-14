@@ -27,16 +27,16 @@ public class Alarm extends BaseEntity {
   @UuidGenerator
   private UUID id;
 
-  private UUID deliveryId;
+  private UUID matchingId;
 
   private String message;
 
   @OneToMany(mappedBy = "alarm", fetch = FetchType.LAZY)
   private List<AlarmRider> alarmRider;
 
-  public static Alarm toEntity(UUID deliveryId, String message) {
+  public static Alarm toEntity(UUID matchingId, String message) {
     return Alarm.builder()
-        .deliveryId(deliveryId)
+        .matchingId(matchingId)
         .message(message)
         .alarmRider(new ArrayList<>())
         .build();

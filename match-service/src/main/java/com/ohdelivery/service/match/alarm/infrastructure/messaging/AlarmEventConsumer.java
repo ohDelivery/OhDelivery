@@ -9,7 +9,6 @@ import com.ohdelivery.service.match.alarm.application.service.AlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,9 +21,9 @@ public class AlarmEventConsumer {
   @KafkaListener(
       topics = CREATED_MATCHING,
       groupId = MATCH_GROUP_ID,
-      containerFactory = "createMatchingConsumerFactory"
+      containerFactory = "createMatchingKafkaListenerContainerFactory"
   )
-  public void sendAlarm(@Payload CreateMatchingEvent event) {
+  public void sendAlarm(CreateMatchingEvent event) {
     AlarmCommand alarmCommand = AlarmCommand.from(event);
     alarmService.sendAlarm(alarmCommand);
   }
