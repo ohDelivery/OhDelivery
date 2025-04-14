@@ -7,8 +7,10 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
+import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.StreamsBuilderFactoryBeanCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.kafka.KafkaStreamsMetrics;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -62,6 +66,7 @@ public class KafkaConfig {
 		props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 		props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
 		props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
+		props.put(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG");
 		return new KafkaStreamsConfiguration(props);
 	}
 
@@ -78,6 +83,17 @@ public class KafkaConfig {
 	@Bean
 	public KafkaStreams kafkaStreams(StreamsBuilderFactoryBean factoryBean) throws Exception {
 		return factoryBean.getKafkaStreams();
+	}
+
+	@Bean
+	public KStream<String, byte[]> exampleStream(StreamsBuilder builder) {
+		log.info("✅ Kafka Streams Topology 생성됨");
+		KStream<String, byte[]> stream = builder.stream("delivery-record-create");
+
+		// 간단히 peek만 해도 스트림 생성됨 (안 쓰면 최적화돼서 무시됨)
+		stream.peek((key, value) -> log.info("KafkaStream 수신: key={}, value={}", key, value));
+
+		return stream;
 	}
 
 }
