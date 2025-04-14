@@ -12,7 +12,10 @@ import com.ohdelivery.service.match.rider.application.service.RiderService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,29 +27,58 @@ public class MatchingServiceImpl implements MatchingService {
   private final MatchingEventPublisher matchingEventPublisher;
   private final RiderService riderService;
   private final DeliveryClientService deliveryService;
+  private final RedissonClient redissonClient;
 
   @Override
   @Transactional
   public UUID createMatching(CreateMatchingRequest request) {
     UUID deliveryId = request.getDeliveryId();
 
-    Matching matching = Matching.create(deliveryId);
+    // 배달 ID를 기반으로 고유한 락 키 생성
+    String lockKey = "delivery:" + deliveryId.toString();
+    RLock lock = redissonClient.getLock(lockKey);
 
-    matchingRepository.save(matching);
-//    TODO : rider에서 후보 라이더들 받아오기, 좌표 정보들로 받아오게 고치기
-    List<String> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
+    try {
+      // 락 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
+      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
 
-    matchingEventPublisher.matchingCreatedEvent(
-        slackIdList,
-        matching.getId(),
-        request.getFee(),
-        request.getStoreName(),
-        request.getStoreAddress(),
-        request.getTargetAddress(),
-        request.getOrderRequest()
-    );
-    return matching.getId();
+      if (!isLocked) {
+        throw new IllegalStateException("배달에 대한 락 획득 실패: " + deliveryId);
+      }
+
+      // 이미 존재하는 매칭 확인 후 예외 처리
+      if (matchingRepository.findByDeliveryId(deliveryId).isPresent()) {
+        throw new IllegalArgumentException("해당 배달에 대한 매칭이 이미 존재합니다.");
+      }
+
+      Matching matching = Matching.create(deliveryId);
+      matchingRepository.save(matching);
+
+      List<String> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
+
+      matchingEventPublisher.matchingCreatedEvent(
+          slackIdList,
+          matching.getId(),
+          request.getFee(),
+          request.getStoreName(),
+          request.getStoreAddress(),
+          request.getTargetAddress(),
+          request.getOrderRequest()
+      );
+
+      return matching.getId();
+
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
+    } finally {
+      // 항상 락 해제 (finally 블록에서 처리)
+      if (lock.isHeldByCurrentThread()) {
+        lock.unlock();
+      }
+    }
   }
+
 
   @Override
   public GetMatchingResponse getMatching(UUID matchingId) {
@@ -62,23 +94,45 @@ public class MatchingServiceImpl implements MatchingService {
   @Override
   @Transactional
   public void updateMatching(UUID matchingId, AssignRiderRequest request) {
-    Matching matching = matchingRepository.findById(matchingId)
-        .orElseThrow(() -> new MatchingNotFoundException());
+    // 매칭 ID를 기반으로 고유한 락 키 생성
+    String lockKey = "matching:" + matchingId.toString();
+    RLock lock = redissonClient.getLock(lockKey);
 
-    if (!matching.isUpdatable()) {
-      throw new IllegalArgumentException("Matching is not updatable");
+    try {
+      // 락을 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
+      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
+
+      if (!isLocked) {
+        throw new IllegalStateException("매칭에 대한 락 획득 실패: " + matchingId);
+      }
+
+      Matching matching = matchingRepository.findById(matchingId)
+          .orElseThrow(() -> new MatchingNotFoundException());
+
+      if (!matching.isUpdatable()) {
+        throw new IllegalArgumentException("매칭은 수정할 수 없는 상태입니다.");
+      }
+
+      UUID riderId = request.getRiderId();
+      if (!riderService.checkAssignAvailable(riderId)) {
+        throw new IllegalArgumentException("라이더는 할당 가능한 상태가 아닙니다.");
+      }
+
+      matching.assignRider(riderId);
+      matchingRepository.save(matching);
+
+      UUID deliveryID = matching.getDeliveryId();
+      matchingEventPublisher.matchingCompletedEvent(deliveryID, riderId);
+
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
+    } finally {
+      // 항상 락 해제 (finally 블록에서 처리)
+      if (lock.isHeldByCurrentThread()) {
+        lock.unlock();
+      }
     }
-
-    UUID riderId = request.getRiderId();
-    if (!riderService.checkAssignAvailable(riderId)) {
-      throw new IllegalArgumentException("Rider is not assignable");
-    }
-
-    matching.assignRider(riderId);
-    matchingRepository.save(matching);
-
-    UUID deliveryID = matching.getDeliveryId();
-    matchingEventPublisher.matchingCompletedEvent(deliveryID, riderId);
   }
 
 
