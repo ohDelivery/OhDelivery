@@ -1,5 +1,7 @@
 package com.ohdelivery.service.match.matching.application;
 
+import com.ohdelivery.common.feign.GetDeliveryResponse;
+import com.ohdelivery.service.match.common.DeliveryClientService;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
@@ -21,6 +23,7 @@ public class MatchingServiceImpl implements MatchingService {
   private final MatchingRepository matchingRepository;
   private final MatchingEventPublisher matchingEventPublisher;
   private final RiderService riderService;
+  private final DeliveryClientService deliveryService;
 
   @Override
   @Transactional
@@ -51,10 +54,9 @@ public class MatchingServiceImpl implements MatchingService {
         .orElseThrow(() -> new MatchingNotFoundException());
 
     UUID deliveryId = matching.getDeliveryId();
-//    TODO : 배달엔티티에서 라이더에게 보여줄 내용 가져오기(feign client)
-
+    GetDeliveryResponse delivery = deliveryService.getDelivery(deliveryId).getData();
     return new GetMatchingResponse(matching.getId(), matching.getRiderId(),
-        matching.getDeliveryId());
+        matching.getDeliveryId(), delivery);
   }
 
   @Override
