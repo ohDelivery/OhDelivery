@@ -9,6 +9,7 @@ import com.ohdelivery.service.match.rider.application.dto.response.GetRiderRespo
 import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
 import com.ohdelivery.service.match.rider.presentation.resposne.RiderSuccessCode;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/riders")
 @RequiredArgsConstructor
 public class RiderController {
+
   private final RiderService riderService;
 
   @PostMapping
@@ -64,8 +66,8 @@ public class RiderController {
   @PatchMapping("/{id}/status")
   public ResponseEntity<ApiResponse<UpdateRiderStstusResponse>> updateRiderStatus(
       @PathVariable("id") UUID id,
-      UpdateRiderStatusRequest request){
-    UpdateRiderStstusResponse response = riderService.updateRiderStatus(id,request);
+      @RequestBody @Valid UpdateRiderStatusRequest request) {
+    UpdateRiderStstusResponse response = riderService.updateRiderStatus(id, request);
     return ResponseEntity.ok(ApiResponse.success(
         RiderSuccessCode.RIDER_STATUS_CHANGE_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage(),
