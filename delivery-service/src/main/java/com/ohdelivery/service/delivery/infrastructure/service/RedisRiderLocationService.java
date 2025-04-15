@@ -33,6 +33,10 @@ public class RedisRiderLocationService implements RiderLocationService {
         }
         Point point = points.get(0);
 
+        if (point == null) {
+            throw new RiderLocationNotFoundException();
+        }
+
         return new RiderLocation(point.getX(), point.getY());
     }
 }

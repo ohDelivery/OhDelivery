@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -30,27 +31,50 @@ public class ConsumerWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        String riderId = message.getPayload();
-        sessionRiderMap.put(session, UUID.fromString(riderId));
+    protected void handleTextMessage(WebSocketSession session, TextMessage message)
+        throws IOException {
+        UUID riderId = UUID.fromString(message.getPayload());
+        // TODO redis에 현재 라이더 위치 추적중인지 확인하고 아니라면 연결 끊기
+        try {
+            RiderLocationResponse response = webSocketEventService.getRiderLocation(riderId);
+            if (response == null) {
+                session.sendMessage(new TextMessage("현재 배달중인 주문이 아닙니다!"));
+                session.close(CloseStatus.NORMAL);
+            }
+        } catch (Exception e) {
+            session.sendMessage(new TextMessage("현재 배달중인 주문이 아닙니다!"));
+            session.close(CloseStatus.NORMAL);
+        }
+        sessionRiderMap.put(session, riderId);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        sessionRiderMap.remove(session);
     }
 
     private void startBroadcasting() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            log.info("send rider locations");
-            for (Map.Entry<WebSocketSession, UUID> entry : sessionRiderMap.entrySet()) {
-                WebSocketSession session = entry.getKey();
-                UUID riderId = entry.getValue();
+            try {
+                log.info("send rider locations");
+                for (Map.Entry<WebSocketSession, UUID> entry : sessionRiderMap.entrySet()) {
+                    WebSocketSession session = entry.getKey();
+                    UUID riderId = entry.getValue();
 
-                RiderLocationResponse response = webSocketEventService.getRiderLocation(riderId);
-                String message = String.format("{\"latitude\": %.6f, \"longitude\": %.6f}",
-                    response.getLatitude(), response.getLongitude());
+                    RiderLocationResponse response = webSocketEventService.getRiderLocation(
+                        riderId);
+                    String message = String.format("{\"latitude\": %.6f, \"longitude\": %.6f}",
+                        response.getLatitude(), response.getLongitude());
 
-                try {
-                    session.sendMessage(new TextMessage(message));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        session.sendMessage(new TextMessage(message));
+                    } catch (IOException e) {
+                        session.close(CloseStatus.NORMAL);
+                        e.printStackTrace();
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }, 0, 5, TimeUnit.SECONDS);
     }
