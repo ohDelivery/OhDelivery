@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Test</title>
+</head>
+<body>
+<h2>WebSocket Rider 위치 전송</h2>
+
+<label>JWT 토큰: <input type="text" id="tokenInput" size="60"></label><br><br>
+<label>Rider ID: <input type="text" id="riderIdInput" size="50"></label><br><br>
+
+<textarea id="log" cols="60" rows="10" readonly></textarea><br>
+<button onclick="connect()">Connect</button>
+<button onclick="send()">Send Location</button>
+
+<script>
+  let socket;
+
+  function connect() {
+    const token = document.getElementById("tokenInput").value;
+    if (!token) {
+      alert("토큰을 입력해주세요.");
+      return;
+    }
+
+    socket = new WebSocket(
+        `ws://localhost:8080/ws/delivery/rider?token=${encodeURIComponent(token)}`);
+
+    socket.onopen = () => log("✅ 연결됨");
+    socket.onmessage = (event) => log("📥 서버 응답: " + event.data);
+    socket.onclose = () => log("❌ 연결 종료");
+    socket.onerror = (error) => log("⚠️ 오류 발생: " + error);
+  }
+
+  function send() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      alert("먼저 연결해주세요.");
+      return;
+    }
+
+    const riderId = document.getElementById("riderIdInput").value;
+    if (!riderId) {
+      alert("Rider ID를 입력해주세요.");
+      return;
+    }
+
+    const message = {
+      riderId: riderId,
+      latitude: 37.5665,
+      longitude: 126.9780,
+      timestamp: Date.now()
+    };
+    socket.send(JSON.stringify(message));
+    log("📤 전송: " + JSON.stringify(message));
+  }
+
+  function log(msg) {
+    const logArea = document.getElementById("log");
+    logArea.value += msg + "\n";
+  }
+</script>
+</body>
+</html>

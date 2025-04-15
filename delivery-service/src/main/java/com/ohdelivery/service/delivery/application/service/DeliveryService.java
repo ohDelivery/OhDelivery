@@ -1,21 +1,21 @@
 package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
-import com.ohdelivery.service.delivery.domain.model.Delivery;
-import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
 import java.util.UUID;
 
 public interface DeliveryService {
 
-    Delivery createDelivery(CreateDeliveryRequest request);
+    DeliveryResponse createDelivery(CreateDeliveryRequest request);
 
-    Delivery getDelivery(UUID deliveryId);
+    DeliveryResponse getDelivery(UUID deliveryId);
 
     void completeDelivery(UUID deliveryId);
 
-    DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee);
+    DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee);
 
-    DeliveryRecord getDeliveryRecord(UUID deliveryId);
+    DeliveryRecordResponse getDeliveryRecord(UUID deliveryId);
 
     void updateFee(UUID deliveryId, Integer fee);
 

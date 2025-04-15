@@ -76,11 +76,13 @@ public class Delivery extends BaseEntity {
         this.status = DeliveryStatus.WAITING_FOR_COOKING;
     }
 
-    public CreateDeliveryEvent toCreateDeliveryEvent() {
+    public CreateDeliveryEvent toCreateDeliveryEvent(Double storeLongitude, Double storeLatitude) {
         return CreateDeliveryEvent.builder()
             .deliveryId(this.getId())
             .storeName(this.getOrderInfo().getStoreName())
             .storeAddress(this.getOrderInfo().getStoreAddress())
+            .storeLongitude(storeLongitude)
+            .storeLatitude(storeLatitude)
             .orderDetails(this.getOrderInfo().getOrderDetails())
             .orderRequest(this.getOrderInfo().getOrderRequest())
             .targetAddress(this.getTargetAddress())

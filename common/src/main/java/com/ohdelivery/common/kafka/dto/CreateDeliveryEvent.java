@@ -30,4 +30,5 @@ public class CreateDeliveryEvent {
   public static class CreateDeliveryEventBuilder {
 
   }
+
 }
