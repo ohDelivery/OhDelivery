@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.response.ApiResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -47,7 +48,7 @@ public class TokenFilter implements GatewayFilter {
                 .uri(validateUrl)
                 .bodyValue(token)
                 .retrieve()
-                .onStatus(status -> status == HttpStatus.UNAUTHORIZED || status == HttpStatus.BAD_REQUEST ||status == HttpStatus.FORBIDDEN,
+                .onStatus(status -> isHandledException(HttpStatus.valueOf(status.value())),
                         response -> response.bodyToMono(ApiResponse.class)
                                 .flatMap(r ->{
                                     return writeErrorResponse(exchange, r);
@@ -80,5 +81,17 @@ public class TokenFilter implements GatewayFilter {
 
         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
         return exchange.getResponse().writeWith(Mono.just(buffer));
+    }
+
+    private boolean isHandledException(HttpStatusCode status) {
+        return List.of(
+                HttpStatus.UNAUTHORIZED,
+                HttpStatus.BAD_REQUEST,
+                HttpStatus.FORBIDDEN,
+                HttpStatus.NOT_FOUND,
+                HttpStatus.METHOD_NOT_ALLOWED,
+                HttpStatus.CONFLICT,
+                HttpStatus.INTERNAL_SERVER_ERROR
+        ).contains(status);
     }
 }
