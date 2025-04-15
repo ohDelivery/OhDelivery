@@ -48,10 +48,16 @@ public class GetDeliveryResponse {
   }
 
   public enum DeliveryStatus {
-    READY, ASSIGNED, PICKED_UP, DELIVERED, CANCELLED
+    WAITING_FOR_RECEPTION,
+    WAITING_FOR_COOKING,
+    WAITING_FOR_PICKUP,
+    DELIVERING,
+    DELIVERED,
   }
 
   public enum PaymentType {
-    CASH, CARD, ONLINE
+    COMPLETED,
+    CASH,
+    CARD,
   }
 }
