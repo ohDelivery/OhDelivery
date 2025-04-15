@@ -8,4 +8,5 @@ public class GatewayConstants {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String PASSPORT_ATTRIBUTE = "passport";
+    public static final String CSRF_HEADER = "X-CSRF-TOKEN";
 }
