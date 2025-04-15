@@ -4,9 +4,11 @@ import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryStatus;
 import com.ohdelivery.service.delivery.domain.model.PaymentType;
 import java.util.UUID;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class DeliveryResponse {
 
     private final UUID deliveryId;
@@ -22,18 +24,20 @@ public class DeliveryResponse {
     private final PaymentType paymentType;
     private final Integer paymentAmount;
 
-    public DeliveryResponse(Delivery delivery) {
-        this.deliveryId = delivery.getId();
-        this.storeName = delivery.getOrderInfo().getStoreName();
-        this.storeAddress = delivery.getOrderInfo().getStoreAddress();
-        this.orderDetails = delivery.getOrderInfo().getOrderDetails();
-        this.orderRequest = delivery.getOrderInfo().getOrderRequest();
-        this.targetAddress = delivery.getTargetAddress();
-        this.expectedTime = delivery.getPathInfo().getExpectedTime();
-        this.shortedDistance = delivery.getPathInfo().getShortedDistance();
-        this.fee = delivery.getFee();
-        this.status = delivery.getStatus();
-        this.paymentType = delivery.getPaymentType();
-        this.paymentAmount = delivery.getPaymentAmount();
+    public static DeliveryResponse from(Delivery delivery) {
+        return DeliveryResponse.builder()
+            .deliveryId(delivery.getId())
+            .storeName(delivery.getOrderInfo().getStoreName())
+            .storeAddress(delivery.getOrderInfo().getStoreAddress())
+            .orderDetails(delivery.getOrderInfo().getOrderDetails())
+            .orderRequest(delivery.getOrderInfo().getOrderRequest())
+            .targetAddress(delivery.getTargetAddress())
+            .expectedTime(delivery.getPathInfo().getExpectedTime())
+            .shortedDistance(delivery.getPathInfo().getShortedDistance())
+            .fee(delivery.getFee())
+            .status(delivery.getStatus())
+            .paymentType(delivery.getPaymentType())
+            .paymentAmount(delivery.getPaymentAmount())
+            .build();
     }
 }
