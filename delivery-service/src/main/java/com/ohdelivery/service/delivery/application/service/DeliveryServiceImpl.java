@@ -1,6 +1,7 @@
 package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
+import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
@@ -77,7 +78,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             .orElseThrow(DeliveryNotFoundException::new);
         deliveryRecord.complete();
 
-        CompleteDeliveryEvent completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
+        DeliveryIncentiveDto completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
             deliveryRecord);
         deliveryEventProducer.publishCompleteDeliveryEvent(completeDeliveryEvent);
     }
@@ -119,20 +120,14 @@ public class DeliveryServiceImpl implements DeliveryService {
         createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
     }
 
-    private CompleteDeliveryEvent createCompleteDeliveryEvent(Delivery delivery,
+    private DeliveryIncentiveDto createCompleteDeliveryEvent(Delivery delivery,
         DeliveryRecord deliveryRecord) {
-        return CompleteDeliveryEvent.builder()
-            .deliveryId(delivery.getId())
-            .storeAddress(delivery.getOrderInfo().getStoreAddress())
-            .targetAddress(delivery.getTargetAddress())
+        return DeliveryIncentiveDto.builder()
             .expectedTime(delivery.getPathInfo().getExpectedTime())
             .shortedDistance(delivery.getPathInfo().getShortedDistance())
-            .fee(delivery.getFee())
-            .paymentType(delivery.getPaymentType().toString())
-            .paymentAmount(delivery.getPaymentAmount())
-            .acceptedAt(deliveryRecord.getAcceptedAt())
             .departedAt(deliveryRecord.getDepartedAt())
             .deliveredAt(deliveryRecord.getDeliveredAt())
+            .riderId(deliveryRecord.getRiderId())
             .build();
     }
 

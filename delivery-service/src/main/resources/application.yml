@@ -3,6 +3,8 @@ spring:
     name: delivery-service
   config:
     import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  kafka:
+    url: localhost:9092
   cloud:
     config:
       discovery:

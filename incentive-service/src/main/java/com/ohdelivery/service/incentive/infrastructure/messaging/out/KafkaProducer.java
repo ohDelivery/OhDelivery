@@ -12,12 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaProducer {
-	// private static final String TOPIC = "delivery-record-create";
-	//
-	// private final KafkaTemplate<String, Object> kafkaTemplate;
-	//
-	// public void deliveryRecordEvent(DeliveryIncentiveDto incentiveDto) {
-	// 	log.info("배달기록 생성!!!!!!");
-	// 	kafkaTemplate.send(TOPIC, incentiveDto);
-	// }
+	private static final String TOPIC = "delivery-record-create";
+
+	private final KafkaTemplate<String, Object> kafkaTemplate;
+
+	public void deliveryRecordEvent(DeliveryIncentiveDto incentiveDto) {
+		log.info("배달기록 생성!!!!!!");
+		for(int i = 0; i<5000; i++){
+			kafkaTemplate.send(TOPIC, incentiveDto);
+		}
+
+	}
 }

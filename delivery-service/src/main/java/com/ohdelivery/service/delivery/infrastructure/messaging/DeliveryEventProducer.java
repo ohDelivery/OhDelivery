@@ -3,6 +3,7 @@ package com.ohdelivery.service.delivery.infrastructure.messaging;
 import com.ohdelivery.common.kafka.Topic;
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
 import com.ohdelivery.common.kafka.dto.CreateDeliveryEvent;
+import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,7 +19,7 @@ public class DeliveryEventProducer {
         kafkaTemplate.send(Topic.CREATE_DELIVERY, event);
     }
 
-    public void publishCompleteDeliveryEvent(CompleteDeliveryEvent event) {
+    public void publishCompleteDeliveryEvent(DeliveryIncentiveDto event) {
         kafkaTemplate.send(Topic.COMPLETE_DELIVERY, event);
     }
 
