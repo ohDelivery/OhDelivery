@@ -54,15 +54,14 @@ public class MatchingServiceImpl implements MatchingService {
       Matching matching = Matching.create(deliveryId);
       matchingRepository.save(matching);
 
-      List<String> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
+      List<String> slackIdList = riderService.getRidersByLocation(request.getStoreLongitude(),
+          request.getStoreLatitude());
 
       matchingEventPublisher.matchingCreatedEvent(
           slackIdList,
           matching.getId(),
           request.getFee(),
           request.getStoreName(),
-          request.getStoreLongitude(),
-          request.getStoreLatitude(),
           request.getStoreAddress(),
           request.getTargetAddress(),
           request.getOrderRequest()

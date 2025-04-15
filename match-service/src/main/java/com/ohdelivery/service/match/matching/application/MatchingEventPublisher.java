@@ -12,8 +12,6 @@ public interface MatchingEventPublisher {
       UUID matchingId,
       Integer fee,
       String storeName,
-      Double storeLongitude,
-      Double storeLatitude,
       String storeAddress,
       String targetAddress,
       String orderRequest);
