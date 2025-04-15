@@ -13,7 +13,8 @@ public class RedissonConfig {
   public RedissonClient redissonClient() {
     Config config = new Config();
     config.useSingleServer()
-        .setAddress("redis://localhost:6379"); // Redis 서버 주소 설정
+        .setAddress("redis://localhost:6379") // Redis 서버 주소 설정
+        .setPassword("root"); // Redis 비밀번호
     return Redisson.create(config);
   }
 }
