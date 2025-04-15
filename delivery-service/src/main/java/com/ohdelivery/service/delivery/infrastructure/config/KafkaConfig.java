@@ -26,7 +26,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @EnableKafka
 public class KafkaConfig {
 
-    @Value("${spring.kafka.url}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServerUrl;
 
     public static final String DELIVERY_GROUP_ID = "delivery-service";
