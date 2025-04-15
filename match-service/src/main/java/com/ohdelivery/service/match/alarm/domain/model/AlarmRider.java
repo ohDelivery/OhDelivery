@@ -26,8 +26,6 @@ public class AlarmRider extends BaseEntity {
   @UuidGenerator
   private UUID id;
 
-  private Integer riderId;
-
   private String slackId;
 
   private String channelId;
@@ -38,10 +36,8 @@ public class AlarmRider extends BaseEntity {
   @JoinColumn(name = "alarm_id")
   private Alarm alarm;
 
-  public static AlarmRider toEntity(Integer riderId, String slackId, String channelId,
-      String sentAt) {
+  public static AlarmRider toEntity(String slackId, String channelId, String sentAt) {
     return AlarmRider.builder()
-        .riderId(riderId)
         .slackId(slackId)
         .channelId(channelId)
         .sentAt(sentAt)

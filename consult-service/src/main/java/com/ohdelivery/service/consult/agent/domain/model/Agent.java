@@ -25,9 +25,4 @@ public class Agent extends BaseEntity {
 
   private Long agentId;
 
-  private AgentStatus status;
-
-  public void updateStatus(AgentStatus status) {
-    this.status = status;
-  }
 }

@@ -7,6 +7,10 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaRiderRepository extends JpaRepository<Rider, UUID> {
+
   Optional<Rider> findByIdAndDeletedAtIsNull(UUID id);
+
   List<Rider> findAllByDeletedAtIsNull();
+
+  Optional<Rider> findByRiderIdAndDeletedAtIsNull(Integer riderId);
 }

@@ -1,18 +1,18 @@
 package com.ohdelivery.service.match.matching.application.dto.response;
 
+import com.ohdelivery.common.feign.GetDeliveryResponse;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class GetMatchingResponse {
-    private final UUID id;
-    private final UUID riderId;
-    private final UUID deliveryId;
-    private final String storeName;
-    private final String storeAddress;
-    private final String destinationAddress;
-    private final String deliveryItem;
-    private final Integer assignedFee;
+
+  private UUID id;
+  private UUID rider_id;
+  private UUID deliveryId;
+  private GetDeliveryResponse delivery;
 }
