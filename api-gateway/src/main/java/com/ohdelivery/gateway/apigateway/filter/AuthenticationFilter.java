@@ -1,7 +1,7 @@
 package com.ohdelivery.gateway.apigateway.filter;
 
 import static com.ohdelivery.common.passport.PassportConstant.PASSPORT_HEADER;
-import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.PASSPORT_ATTRIBUTE;
+import static com.ohdelivery.gateway.apigateway.constants.GatewayConstants.PASSPORT_ATTRIBUTE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.passport.Passport;

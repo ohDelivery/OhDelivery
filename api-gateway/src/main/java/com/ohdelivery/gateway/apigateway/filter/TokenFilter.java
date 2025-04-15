@@ -1,8 +1,8 @@
 package com.ohdelivery.gateway.apigateway.filter;
 
-import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.AUTHORIZATION_HEADER;
-import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.BEARER_PREFIX;
-import static com.ohdelivery.gateway.apigateway.constants.FilterConstants.PASSPORT_ATTRIBUTE;
+import static com.ohdelivery.gateway.apigateway.constants.GatewayConstants.AUTHORIZATION_HEADER;
+import static com.ohdelivery.gateway.apigateway.constants.GatewayConstants.BEARER_PREFIX;
+import static com.ohdelivery.gateway.apigateway.constants.GatewayConstants.PASSPORT_ATTRIBUTE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
