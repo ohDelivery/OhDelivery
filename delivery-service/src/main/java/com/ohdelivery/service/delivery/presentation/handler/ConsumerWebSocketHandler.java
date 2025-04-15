@@ -40,10 +40,12 @@ public class ConsumerWebSocketHandler extends TextWebSocketHandler {
             if (response == null) {
                 session.sendMessage(new TextMessage("현재 배달중인 주문이 아닙니다!"));
                 session.close(CloseStatus.NORMAL);
+                sessionRiderMap.remove(session);
             }
         } catch (Exception e) {
             session.sendMessage(new TextMessage("현재 배달중인 주문이 아닙니다!"));
             session.close(CloseStatus.NORMAL);
+            sessionRiderMap.remove(session);
         }
         sessionRiderMap.put(session, riderId);
     }
@@ -55,26 +57,27 @@ public class ConsumerWebSocketHandler extends TextWebSocketHandler {
 
     private void startBroadcasting() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            try {
-                log.info("send rider locations");
-                for (Map.Entry<WebSocketSession, UUID> entry : sessionRiderMap.entrySet()) {
-                    WebSocketSession session = entry.getKey();
-                    UUID riderId = entry.getValue();
+            log.info("send rider locations");
+            for (Map.Entry<WebSocketSession, UUID> entry : sessionRiderMap.entrySet()) {
+                WebSocketSession session = entry.getKey();
+                UUID riderId = entry.getValue();
 
+                try {
                     RiderLocationResponse response = webSocketEventService.getRiderLocation(
                         riderId);
                     String message = String.format("{\"latitude\": %.6f, \"longitude\": %.6f}",
                         response.getLatitude(), response.getLongitude());
 
+                    session.sendMessage(new TextMessage(message));
+                } catch (Exception e) {
                     try {
-                        session.sendMessage(new TextMessage(message));
-                    } catch (IOException e) {
                         session.close(CloseStatus.NORMAL);
+                    } catch (IOException ex) {
                         e.printStackTrace();
+                    } finally {
+                        sessionRiderMap.remove(session);
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }, 0, 5, TimeUnit.SECONDS);
     }
