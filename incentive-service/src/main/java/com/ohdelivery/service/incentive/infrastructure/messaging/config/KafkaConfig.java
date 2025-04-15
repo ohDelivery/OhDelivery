@@ -67,6 +67,7 @@ public class KafkaConfig {
 		props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
 		props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 1000);
 		props.put(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG");
+		props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 4);
 		return new KafkaStreamsConfiguration(props);
 	}
 
@@ -83,6 +84,7 @@ public class KafkaConfig {
 	@Bean
 	public KafkaStreams kafkaStreams(StreamsBuilderFactoryBean factoryBean) throws Exception {
 		return factoryBean.getKafkaStreams();
+
 	}
 
 	@Bean

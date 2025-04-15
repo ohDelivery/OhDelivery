@@ -26,7 +26,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @EnableKafka
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
+    @Value("${spring.kafka.url}")
     private String kafkaServerUrl;
 
     public static final String DELIVERY_GROUP_ID = "delivery-service";
@@ -63,7 +63,6 @@ public class KafkaConfig {
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
-
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> completeMatchingKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();

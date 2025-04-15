@@ -18,6 +18,9 @@ public class KafkaProducer {
 
 	public void deliveryRecordEvent(DeliveryIncentiveDto incentiveDto) {
 		log.info("배달기록 생성!!!!!!");
-		kafkaTemplate.send(TOPIC, incentiveDto);
+		for(int i = 0; i<5000; i++){
+			kafkaTemplate.send(TOPIC, incentiveDto);
+		}
+
 	}
 }

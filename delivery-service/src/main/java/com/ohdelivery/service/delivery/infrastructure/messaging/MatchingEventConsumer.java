@@ -20,7 +20,7 @@ public class MatchingEventConsumer {
     @KafkaListener(
         topics = Topic.COMPLETE_MATCHING,
         groupId = KafkaConfig.DELIVERY_GROUP_ID,
-        containerFactory = "completeMatchingConsumerFactory"
+        containerFactory = "completeMatchingKafkaListenerContainerFactory"
     )
     public void handleCompleteMatchingEvent(@Payload CompleteMatchingEvent event) {
         deliveryService.completeMatching(event.getDeliveryId(), event.getRiderId());
