@@ -112,11 +112,6 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public List<String> getRidersByLocation(String storeAddress) {
-    return List.of();
-  }
-
-  @Override
   public boolean checkAssignAvailable(UUID id) {
     Rider rider = riderRepository.findById(id)
         .orElseThrow(() -> new RiderNotFoundException());
@@ -124,6 +119,11 @@ public class RiderServiceImpl implements RiderService {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude) {
+    return List.of();
   }
 
   private void validateRiderStatus(RiderStatus status) {
