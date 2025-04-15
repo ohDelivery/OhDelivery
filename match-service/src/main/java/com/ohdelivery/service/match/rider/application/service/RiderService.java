@@ -26,7 +26,7 @@ public interface RiderService {
 
   void deleteRiderByRiderId(int userId);
 
-  List<String> getRidersByLocation(String storeAddress);
-
   boolean checkAssignAvailable(UUID riderId);
+
+  List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude);
 }
