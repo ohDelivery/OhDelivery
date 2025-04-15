@@ -6,18 +6,23 @@ spring:
     web-application-type: reactive
   application:
     name: api-gateway
-
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
   cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
     gateway:
       routes:
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
-        - id: delivery-service
-          uri: lb://delivery-service
-          predicates:
-            - Path=/deliveries/**, /delivery-service/v3/api-docs
+      #        - id: delivery-service
+      #          uri: lb://delivery-service
+      #          predicates:
+      #            - Path=/deliveries/**, /delivery-service/v3/api-docs, /ws/delivery/**
       discovery:
         locator:
           enabled: true
@@ -25,7 +30,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
 
 springdoc:
   swagger-ui:
@@ -38,5 +43,6 @@ logging:
   level:
     com.example.gateway: DEBUG
 
-auth-server:
-  validate-url: http://localhost:18081/auth/validate
+url:
+  origin:
+    origin-url: http://localhost:8080
