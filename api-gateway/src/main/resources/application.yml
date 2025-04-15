@@ -37,3 +37,6 @@ springdoc:
 logging:
   level:
     com.example.gateway: DEBUG
+
+auth-server:
+  validate-url: http://localhost:18081/auth/validate

@@ -111,6 +111,21 @@ public class RiderServiceImpl implements RiderService {
     rider.delete(now, createdBy);
   }
 
+  @Override
+  public List<String> getRidersByLocation(String storeAddress) {
+    return List.of();
+  }
+
+  @Override
+  public boolean checkAssignAvailable(UUID id) {
+    Rider rider = riderRepository.findById(id)
+        .orElseThrow(() -> new RiderNotFoundException());
+    if (rider.getStatus().equals(RiderStatus.AVAILABLE)) {
+      return true;
+    }
+    return false;
+  }
+
   private void validateRiderStatus(RiderStatus status) {
     if (status == null) {
       throw new RiderInvalidStatusException("라이더 상태가 지정되지 않았습니다.");

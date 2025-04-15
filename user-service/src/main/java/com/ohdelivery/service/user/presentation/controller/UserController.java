@@ -1,5 +1,7 @@
 package com.ohdelivery.service.user.presentation.controller;
 
+import com.ohdelivery.common.response.ApiResponse;
+import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.user.application.UserService;
 import com.ohdelivery.service.user.presentation.request.CreateUserRequest;
 import com.ohdelivery.service.user.presentation.request.UserLoginRequest;
@@ -21,8 +23,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public UserLoginResponse login(@RequestBody UserLoginRequest request) {
-        return userService.login(request.toCommand());
+    public ApiResponse<UserLoginResponse> login(@RequestBody UserLoginRequest request) {
+        return ApiResponse.success(
+                SuccessCode.COMMON_SUCCESS.getCode().toString(),
+                "Login Success",
+                userService.login(request.toCommand())
+        );
     }
 
     @GetMapping
@@ -31,12 +37,22 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public void createUser(@RequestBody CreateUserRequest request) {
+    public ApiResponse<Void> createUser(@RequestBody CreateUserRequest request) {
         userService.createUser(request.toCommand());
+
+        return ApiResponse.success(
+                SuccessCode.COMMON_SUCCESS.getCode().toString(),
+                SuccessCode.COMMON_SUCCESS.getMessage()
+        );
     }
 
     @DeleteMapping
-    public void deleteUser(Long id) {
+    public ApiResponse<Void> deleteUser(Long id) {
         userService.deleteUser(id);
+
+        return ApiResponse.success(
+            SuccessCode.DELETED_SUCCESS.getCode().toString(),
+            SuccessCode.DELETED_SUCCESS.getMessage()
+        );
     }
 }

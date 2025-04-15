@@ -7,9 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ServiceConstants {
 
-    USER_SERVICE("user-service", "lb://user-service", new String[]{"/users/**"}),
     DELIVERY_SERVICE("delivery-service", "lb://delivery-service", new String[]{"/deliveries/**"}),
-    INCENTIVE_SERVICE("incentive-service", "lb://incentive-service", new String[]{"/incentives/**"});
+    INCENTIVE_SERVICE("incentive-service", "lb://incentive-service", new String[]{"/incentives/**"}),
+    USER_SERVICE("user-service", "lb://user-service", new String[]{"/api/users"}),
+    AUTH_SERVER("auth-server", "lb://auth-server", new String[]{"/auth/logout"})
+    ;
 
     private final String serviceName;
     private final String serviceUri;

@@ -16,4 +16,13 @@ public enum RoleType {
 	public String getAuthority() {
 		return this.authority;
 	}
+
+	public static RoleType fromAuthority(String authority) {
+		for (RoleType role : RoleType.values()) {
+			if (role.getAuthority().equals(authority)) {
+				return role;
+			}
+		}
+		throw new IllegalArgumentException(authority + "역할에 대한 권한이 없습니다");
+	}
 }

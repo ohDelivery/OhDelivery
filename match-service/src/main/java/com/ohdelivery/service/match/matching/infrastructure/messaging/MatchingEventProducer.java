@@ -1,9 +1,12 @@
 package com.ohdelivery.service.match.matching.infrastructure.messaging;
 
 import static com.ohdelivery.common.kafka.Topic.COMPLETE_MATCHING;
+import static com.ohdelivery.common.kafka.Topic.CREATED_MATCHING;
 
 import com.ohdelivery.common.kafka.dto.CompleteMatchingEvent;
+import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,4 +26,26 @@ public class MatchingEventProducer implements MatchingEventPublisher {
     log.info("matching completed event: {}", event);
     kafkaTemplate.send(COMPLETE_MATCHING, event);
   }
+
+  @Override
+  public void matchingCreatedEvent(
+      List<String> slackIdList,
+      UUID matchingId,
+      Integer fee,
+      String storeName,
+      String storeAddress,
+      String targetAddress,
+      String orderRequest) {
+    CreateMatchingEvent event = new CreateMatchingEvent(
+        slackIdList,
+        matchingId,
+        fee,
+        storeName,
+        storeAddress,
+        targetAddress,
+        orderRequest);
+    log.info("matching created event: {}", event);
+    kafkaTemplate.send(CREATED_MATCHING, event);
+  }
+
 }

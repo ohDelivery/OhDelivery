@@ -12,6 +12,7 @@ public enum ErrorCode {
 
     // 401
     INCORRECT_PASSWORD_EXCEPTION(HttpStatus.UNAUTHORIZED, "비밀번호가 잘못 되었습니다."),
+    EXPIRED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "인증 토큰이 만료되었습니다."),
 
     //404
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 유저는 존재하지 않습니다."),

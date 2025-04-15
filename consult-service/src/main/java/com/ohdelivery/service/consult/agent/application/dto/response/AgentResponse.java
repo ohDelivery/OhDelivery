@@ -18,11 +18,11 @@ public class AgentResponse {
   private Long agentId;
   private AgentStatus status;
 
-  public static AgentResponse toDto(Agent agent) {
+  public static AgentResponse toDto(Agent agent, AgentStatus status) {
     return AgentResponse.builder()
         .id(agent.getId())
         .agentId(agent.getAgentId())
-        .status(agent.getStatus())
+        .status(status)
         .build();
   }
 }

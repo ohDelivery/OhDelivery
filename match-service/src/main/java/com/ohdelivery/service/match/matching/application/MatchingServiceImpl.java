@@ -1,17 +1,21 @@
 package com.ohdelivery.service.match.matching.application;
 
+import com.ohdelivery.common.feign.GetDeliveryResponse;
+import com.ohdelivery.service.match.common.DeliveryClientService;
+import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
-import com.ohdelivery.service.match.matching.application.dto.request.UpdateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
 import com.ohdelivery.service.match.matching.application.exception.MatchingNotFoundException;
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
-import com.ohdelivery.service.match.matching.domain.vo.DeliveryInfo;
-import com.ohdelivery.service.match.matching.domain.vo.PayInfo;
-import com.ohdelivery.service.match.matching.domain.vo.RiderInfo;
+import com.ohdelivery.service.match.rider.application.service.RiderService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,76 +25,138 @@ public class MatchingServiceImpl implements MatchingService {
 
   private final MatchingRepository matchingRepository;
   private final MatchingEventPublisher matchingEventPublisher;
+  private final RiderService riderService;
+  private final DeliveryClientService deliveryService;
+  private final RedissonClient redissonClient;
 
   @Override
   @Transactional
   public UUID createMatching(CreateMatchingRequest request) {
-    RiderInfo riderInfo = new RiderInfo(request.getRiderId());
+    UUID deliveryId = request.getDeliveryId();
 
-    PayInfo payInfo = new PayInfo(request.getAssignedFee());
+    // 배달 ID를 기반으로 고유한 락 키 생성
+    String lockKey = "delivery:" + deliveryId.toString();
+    RLock lock = redissonClient.getLock(lockKey);
 
-    DeliveryInfo deliveryInfo = new DeliveryInfo(
-        request.getDeliveryId(),
-        request.getStoreName(),
-        request.getStoreAddress(),
-        request.getDestinationAddress(),
-        request.getDeliveryItem()
-    );
+    try {
+      // 락 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
+      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
 
-    Matching matching = new Matching(riderInfo, payInfo, deliveryInfo);
-    matchingRepository.save(matching);
-    UUID deliveryId = matching.getDeliveryInfo().getDeliveryId();
-    UUID riderId = matching.getRiderInfo().getRiderId();
-    matchingEventPublisher.matchingCompletedEvent(deliveryId, riderId);
-    return matching.getId();
+      if (!isLocked) {
+        throw new IllegalStateException("배달에 대한 락 획득 실패: " + deliveryId);
+      }
+
+      // 이미 존재하는 매칭 확인 후 예외 처리
+      if (matchingRepository.findByDeliveryId(deliveryId).isPresent()) {
+        throw new IllegalArgumentException("해당 배달에 대한 매칭이 이미 존재합니다.");
+      }
+
+      Matching matching = Matching.create(deliveryId);
+      matchingRepository.save(matching);
+
+      List<String> slackIdList = riderService.getRidersByLocation(request.getStoreAddress());
+
+      matchingEventPublisher.matchingCreatedEvent(
+          slackIdList,
+          matching.getId(),
+          request.getFee(),
+          request.getStoreName(),
+          request.getStoreAddress(),
+          request.getTargetAddress(),
+          request.getOrderRequest()
+      );
+
+      return matching.getId();
+
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
+    } finally {
+      // 항상 락 해제 (finally 블록에서 처리)
+      if (lock.isHeldByCurrentThread()) {
+        lock.unlock();
+      }
+    }
+  }
+
+
+  @Override
+  public GetMatchingResponse getMatching(UUID matchingId) {
+    Matching matching = matchingRepository.findById(matchingId)
+        .orElseThrow(() -> new MatchingNotFoundException());
+
+    UUID deliveryId = matching.getDeliveryId();
+    GetDeliveryResponse delivery = deliveryService.getDelivery(deliveryId).getData();
+    return new GetMatchingResponse(matching.getId(), matching.getRiderId(),
+        matching.getDeliveryId(), delivery);
   }
 
   @Override
-  public GetMatchingResponse getMatching(UUID id) {
-    Matching matching = matchingRepository.findById(id)
-        .orElseThrow(() -> new MatchingNotFoundException());
+  @Transactional
+  public void updateMatching(UUID matchingId, AssignRiderRequest request) {
+    // 매칭 ID를 기반으로 고유한 락 키 생성
+    String lockKey = "matching:" + matchingId.toString();
+    RLock lock = redissonClient.getLock(lockKey);
 
-    return new GetMatchingResponse(
-        matching.getId(),
-        matching.getRiderInfo().getRiderId(),
-        matching.getDeliveryInfo().getDeliveryId(),
-        matching.getDeliveryInfo().getStoreName(),
-        matching.getDeliveryInfo().getStoreAddress(),
-        matching.getDeliveryInfo().getDestinationAddress(),
-        matching.getDeliveryInfo().getDeliveryItem(),
-        matching.getPayInfo().getAssignedFee()
-    );
+    try {
+      // 락을 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
+      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
+
+      if (!isLocked) {
+        throw new IllegalStateException("매칭에 대한 락 획득 실패: " + matchingId);
+      }
+
+      Matching matching = matchingRepository.findById(matchingId)
+          .orElseThrow(() -> new MatchingNotFoundException());
+
+      if (!matching.isUpdatable()) {
+        throw new IllegalArgumentException("매칭은 수정할 수 없는 상태입니다.");
+      }
+
+      UUID riderId = request.getRiderId();
+      if (!riderService.checkAssignAvailable(riderId)) {
+        throw new IllegalArgumentException("라이더는 할당 가능한 상태가 아닙니다.");
+      }
+
+      matching.assignRider(riderId);
+      matchingRepository.save(matching);
+
+      UUID deliveryID = matching.getDeliveryId();
+      matchingEventPublisher.matchingCompletedEvent(deliveryID, riderId);
+
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
+    } finally {
+      // 항상 락 해제 (finally 블록에서 처리)
+      if (lock.isHeldByCurrentThread()) {
+        lock.unlock();
+      }
+    }
   }
 
+
   @Override
-  public void updateMatching(UUID id, UpdateMatchingRequest request) {
-    Matching matching = matchingRepository.findById(id)
+  public void deleteMatching(UUID deliveryId) {
+//    배달 취소 기능 -> 배달 취소 시 매칭도 없어져야 하는부분
+    Matching matching = matchingRepository.findByDeliveryId(deliveryId)
         .orElseThrow(() -> new MatchingNotFoundException());
 
-    matching = new Matching(
-        matching.getId(),
-        new RiderInfo(request.getRiderId()),
-        new PayInfo(request.getAssignedFee()),
-        new DeliveryInfo(
-            request.getDeliveryId(),
-            request.getStoreName(),
-            request.getStoreAddress(),
-            request.getDestinationAddress(),
-            request.getDeliveryItem()
-        )
-    );
-
-    matchingRepository.save(matching);
+    if (matching.isUpdatable()) {
+      LocalDateTime now = LocalDateTime.now();
+      String createdBy = "system";
+      matching.delete(now, createdBy);
+      matchingRepository.save(matching);
+    } else {
+      throw new IllegalArgumentException("Matching is not deletable");
+    }
   }
 
-  @Override
-  public void deleteMatching(UUID id) {
-    Matching matching = matchingRepository.findById(id)
-        .orElseThrow(() -> new MatchingNotFoundException());
-    // TODO : BaseEntity의 delete메서드 매개변수 넣는 이유 물어보기
-    LocalDateTime now = LocalDateTime.now();
-    String createdBy = "system";
-    matching.delete(now, createdBy);
-    matchingRepository.save(matching);
+  public List<Matching> getMatchings(UUID riderId) {
+    if (riderId == null) {
+      throw new IllegalArgumentException("RiderId is null");
+    }
+
+    return matchingRepository.findByRiderId(riderId);
   }
 }
