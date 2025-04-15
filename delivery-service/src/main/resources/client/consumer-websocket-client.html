@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rider 위치 추적</title>
+</head>
+<body>
+<h2>라이더 위치</h2>
+
+<label>JWT 토큰: <input type="text" id="tokenInput" size="60"></label><br><br>
+<label>Rider ID: <input type="text" id="riderIdInput" value="8ec9d381-f33f-48c4-ab94-d0a3f0afe86c"
+                        size="40"></label><br><br>
+<button onclick="connect()">Connect</button>
+
+<div id="location">로딩 중...</div>
+
+<script>
+  let socket;
+
+  function connect() {
+    const token = document.getElementById("tokenInput").value;
+    const riderId = document.getElementById("riderIdInput").value;
+
+    if (!token || !riderId) {
+      alert("토큰과 라이더 ID를 입력해주세요.");
+      return;
+    }
+
+    socket = new WebSocket(
+        `ws://localhost:8080/ws/delivery/consumer?token=${encodeURIComponent(token)}`);
+
+    socket.onopen = () => {
+      socket.send(riderId);
+      log(`🔗 연결됨, Rider ID 전송: ${riderId}`);
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      document.getElementById("location").innerText =
+          `위도: ${data.latitude}, 경도: ${data.longitude}`;
+    };
+
+    socket.onclose = () => log("❌ 연결 종료");
+    socket.onerror = (error) => log("⚠️ 오류 발생: " + error);
+  }
+
+  function log(msg) {
+    const div = document.getElementById("location");
+    div.innerText = msg;
+  }
+</script>
+</body>
+</html>

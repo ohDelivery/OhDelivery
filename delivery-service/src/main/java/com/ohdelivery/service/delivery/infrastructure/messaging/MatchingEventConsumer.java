@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MatchingEventConsumer {
 
-    private final DeliveryService deliveryService;
+  private final DeliveryService deliveryService;
 
     @KafkaListener(
         topics = Topic.COMPLETE_MATCHING,

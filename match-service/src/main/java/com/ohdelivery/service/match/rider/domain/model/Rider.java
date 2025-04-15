@@ -3,6 +3,8 @@ package com.ohdelivery.service.match.rider.domain.model;
 import com.ohdelivery.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -31,6 +33,7 @@ public class Rider extends BaseEntity {
   private String slackId;
 
   @Column(name = "status")
+  @Enumerated(EnumType.STRING)
   private RiderStatus status;
 
   @Column(name = "latitude")
