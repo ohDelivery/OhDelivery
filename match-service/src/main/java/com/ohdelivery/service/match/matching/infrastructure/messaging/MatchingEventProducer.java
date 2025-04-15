@@ -33,6 +33,8 @@ public class MatchingEventProducer implements MatchingEventPublisher {
       UUID matchingId,
       Integer fee,
       String storeName,
+      Double storeLongitude,
+      Double storeLatitude,
       String storeAddress,
       String targetAddress,
       String orderRequest) {
@@ -41,6 +43,8 @@ public class MatchingEventProducer implements MatchingEventPublisher {
         matchingId,
         fee,
         storeName,
+        storeLongitude,
+        storeLatitude,
         storeAddress,
         targetAddress,
         orderRequest);

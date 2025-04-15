@@ -15,14 +15,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MatchingEventConsumer {
 
-    private final DeliveryService deliveryService;
+  private final DeliveryService deliveryService;
 
-    @KafkaListener(
-        topics = Topic.COMPLETE_MATCHING,
-        groupId = KafkaConfig.DELIVERY_GROUP_ID,
-        containerFactory = "completeMatchingConsumerFactory"
-    )
-    public void handleCompleteMatchingEvent(@Payload CompleteMatchingEvent event) {
-        deliveryService.completeMatching(event.getDeliveryId(), event.getRiderId());
-    }
+  @KafkaListener(
+      topics = Topic.COMPLETE_MATCHING,
+      groupId = KafkaConfig.DELIVERY_GROUP_ID,
+      containerFactory = "completeMatchingKafkaListenerContainerFactory"
+  )
+  public void handleCompleteMatchingEvent(@Payload CompleteMatchingEvent event) {
+    deliveryService.completeMatching(event.getDeliveryId(), event.getRiderId());
+  }
 }

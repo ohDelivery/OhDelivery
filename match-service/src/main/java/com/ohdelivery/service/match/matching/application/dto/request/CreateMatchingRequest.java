@@ -11,6 +11,8 @@ public class CreateMatchingRequest {
   private UUID deliveryId;
   private String storeName;
   private String storeAddress;
+  private Double storeLongitude;
+  private Double storeLatitude;
   private String orderDetails;
   private String orderRequest;
   private String targetAddress;
