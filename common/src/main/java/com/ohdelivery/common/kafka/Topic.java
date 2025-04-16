@@ -8,7 +8,9 @@ public class Topic {
 
   public static final String COMPLETE_MATCHING = "complete-matching";
   public static final String CREATED_MATCHING = "create-matching";
+  public static final String FAILED_MATCHING = "fail-matching";
 
   public static final String UPDATED_SLACK_ID = "update-slackId";
   public static final String DELETED_USER = "delete-user";
+  public static final String CREATED_USER = "create-user";
 }

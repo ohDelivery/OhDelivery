@@ -2,9 +2,11 @@ package com.ohdelivery.service.match.matching.infrastructure.messaging;
 
 import static com.ohdelivery.common.kafka.Topic.COMPLETE_MATCHING;
 import static com.ohdelivery.common.kafka.Topic.CREATED_MATCHING;
+import static com.ohdelivery.common.kafka.Topic.FAILED_MATCHING;
 
 import com.ohdelivery.common.kafka.dto.CompleteMatchingEvent;
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
+import com.ohdelivery.common.kafka.dto.FailCreateMatchingEvent;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +48,13 @@ public class MatchingEventProducer implements MatchingEventPublisher {
         orderRequest);
     log.info("matching created event: {}", event);
     kafkaTemplate.send(CREATED_MATCHING, event);
+  }
+
+  @Override
+  public void matchingCreateFailedEvent(UUID deliveryId) {
+    FailCreateMatchingEvent event = new FailCreateMatchingEvent(deliveryId);
+    log.info("matching created failed event: {}", event);
+    kafkaTemplate.send(FAILED_MATCHING, event);
   }
 
 }

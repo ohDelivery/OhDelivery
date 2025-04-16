@@ -15,4 +15,6 @@ public interface MatchingEventPublisher {
       String storeAddress,
       String targetAddress,
       String orderRequest);
+
+  void matchingCreateFailedEvent(UUID deliveryId);
 }
