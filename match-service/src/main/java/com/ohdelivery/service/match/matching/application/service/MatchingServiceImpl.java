@@ -8,6 +8,7 @@ import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
+import com.ohdelivery.service.match.matching.application.dto.response.SearchMatchingResponse;
 import com.ohdelivery.service.match.matching.application.exception.MatchingNotFoundException;
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
@@ -19,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,7 +100,7 @@ public class MatchingServiceImpl implements MatchingService {
         throw new IllegalArgumentException("MASTER가 아니면 본인만 할당 가능합니다.");
       }
     }
-    
+
     try {
       // 락을 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
       boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
@@ -150,11 +155,28 @@ public class MatchingServiceImpl implements MatchingService {
     }
   }
 
-  public List<Matching> getMatchings(UUID riderId) {
-    if (riderId == null) {
-      throw new IllegalArgumentException("RiderId is null");
+  @Override
+  public Page<SearchMatchingResponse> searchMatchings(
+      Passport currentUser,
+      int page,
+      int size,
+      String sortBy,
+      String direction
+  ) {
+    Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
+        : Sort.by(sortBy).descending();
+    Pageable pageable = PageRequest.of(page, size, sort);
+    long userId = Long.parseLong(currentUser.getUserId());
+
+    if (currentUser.getRoleType() == RoleType.RIDER) {
+      UUID riderId = riderService.getRiderByuserId(userId).getId();
+      return matchingRepository.findByRiderId(riderId, pageable)
+          .map(SearchMatchingResponse::from);
     }
 
-    return matchingRepository.findByRiderId(riderId);
+    // 마스터라면 전체 매칭 조회
+    return matchingRepository.findAll(pageable)
+        .map(SearchMatchingResponse::from);
   }
+
 }

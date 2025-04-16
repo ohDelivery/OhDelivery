@@ -1,9 +1,10 @@
 package com.ohdelivery.service.match.matching.domain.repository;
 
 import com.ohdelivery.service.match.matching.domain.Matching;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,5 +16,7 @@ public interface MatchingRepository {
 
   Optional<Matching> findByDeliveryId(UUID deliveryId);
 
-  List<Matching> findByRiderId(UUID riderId);
+  Page<Matching> findByRiderId(UUID riderId, Pageable pageable);
+
+  Page<Matching> findAll(Pageable pageable);
 }

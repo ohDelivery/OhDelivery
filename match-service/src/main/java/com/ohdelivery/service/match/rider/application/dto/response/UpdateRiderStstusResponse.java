@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class UpdateRiderStstusResponse {
 
   private final UUID id;
-  private final Integer rider_id;
+  private final long rider_id;
   private final String slack_id;
   private final String status;
   private final Double latitude;
