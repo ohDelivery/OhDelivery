@@ -1,5 +1,7 @@
 package com.ohdelivery.service.match.rider.presentation;
 
+import com.ohdelivery.common.passport.RoleCheck;
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
@@ -32,6 +34,7 @@ public class RiderController {
 
   private final RiderService riderService;
 
+  @RoleCheck(RoleType.MASTER)
   @PostMapping
   public ResponseEntity<ApiResponse<UUID>> create(@RequestBody CreateRiderRequest request) {
     UUID id = riderService.createRider(request);
@@ -54,6 +57,7 @@ public class RiderController {
   }
 
   @GetMapping("/all")
+  @RoleCheck(RoleType.MASTER)
   public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllRider() {
     List<GetRiderResponse> response = riderService.getAllRider();
     return ResponseEntity.ok(ApiResponse.success(
@@ -64,6 +68,7 @@ public class RiderController {
   }
 
   @PatchMapping("/{id}/status")
+  @RoleCheck({RoleType.MASTER, RoleType.RIDER})
   public ResponseEntity<ApiResponse<UpdateRiderStstusResponse>> updateRiderStatus(
       @PathVariable("id") UUID id,
       @RequestBody @Valid UpdateRiderStatusRequest request) {
@@ -88,6 +93,7 @@ public class RiderController {
   }
 
   @DeleteMapping("/{id}")
+  @RoleCheck(RoleType.MASTER)
   public ResponseEntity<ApiResponse<Void>> deleteMatching(@PathVariable UUID id) {
     riderService.deleteRider(id);
     return ResponseEntity.ok(ApiResponse.success(

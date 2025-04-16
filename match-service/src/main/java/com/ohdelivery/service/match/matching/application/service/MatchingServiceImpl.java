@@ -1,7 +1,8 @@
-package com.ohdelivery.service.match.matching.application;
+package com.ohdelivery.service.match.matching.application.service;
 
 import com.ohdelivery.common.feign.GetDeliveryResponse;
 import com.ohdelivery.service.match.common.DeliveryClientService;
+import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
@@ -113,8 +114,8 @@ public class MatchingServiceImpl implements MatchingService {
       if (!matching.isUpdatable()) {
         throw new IllegalArgumentException("매칭은 수정할 수 없는 상태입니다.");
       }
-
-      UUID riderId = request.getRiderId();
+//    TODO : 로그인한 사람의 RiderId를 request 대신에 넣기
+      UUID riderId = riderService.getRiderByuserId(request.getRiderId()).getId();
       if (!riderService.checkAssignAvailable(riderId)) {
         throw new IllegalArgumentException("라이더는 할당 가능한 상태가 아닙니다.");
       }

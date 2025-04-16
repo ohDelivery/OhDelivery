@@ -29,4 +29,6 @@ public interface RiderService {
   boolean checkAssignAvailable(UUID riderId);
 
   List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude);
+
+  GetRiderResponse getRiderByuserId(Integer riderId);
 }

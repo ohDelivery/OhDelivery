@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.matching.application;
+package com.ohdelivery.service.match.matching.application.service;
 
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
