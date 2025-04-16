@@ -1,6 +1,5 @@
 package com.ohdelivery.service.user.presentation.response;
 
-import com.ohdelivery.service.user.domain.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
