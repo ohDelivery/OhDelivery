@@ -48,4 +48,8 @@ public class User extends BaseEntity {
                 .slackId(slackId)
                 .build();
     }
+
+    public void updateSlackId(String slackId) {
+        this.slackId = slackId;
+    }
 }
