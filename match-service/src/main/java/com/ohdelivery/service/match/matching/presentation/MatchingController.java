@@ -1,5 +1,7 @@
 package com.ohdelivery.service.match.matching.presentation;
 
+import com.ohdelivery.common.passport.RoleCheck;
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
@@ -27,6 +29,7 @@ public class MatchingController {
   private final MatchingService matchingService;
 
   @PostMapping
+  @RoleCheck(RoleType.MASTER)
   public ResponseEntity<ApiResponse<UUID>> createMatching(
       @RequestBody CreateMatchingRequest request) {
     UUID id = matchingService.createMatching(request);
@@ -48,7 +51,9 @@ public class MatchingController {
     ));
   }
 
+  //  TODO : 로그인한 사람의 Id가져와서 그 Id로 조회하기
   @PutMapping("/{id}")
+  @RoleCheck({RoleType.MASTER, RoleType.RIDER})
   public ResponseEntity<ApiResponse<Void>> updateMatching(
       @PathVariable UUID id,
       @RequestBody AssignRiderRequest request) {
@@ -60,6 +65,7 @@ public class MatchingController {
   }
 
   @DeleteMapping("/{id}")
+  @RoleCheck(RoleType.MASTER)
   public ResponseEntity<ApiResponse<Void>> deleteMatching(@PathVariable UUID id) {
     matchingService.deleteMatching(id);
     return ResponseEntity.ok(ApiResponse.success(
