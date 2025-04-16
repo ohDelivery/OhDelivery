@@ -6,6 +6,7 @@ import com.ohdelivery.service.user.application.UserService;
 import com.ohdelivery.service.user.presentation.request.CreateUserRequest;
 import com.ohdelivery.service.user.presentation.request.UpdateSlackIdRequest;
 import com.ohdelivery.service.user.presentation.request.UserLoginRequest;
+import com.ohdelivery.service.user.presentation.response.GetUserResponse;
 import com.ohdelivery.service.user.presentation.response.UserAuthResponse;
 import com.ohdelivery.service.user.presentation.response.UserLoginResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +35,19 @@ public class UserController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/auth")
     public UserAuthResponse getUserInfo(Long id) {
-        return userService.getUser(id);
+        return userService.getUserInfo(id);
     }
 
+    @GetMapping
+    public ApiResponse<GetUserResponse> getUser(Long id) {
+        return ApiResponse.success(
+                SuccessCode.COMMON_SUCCESS.getCode().toString(),
+                SuccessCode.COMMON_SUCCESS.getMessage(),
+                userService.getUser(id)
+        );
+    }
     @PostMapping("/join")
     public ApiResponse<Void> createUser(@RequestBody CreateUserRequest request) {
         userService.createUser(request.toCommand());

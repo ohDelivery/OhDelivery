@@ -44,6 +44,17 @@ public class UserService {
         return new UserAuthResponse(user.getId(), user.getRole());
     }
 
+    @Transactional(readOnly = true)
+    public GetUserResponse getUser(Long id){
+        User user = userRepository.findById(id);
+        return GetUserResponse.create(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getSlackId()
+        );
+    }
+
     public void createUser(CreateUserCommand command) {
         User user = userRepository.save(User.create(
                 command.getUsername(),
