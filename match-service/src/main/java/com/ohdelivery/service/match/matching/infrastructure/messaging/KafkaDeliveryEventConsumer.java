@@ -24,7 +24,7 @@ public class KafkaDeliveryEventConsumer {
       containerFactory = "createDeliveryKafkaListenerFactory"
   )
   public void consumeCreateDelivery(CreateDeliveryEvent event) {
-    log.info("Received UpdateSlackIdEvent: userId={}, slackId={}", event);
+    log.info("Received CreateDeliveryEvent", event);
     CreateMatchingRequest request = CreateMatchingRequest.from(event);
     matchingService.createMatching(request);
   }
