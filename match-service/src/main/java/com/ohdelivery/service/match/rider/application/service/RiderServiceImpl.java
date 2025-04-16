@@ -5,6 +5,7 @@ import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderReq
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
+import com.ohdelivery.service.match.rider.application.exception.AvailableRiderNotFoundException;
 import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStatusException;
 import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RiderServiceImpl implements RiderService {
 
   private final RiderRepository riderRepository;
+  private static final double EARTH_RADIUS = 6371.0;
 
   @Override
   @Transactional
@@ -112,11 +114,6 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public List<String> getRidersByLocation(String storeAddress) {
-    return List.of();
-  }
-
-  @Override
   public boolean checkAssignAvailable(UUID id) {
     Rider rider = riderRepository.findById(id)
         .orElseThrow(() -> new RiderNotFoundException());
@@ -126,9 +123,46 @@ public class RiderServiceImpl implements RiderService {
     return false;
   }
 
+  @Override
+  public List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude) {
+    List<Rider> availableRiders = getAvailableRiders();
+    List<String> slackIds = getNearByRiders(availableRiders, storeLatitude, storeLongitude);
+    return slackIds;
+  }
+  
   private void validateRiderStatus(RiderStatus status) {
     if (status == null) {
       throw new RiderInvalidStatusException("라이더 상태가 지정되지 않았습니다.");
     }
+  }
+
+  private List<Rider> getAvailableRiders() {
+    List<Rider> riders = riderRepository.findAllByStatus(RiderStatus.AVAILABLE);
+    if (riders.isEmpty()) {
+      throw new AvailableRiderNotFoundException();
+    }
+    return riders;
+  }
+
+  private List<String> getNearByRiders(List<Rider> riders, double storeLat, double storeLng) {
+    List<String> slackIds = riders.stream()
+        .filter(rider ->
+            calculateDistance(storeLat, storeLng, rider.getLatitude(), rider.getLongitude()) <= 10)
+        .map(Rider::getSlackId)
+        .toList();
+    if (slackIds.isEmpty()) {
+      throw new AvailableRiderNotFoundException();
+    }
+    return slackIds;
+  }
+
+  private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    double dLat = Math.toRadians(lat2 - lat1);
+    double dLon = Math.toRadians(lon2 - lon1);
+    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+        + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+        * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return EARTH_RADIUS * c;
   }
 }

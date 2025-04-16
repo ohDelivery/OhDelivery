@@ -1,13 +1,17 @@
 package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
+import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
+import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
 import com.ohdelivery.service.delivery.application.exception.DeliveryNotFoundException;
 import com.ohdelivery.service.delivery.domain.model.Delivery;
 import com.ohdelivery.service.delivery.domain.model.DeliveryRecord;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRecordRepository;
 import com.ohdelivery.service.delivery.domain.repository.DeliveryRepository;
+import com.ohdelivery.service.delivery.domain.service.RiderLocationService;
 import com.ohdelivery.service.delivery.domain.service.ShortedPathService;
 import com.ohdelivery.service.delivery.infrastructure.dto.LocationInfo;
 import com.ohdelivery.service.delivery.infrastructure.dto.PathInfo;
@@ -27,10 +31,11 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRecordRepository deliveryRecordRepository;
     private final ShortedPathService shortedPathService;
     private final DeliveryEventProducer deliveryEventProducer;
+    private final RiderLocationService riderLocationService;
 
     @Override
     @Transactional
-    public Delivery createDelivery(CreateDeliveryRequest request) {
+    public DeliveryResponse createDelivery(CreateDeliveryRequest request) {
         LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
         LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
 
@@ -48,51 +53,57 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery saveDelivery = deliveryRepository.save(
             request.toDelivery(path.getDistance(), path.getDistance()));
 
-        deliveryEventProducer.publishCreateDeliveryEvent(saveDelivery.toCreateDeliveryEvent());
+        deliveryEventProducer.publishCreateDeliveryEvent(
+            saveDelivery.toCreateDeliveryEvent(storeX, storeY));
 
-        return saveDelivery;
+        return DeliveryResponse.from(saveDelivery);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Delivery getDelivery(UUID deliveryId) {
-        return deliveryRepository.findById(deliveryId)
+    public DeliveryResponse getDelivery(UUID deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(DeliveryNotFoundException::new);
+        return DeliveryResponse.from(delivery);
     }
 
     @Override
     @Transactional
     public void completeDelivery(UUID deliveryId) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.complete();
 
-        DeliveryRecord deliveryRecord = getDeliveryRecord(deliveryId);
+        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         deliveryRecord.complete();
 
-        CompleteDeliveryEvent completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
+        DeliveryIncentiveDto completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
             deliveryRecord);
         deliveryEventProducer.publishCompleteDeliveryEvent(completeDeliveryEvent);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryRecord getDeliveryRecord(UUID deliveryId) {
-        return deliveryRecordRepository.findByDeliveryId(deliveryId)
+    public DeliveryRecordResponse getDeliveryRecord(UUID deliveryId) {
+        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
             .orElseThrow(DeliveryNotFoundException::new);
+        return DeliveryRecordResponse.from(deliveryRecord);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryRecord createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
+    public DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
         DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
 
-        return deliveryRecordRepository.save(deliveryRecord);
+        return DeliveryRecordResponse.from(deliveryRecordRepository.save(deliveryRecord));
     }
 
     @Override
     @Transactional
     public void updateFee(UUID deliveryId, Integer fee) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.updateFee(fee);
 
         deliveryEventProducer.publishUpdateDeliveryEvent(
@@ -102,26 +113,22 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public void completeMatching(UUID deliveryId, UUID riderId) {
-        Delivery delivery = getDelivery(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
         delivery.updateWaitingForCooking();
 
         createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
     }
 
-    private CompleteDeliveryEvent createCompleteDeliveryEvent(Delivery delivery,
+    private DeliveryIncentiveDto createCompleteDeliveryEvent(Delivery delivery,
         DeliveryRecord deliveryRecord) {
-        return CompleteDeliveryEvent.builder()
-            .deliveryId(delivery.getId())
-            .storeAddress(delivery.getOrderInfo().getStoreAddress())
-            .targetAddress(delivery.getTargetAddress())
+        return DeliveryIncentiveDto.builder()
             .expectedTime(delivery.getPathInfo().getExpectedTime())
             .shortedDistance(delivery.getPathInfo().getShortedDistance())
-            .fee(delivery.getFee())
-            .paymentType(delivery.getPaymentType().toString())
-            .paymentAmount(delivery.getPaymentAmount())
-            .acceptedAt(deliveryRecord.getAcceptedAt())
             .departedAt(deliveryRecord.getDepartedAt())
             .deliveredAt(deliveryRecord.getDeliveredAt())
+            .riderId(deliveryRecord.getRiderId())
             .build();
     }
+
 }

@@ -30,11 +30,11 @@ public class IncentiveController {
 	private final KafkaProducer kafkaProducer;
 	private final IncentiveService incentiveService;
 
-	// @PostMapping
-	// public ResponseEntity<String> create(@RequestBody DeliveryIncentiveDto dto) {
-	// 	kafkaProducer.deliveryRecordEvent(dto);
-	// 	return ResponseEntity.ok("Success");
-	// }
+	@PostMapping
+	public ResponseEntity<String> create(@RequestBody DeliveryIncentiveDto dto) {
+		kafkaProducer.deliveryRecordEvent(dto);
+		return ResponseEntity.ok("Success");
+	}
 
 	@GetMapping("/{incentiveId}")
 	public ResponseEntity<ApiResponse<IncentiveResponse.GetIncentiveResponse>> getIncentive(

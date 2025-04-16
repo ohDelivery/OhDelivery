@@ -45,45 +45,54 @@ public class GatewayConfiguration {
 
         for (ServiceConstants serviceConstant : ServiceConstants.values()) {
             addRoute(
-                    builder,
-                    serviceConstant.getServiceName(),
-                    serviceConstant.getServiceUri(),
-                    new GatewayFilter[]{tokenFilter, authenticationFilter},
-                    serviceConstant.getApiPaths()
+                builder,
+                serviceConstant.getServiceName(),
+                serviceConstant.getServiceUri(),
+                new GatewayFilter[]{tokenFilter, authenticationFilter},
+                serviceConstant.getApiPaths()
             );
         }
 
         addRoute(
-                builder,
-                "user-service",
-                "lb://user-service",
-                new GatewayFilter[]{},
-                new String[] {"/api/users/join"}
+            builder,
+            "user-service",
+            "lb://user-service",
+            new GatewayFilter[]{},
+            new String[]{"/api/users/join"}
         );
         addRoute(
-                builder,
-                "auth-server",
-                "lb://auth-server",
-                new GatewayFilter[]{},
-                new String[] {"/auth/login", "/auth/validate"}
+            builder,
+            "auth-server",
+            "lb://auth-server",
+            new GatewayFilter[]{},
+            new String[]{"/auth/login", "/auth/validate"}
+        );
+        addRoute(
+            builder,
+            "delivery-service",
+            "lb://delivery-service",
+            new GatewayFilter[]{},
+            new String[]{"/delivery-service/v3/api-docs", "/ws/delivery/**"}
         );
 
         return builder.build();
     }
 
-    private void addRoute(Builder builder, String serviceName, String serviceUri, GatewayFilter[] gatewayFilters,
-                          String... apiPaths) {
+    private void addRoute(Builder builder, String serviceName, String serviceUri,
+        GatewayFilter[] gatewayFilters,
+        String... apiPaths) {
 
-        final GatewayFilter[] filters = gatewayFilters != null ? gatewayFilters : new GatewayFilter[0];
+        final GatewayFilter[] filters =
+            gatewayFilters != null ? gatewayFilters : new GatewayFilter[0];
 
         builder.route(serviceName, routeSpec -> routeSpec
-                .path(apiPaths)
-                .filters(filterSpec -> {
-                    Arrays.stream(filters).forEach(filterSpec::filter);
-                    return filterSpec;
-                })
+            .path(apiPaths)
+            .filters(filterSpec -> {
+                Arrays.stream(filters).forEach(filterSpec::filter);
+                return filterSpec;
+            })
 
-                .uri(serviceUri)
+            .uri(serviceUri)
         );
     }
 }

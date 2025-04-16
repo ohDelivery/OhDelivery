@@ -63,7 +63,6 @@ public class KafkaConfig {
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
-
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> completeMatchingKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();

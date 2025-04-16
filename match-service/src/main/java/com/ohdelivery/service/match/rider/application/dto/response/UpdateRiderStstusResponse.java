@@ -8,12 +8,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class UpdateRiderStstusResponse {
+
   private final UUID id;
   private final Integer rider_id;
   private final String slack_id;
   private final String status;
-  private final double latitude;
-  private final double longitude;
+  private final Double latitude;
+  private final Double longitude;
 
   public static UpdateRiderStstusResponse from(Rider rider) {
     return new UpdateRiderStstusResponse(
