@@ -1,5 +1,7 @@
 package com.ohdelivery.service.delivery.presentation.controller;
 
+import com.ohdelivery.common.passport.RoleCheck;
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
@@ -29,7 +31,7 @@ public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
-    // TODO RoleCheck 추가하기
+    @RoleCheck({RoleType.MASTER, RoleType.STORE})
     @PostMapping
     @Operation(summary = "배달 생성하기")
     public ResponseEntity<ApiResponse<DeliveryResponse>> createdDelivery(
@@ -45,7 +47,7 @@ public class DeliveryController {
         );
     }
 
-    // TODO RoleCheck 추가하기
+    @RoleCheck({RoleType.MASTER, RoleType.STORE, RoleType.RIDER, RoleType.AGENT})
     @GetMapping("/{deliveryId}")
     @Operation(summary = "배달 조회하기")
     public ResponseEntity<ApiResponse<DeliveryResponse>> getDelivery(
@@ -61,7 +63,7 @@ public class DeliveryController {
         );
     }
 
-    // TODO RoleCheck 추가하기
+    @RoleCheck({RoleType.MASTER, RoleType.RIDER})
     @PatchMapping("/{deliveryId}/complete")
     @Operation(summary = "배달 완료 처리하기")
     public ResponseEntity<ApiResponse<Void>> completeDelivery(
@@ -76,7 +78,7 @@ public class DeliveryController {
         );
     }
 
-    // TODO RoleCheck 추가하기
+    @RoleCheck({RoleType.MASTER, RoleType.RIDER})
     @GetMapping("/record/{deliveryId}")
     @Operation(summary = "배달 기록 조회하기")
     public ResponseEntity<ApiResponse<DeliveryRecordResponse>> getDeliveryRecord(
@@ -93,7 +95,7 @@ public class DeliveryController {
         );
     }
 
-    // TODO RoleCheck 추가하기
+    @RoleCheck({RoleType.MASTER, RoleType.STORE})
     @PatchMapping("/fee/{deliveryId}")
     @Operation(summary = "배달 요금 변경하기")
     public ResponseEntity<ApiResponse<Void>> updateFee(
