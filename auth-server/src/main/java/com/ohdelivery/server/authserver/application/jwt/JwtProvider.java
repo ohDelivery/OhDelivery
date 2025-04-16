@@ -12,6 +12,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
@@ -76,7 +77,6 @@ public class JwtProvider {
 
     public UserInfo validateToken(String token) {
         try {
-
             checkBlackList(token);
 
             Jwts.parserBuilder()
@@ -87,7 +87,7 @@ public class JwtProvider {
             return getUserInfoFromToken(token);
         } catch (ExpiredJwtException e) {
             throw new JwtExpiredException();
-        } catch (MalformedJwtException | UnsupportedJwtException e) {
+        } catch (SignatureException | MalformedJwtException | UnsupportedJwtException e) {
             throw new JwtInvalidException();
         }
     }
