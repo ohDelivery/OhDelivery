@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AgentRepository extends JpaRepository<Agent, UUID> {
 
-  Optional<Agent> findByAgentIdAndDeletedAtIsNull(Long agentId);
+  Optional<Agent> findByAgentId(Long agentId);
 }

@@ -21,8 +21,6 @@ public class AgentService {
   private final AgentRepository agentRepository;
   private final RedisAgentRepository redisAgentRepository;
 
-  // todo: role check
-
   @Transactional
   public AgentResponse createAgent(CreateAgentRequest request) {
     checkExistingAgent(request.getAgentId());
@@ -35,6 +33,7 @@ public class AgentService {
   @Transactional
   public AgentResponse updateAgent(Long agentId, UpdateAgentRequest request) {
     Agent agent = findAgent(agentId);
+    checkDeletedAgent(agent.getDeletedAt());
     redisAgentRepository.updateStatus(agentId.toString(), request.getStatus().toString());
     return AgentResponse.toDto(agent, request.getStatus());
   }
@@ -42,6 +41,7 @@ public class AgentService {
   @Transactional(readOnly = true)
   public AgentResponse getAgent(Long agentId) {
     Agent agent = findAgent(agentId);
+    checkDeletedAgent(agent.getDeletedAt());
     String status = redisAgentRepository.getStatus(agentId.toString());
     return AgentResponse.toDto(agent, AgentStatus.valueOf(status));
   }
@@ -49,20 +49,27 @@ public class AgentService {
   @Transactional
   public void deleteAgent(Long agentId) {
     Agent agent = findAgent(agentId);
+    checkDeletedAgent(agent.getDeletedAt());
 
     // todo: deletedBy -> 로그인한 유저 id로 변경
     agent.delete(LocalDateTime.now(), agentId.toString());
     redisAgentRepository.delete(agentId.toString());
   }
 
+  private Agent findAgent(Long agentId) {
+    return agentRepository.findByAgentId(agentId)
+        .orElseThrow(() -> new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND));
+  }
+
   private void checkExistingAgent(Long agentId) {
-    if (agentRepository.findByAgentIdAndDeletedAtIsNull(agentId).isPresent()) {
+    if (agentRepository.findByAgentId(agentId).isPresent()) {
       throw new AgentException(AgentErrorCode.AGENT_ID_ALREADY_EXISTS);
     }
   }
 
-  private Agent findAgent(Long agentId) {
-    return agentRepository.findByAgentIdAndDeletedAtIsNull(agentId)
-        .orElseThrow(() -> new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND));
+  private void checkDeletedAgent(LocalDateTime deletedAt) {
+    if (deletedAt != null) {
+      throw new AgentException(AgentErrorCode.AGENT_ID_NOT_FOUND);
+    }
   }
 }
