@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Alarm Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      white-space: pre-wrap; /* 줄바꿈 표시 */
+    }
+
+    .message {
+      margin-bottom: 5px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .connect-status {
+      font-weight: bold;
+    }
+
+    .connected {
+      color: green;
+    }
+
+    .disconnected {
+      color: red;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+
+<h1>WebSocket Alarm Test Client</h1>
+
+<div>
+  <button id="connectBtn" onclick="connect()">Connect</button>
+  <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+  <span id="status" class="connect-status disconnected">Disconnected</span>
+</div>
+
+<h2>Received Alarms:</h2>
+<div id="messages"></div>
+
+<script>
+  var stompClient = null;
+  var messagesDiv = document.getElementById('messages');
+  var connectBtn = document.getElementById('connectBtn');
+  var disconnectBtn = document.getElementById('disconnectBtn');
+  var statusSpan = document.getElementById('status');
+
+  function setConnected(connected) {
+    connectBtn.disabled = connected;
+    disconnectBtn.disabled = !connected;
+    if (connected) {
+      statusSpan.textContent = 'Connected';
+      statusSpan.className = 'connect-status connected';
+    } else {
+      statusSpan.textContent = 'Disconnected';
+      statusSpan.className = 'connect-status disconnected';
+      stompClient = null; // 연결 끊김 시 클라이언트 객체 초기화
+    }
+    // 연결 끊김 시 메시지 영역 초기화 (선택 사항)
+    // if (!connected) messagesDiv.innerHTML = '';
+  }
+
+  function connect() {
+    // WebSocketConfig에서 설정한 엔드포인트('/ws-alarm')로 SockJS 연결 생성
+    var socket = new SockJS('/ws/alarm');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+      setConnected(true);
+      console.log('Connected: ' + frame);
+
+      // 서버에서 설정한 토픽('/topic/alarm') 구독
+      stompClient.subscribe('/topic/alarm', function (message) {
+        showMessage(message.body);
+      });
+    }, function (error) {
+      console.error('STOMP connection error: ', error);
+      setConnected(false);
+      alert('Connection failed: ' + error);
+    });
+
+    // 연결이 예기치 않게 끊어졌을 때 처리
+    stompClient.ws.onclose = function () {
+      console.log('STOMP connection closed');
+      setConnected(false);
+    };
+  }
+
+  function disconnect() {
+    if (stompClient !== null) {
+      stompClient.disconnect(function () {
+        console.log("Disconnected");
+        setConnected(false);
+      });
+    } else {
+      setConnected(false); // 이미 연결 끊긴 상태 처리
+    }
+  }
+
+  function showMessage(message) {
+    var messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.textContent = message; // 텍스트 내용으로 설정
+    messagesDiv.appendChild(messageElement);
+    // 새 메시지가 오면 스크롤을 맨 아래로 이동
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // 페이지 로드 시 자동 연결 방지. 사용자가 버튼을 눌러 연결하도록 함.
+</script>
+
+</body>
+</html>

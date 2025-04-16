@@ -10,6 +10,7 @@ import com.slack.api.methods.SlackApiException;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class AlarmService {
   private final SlackService slackService;
   private final AlarmRepository alarmRepository;
   private final AlarmRiderRepository alarmRiderRepository;
+  private final SimpMessagingTemplate messagingTemplate;
 
   @Transactional
   public void sendAlarm(AlarmCommand command) {
@@ -28,29 +30,27 @@ public class AlarmService {
     Alarm alarm = Alarm.toEntity(command.getMatchingId(), message);
     alarmRepository.save(alarm);
 
-    // 가용 범위 내 라이더에게 알림
-    // slack으로 알림 -> 추후 웹소켓으로 변경 계획 있음
-    notifyRidersWithinDistance(command.getSlackIdList(), message);
+    notifySlack(command.getSlackIdList(), message);
+    notifyWebSocket(message);
   }
 
   private String createMessage(AlarmCommand command) {
     StringBuilder builder = new StringBuilder();
 
-    builder.append("[ 새로운 배달 요청이 도착했습니다! ]\n\n");
+    builder.append("[\uD83D\uDD14 새로운 배달 요청이 도착했습니다! ]\n\n");
 
-    builder.append("가게 정보\n")
-        .append("가게 이름: ").append(command.getStoreName()).append("\n")
-        .append("가게 주소: ").append(command.getStoreAddress()).append("\n\n");
+    builder.append("\uD83C\uDFE1 <").append(command.getStoreName()).append(">\n")
+        .append("- 가게 주소: ").append(command.getStoreAddress()).append("\n\n");
 
-    builder.append("배달 정보\n")
-        .append("배달료: ").append(command.getFee()).append("\n")
-        .append("배달지 주소: ").append(command.getTargetAddress()).append("\n")
-        .append("배달 요청 사항: ").append(command.getOrderRequest()).append("\n\n");
+    builder.append("\uD83C\uDF73 배달 정보\n")
+        .append("- 배달료: ").append(command.getFee()).append("\n")
+        .append("- 배달지 주소: ").append(command.getTargetAddress()).append("\n")
+        .append("- 요청 사항: ").append(command.getOrderRequest());
 
     return builder.toString();
   }
 
-  private void notifyRidersWithinDistance(List<String> slackEmails, String message) {
+  private void notifySlack(List<String> slackEmails, String message) {
     for (String slackEmail : slackEmails) {
       try {
         SlackResponse res = slackService.sendSlackMessage(slackEmail, message);
@@ -61,5 +61,9 @@ public class AlarmService {
         // todo: 예외 처리 로직 추가
       }
     }
+  }
+
+  private void notifyWebSocket(String message) {
+    messagingTemplate.convertAndSend("/topic/alarm", message);
   }
 }
