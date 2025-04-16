@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UpdateSlackIdEvent {
 
-  private int userId;
+  private Long userId;
   private String slack_id;
 }

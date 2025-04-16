@@ -22,13 +22,13 @@ public interface RiderService {
 
   List<GetRiderResponse> getAllRider();
 
-  void updateSlackId(int userId, String slackId);
+  void updateSlackId(long userId, String slackId);
 
-  void deleteRiderByRiderId(int userId);
+  void deleteRiderByRiderId(long userId);
 
   boolean checkAssignAvailable(UUID riderId);
 
   List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude);
 
-  GetRiderResponse getRiderByuserId(Integer riderId);
+  GetRiderResponse getRiderByuserId(long riderId);
 }

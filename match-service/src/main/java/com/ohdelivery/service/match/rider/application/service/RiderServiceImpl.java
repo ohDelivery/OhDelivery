@@ -98,14 +98,14 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   @Transactional
-  public void updateSlackId(int riderId, String slackId) {
+  public void updateSlackId(long riderId, String slackId) {
     Rider rider = riderRepository.findByRiderId(riderId)
         .orElseThrow(() -> new RiderNotFoundException());
     rider.updateSlackId(slackId);
   }
 
   @Override
-  public void deleteRiderByRiderId(int userId) {
+  public void deleteRiderByRiderId(long userId) {
     Rider rider = riderRepository.findByRiderId(userId)
         .orElseThrow(() -> new RiderNotFoundException());
     LocalDateTime now = LocalDateTime.now();
@@ -131,7 +131,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public GetRiderResponse getRiderByuserId(Integer riderId) {
+  public GetRiderResponse getRiderByuserId(long riderId) {
     Rider rider = riderRepository.findByRiderId(riderId)
         .orElseThrow(() -> new RiderNotFoundException());
     return new GetRiderResponse(
