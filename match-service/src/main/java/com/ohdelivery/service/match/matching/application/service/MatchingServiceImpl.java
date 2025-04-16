@@ -35,50 +35,36 @@ public class MatchingServiceImpl implements MatchingService {
   public UUID createMatching(CreateMatchingRequest request) {
     UUID deliveryId = request.getDeliveryId();
 
-    // 배달 ID를 기반으로 고유한 락 키 생성
-    String lockKey = "delivery:" + deliveryId.toString();
-    RLock lock = redissonClient.getLock(lockKey);
-
-    try {
-      // 락 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
-      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
-
-      if (!isLocked) {
-        throw new IllegalStateException("배달에 대한 락 획득 실패: " + deliveryId);
-      }
-
-      // 이미 존재하는 매칭 확인 후 예외 처리
-      if (matchingRepository.findByDeliveryId(deliveryId).isPresent()) {
-        throw new IllegalArgumentException("해당 배달에 대한 매칭이 이미 존재합니다.");
-      }
-
-      Matching matching = Matching.create(deliveryId);
-      matchingRepository.save(matching);
-
-      List<String> slackIdList = riderService.getRidersByLocation(request.getStoreLongitude(),
-          request.getStoreLatitude());
-
-      matchingEventPublisher.matchingCreatedEvent(
-          slackIdList,
-          matching.getId(),
-          request.getFee(),
-          request.getStoreName(),
-          request.getStoreAddress(),
-          request.getTargetAddress(),
-          request.getOrderRequest()
-      );
-
-      return matching.getId();
-
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
-    } finally {
-      // 항상 락 해제 (finally 블록에서 처리)
-      if (lock.isHeldByCurrentThread()) {
-        lock.unlock();
-      }
+    // 이미 존재하는 매칭 확인 후 예외 처리
+    if (matchingRepository.findByDeliveryId(deliveryId).isPresent()) {
+      throw new IllegalArgumentException("해당 배달에 대한 매칭이 이미 존재합니다.");
     }
+
+    Matching matching = Matching.create(deliveryId);
+    matchingRepository.save(matching);
+
+    List<String> slackIdList = null;
+    try {
+      slackIdList = riderService.getRidersByLocation(
+          request.getStoreLongitude(),
+          request.getStoreLatitude()
+      );
+    } catch (Exception e) {
+      matchingEventPublisher.matchingCreateFailedEvent(deliveryId);
+      throw new RuntimeException(e);
+    }
+
+    matchingEventPublisher.matchingCreatedEvent(
+        slackIdList,
+        matching.getId(),
+        request.getFee(),
+        request.getStoreName(),
+        request.getStoreAddress(),
+        request.getTargetAddress(),
+        request.getOrderRequest()
+    );
+
+    return matching.getId();
   }
 
 
