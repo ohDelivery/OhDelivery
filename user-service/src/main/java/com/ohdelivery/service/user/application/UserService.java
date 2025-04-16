@@ -1,6 +1,8 @@
 package com.ohdelivery.service.user.application;
 
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.service.user.application.command.CreateUserCommand;
+import com.ohdelivery.service.user.application.command.UpdateSlackIdCommand;
 import com.ohdelivery.service.user.application.command.UserLoginCommand;
 import com.ohdelivery.service.user.application.exception.UserException.IncorrectPasswordException;
 import com.ohdelivery.service.user.domain.model.User;
@@ -20,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserEventPublisher userEventPublisher;
 
     @Transactional(readOnly = true)
     public UserLoginResponse login(UserLoginCommand userLoginCommand) {
@@ -42,16 +45,34 @@ public class UserService {
     }
 
     public void createUser(CreateUserCommand command) {
-        userRepository.save(User.create(
+        User user = userRepository.save(User.create(
                 command.getUsername(),
                 command.getName(),
                 passwordEncoder.encode(command.getPassword()),
                 command.getRole(),
                 command.getSlackId()
         ));
+
+        if (user.getRole() == RoleType.RIDER){
+            userEventPublisher.produceCreateUser(user.getId());
+        }
+    }
+
+    public void updateSlackId(UpdateSlackIdCommand command) {
+        User user = userRepository.findById(command.getId());
+        user.updateSlackId(command.getSlackId());
+
+        if (user.getRole() == RoleType.RIDER) {
+            userEventPublisher.produceUpdateSlackId(user.getId(), user.getSlackId());
+        }
     }
 
     public void deleteUser(Long id) {
-        userRepository.findById(id).delete(LocalDateTime.now(), String.valueOf(id));
+        User user = userRepository.findById(id);
+        user.delete(LocalDateTime.now(), String.valueOf(id));
+
+        if (user.getRole() == RoleType.RIDER) {
+            userEventPublisher.produceDeleteUser(id);
+        }
     }
 }

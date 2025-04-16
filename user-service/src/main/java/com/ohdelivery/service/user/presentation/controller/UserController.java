@@ -4,13 +4,16 @@ import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.user.application.UserService;
 import com.ohdelivery.service.user.presentation.request.CreateUserRequest;
+import com.ohdelivery.service.user.presentation.request.UpdateSlackIdRequest;
 import com.ohdelivery.service.user.presentation.request.UserLoginRequest;
 import com.ohdelivery.service.user.presentation.response.UserAuthResponse;
 import com.ohdelivery.service.user.presentation.response.UserLoginResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +56,15 @@ public class UserController {
         return ApiResponse.success(
             SuccessCode.DELETED_SUCCESS.getCode().toString(),
             SuccessCode.DELETED_SUCCESS.getMessage()
+        );
+    }
+
+    @PatchMapping
+    public ApiResponse<Void> updateSlackId(@RequestBody UpdateSlackIdRequest request){
+        userService.updateSlackId(request.toCommand());
+        return ApiResponse.success(
+                SuccessCode.UPDATED_SUCCESS.getCode().toString(),
+                SuccessCode.UPDATED_SUCCESS.getMessage()
         );
     }
 }
