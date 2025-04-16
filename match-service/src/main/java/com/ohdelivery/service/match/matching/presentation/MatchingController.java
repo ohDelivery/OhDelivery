@@ -1,5 +1,7 @@
 package com.ohdelivery.service.match.matching.presentation;
 
+import com.ohdelivery.common.annotations.CurrentUser;
+import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleCheck;
 import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
@@ -56,8 +58,9 @@ public class MatchingController {
   @RoleCheck({RoleType.MASTER, RoleType.RIDER})
   public ResponseEntity<ApiResponse<Void>> updateMatching(
       @PathVariable UUID id,
+      @CurrentUser Passport currentUser,
       @RequestBody AssignRiderRequest request) {
-    matchingService.updateMatching(id, request);
+    matchingService.updateMatching(id, request, currentUser);
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage()
