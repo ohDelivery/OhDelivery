@@ -129,7 +129,21 @@ public class RiderServiceImpl implements RiderService {
     List<String> slackIds = getNearByRiders(availableRiders, storeLatitude, storeLongitude);
     return slackIds;
   }
-  
+
+  @Override
+  public GetRiderResponse getRiderByuserId(Integer riderId) {
+    Rider rider = riderRepository.findByRiderId(riderId)
+        .orElseThrow(() -> new RiderNotFoundException());
+    return new GetRiderResponse(
+        rider.getId(),
+        rider.getRiderId(),
+        rider.getSlackId(),
+        rider.getStatus().toString(),
+        rider.getLatitude(),
+        rider.getLongitude()
+    );
+  }
+
   private void validateRiderStatus(RiderStatus status) {
     if (status == null) {
       throw new RiderInvalidStatusException("라이더 상태가 지정되지 않았습니다.");
