@@ -2,10 +2,10 @@ package com.ohdelivery.service.match.matching.presentation;
 
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
-import com.ohdelivery.service.match.matching.application.MatchingService;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
+import com.ohdelivery.service.match.matching.application.service.MatchingService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
