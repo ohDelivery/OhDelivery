@@ -7,6 +7,7 @@ import com.ohdelivery.service.user.application.command.UserLoginCommand;
 import com.ohdelivery.service.user.application.exception.UserException.IncorrectPasswordException;
 import com.ohdelivery.service.user.domain.model.User;
 import com.ohdelivery.service.user.domain.repository.UserRepository;
+import com.ohdelivery.service.user.presentation.response.GetUserResponse;
 import com.ohdelivery.service.user.presentation.response.UserAuthResponse;
 import com.ohdelivery.service.user.presentation.response.UserLoginResponse;
 import java.time.LocalDateTime;
@@ -34,14 +35,14 @@ public class UserService {
             throw new IncorrectPasswordException();
         }
 
-        return new UserLoginResponse(user.getId(), user.getRole());
+        return UserLoginResponse.create(user.getId(), user.getRole());
     }
 
     @Transactional(readOnly = true)
-    public UserAuthResponse getUser(Long id) {
+    public UserAuthResponse getUserInfo(Long id) {
         User user = userRepository.findById(id);
 
-        return new UserAuthResponse(user.getId(), user.getRole());
+        return UserAuthResponse.create(user.getId(), user.getRole());
     }
 
     @Transactional(readOnly = true)

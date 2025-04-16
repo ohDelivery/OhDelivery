@@ -9,4 +9,8 @@ import lombok.Getter;
 public class UserLoginResponse {
     Long id;
     RoleType role;
+
+    public static UserLoginResponse create(Long id, RoleType role) {
+        return new UserLoginResponse(id, role);
+    }
 }
