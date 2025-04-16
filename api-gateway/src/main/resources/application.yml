@@ -42,3 +42,6 @@ springdoc:
 logging:
   level:
     com.example.gateway: DEBUG
+url:
+  origin:
+    origin-url: http://localhost:8080

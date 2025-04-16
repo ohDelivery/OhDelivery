@@ -6,7 +6,7 @@ spring:
   kafka:
     url: localhost:9092
   config:
-    import: optional:configserver:http://localhost:18080
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
   cloud:
     config:
       discovery:
@@ -20,4 +20,4 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
