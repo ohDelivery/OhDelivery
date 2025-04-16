@@ -6,19 +6,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
+import com.ohdelivery.common.passport.RoleCheck;
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.incentive.application.request.IncentiveRequest;
 import com.ohdelivery.service.incentive.application.response.IncentiveResponse;
 import com.ohdelivery.service.incentive.application.service.IncentiveService;
-import com.ohdelivery.service.incentive.infrastructure.messaging.out.KafkaProducer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,15 +26,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/incentives")
 public class IncentiveController {
 
-	private final KafkaProducer kafkaProducer;
 	private final IncentiveService incentiveService;
 
-	@PostMapping
-	public ResponseEntity<String> create(@RequestBody DeliveryIncentiveDto dto) {
-		kafkaProducer.deliveryRecordEvent(dto);
-		return ResponseEntity.ok("Success");
-	}
-
+	@RoleCheck({RoleType.MASTER, RoleType.RIDER})
 	@GetMapping("/{incentiveId}")
 	public ResponseEntity<ApiResponse<IncentiveResponse.GetIncentiveResponse>> getIncentive(
 		@PathVariable UUID incentiveId
@@ -44,6 +37,7 @@ public class IncentiveController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.INCENTIVE_GET_SUCCESS.getCode().toString(),SuccessCode.INCENTIVE_GET_SUCCESS.getMessage(),response));
 	}
 
+	@RoleCheck(RoleType.MASTER)
 	@PutMapping("/{incentiveId}")
 	public ResponseEntity<ApiResponse<String>> updateIncentive(
 		@PathVariable UUID incentiveId,
@@ -53,6 +47,7 @@ public class IncentiveController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.INCENTIVE_UPDATED_SUCCESS.getCode().toString(),SuccessCode.INCENTIVE_UPDATED_SUCCESS.getMessage()));
 	}
 
+	@RoleCheck(RoleType.MASTER)
 	@DeleteMapping("/{incentiveId}")
 	public ResponseEntity<ApiResponse<IncentiveResponse.DeleteIncentiveResponse>> deleteIncentive(
 		@PathVariable UUID incentiveId
