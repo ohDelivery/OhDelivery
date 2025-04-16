@@ -1,4 +1,4 @@
-package com.ohdelivery.common.model;
+package com.ohdelivery.common.passport.usercontext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.passport.Passport;
@@ -25,7 +25,7 @@ public class UserContextFilter implements Filter {
 
             if (passportJson != null && !passportJson.isEmpty()) {
                 Passport passport = objectMapper.readValue(passportJson, Passport.class);
-                UserContextHolder.setCurrentUser(passport.getUserId());
+                UserContextHolder.setPassport(passport);
             }
 
             chain.doFilter(request, response);

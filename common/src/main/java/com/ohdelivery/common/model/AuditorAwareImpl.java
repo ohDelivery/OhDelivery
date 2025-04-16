@@ -1,6 +1,6 @@
 package com.ohdelivery.common.model;
 
-import com.ohdelivery.common.passport.Passport;
+import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,7 +16,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
     @NonNull
     @Override
     public Optional<String> getCurrentAuditor() {
-        String currentUser = UserContextHolder.getCurrentUser();
+        String currentUser = UserContextHolder.getPassport().getUserId();
         return (currentUser != null && !currentUser.isEmpty())
             ? Optional.of(currentUser)
             : Optional.of("system");
