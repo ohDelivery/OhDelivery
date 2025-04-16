@@ -3,6 +3,7 @@ package com.ohdelivery.gateway.apigateway.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.gateway.apigateway.constants.ServiceConstants;
 import com.ohdelivery.gateway.apigateway.filter.AuthenticationFilter;
+import com.ohdelivery.gateway.apigateway.filter.CsrfFilter;
 import com.ohdelivery.gateway.apigateway.filter.TokenFilter;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,6 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder.Builder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -33,8 +33,8 @@ public class GatewayConfiguration {
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
+    public CsrfFilter csrfFilter() {
+        return new CsrfFilter();
     }
 
     @Bean
