@@ -24,8 +24,8 @@ public class UserEventProducer implements UserEventPublisher {
         kafkaTemplate.send(Topic.UPDATE_DELIVERY, new DeleteUserEvent(userId.intValue()));
     }
 
-    public void produceCreateUser(Long userId){
-        kafkaTemplate.send(Topic.CREATED_USER, new CreateUserEvent(userId));
+    public void produceCreateUser(Long userId, String slackId){
+        kafkaTemplate.send(Topic.CREATED_USER, new CreateUserEvent(userId, slackId));
     }
 
 }

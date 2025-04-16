@@ -7,4 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateUserEvent {
     private Long userId;
+    private String slackId;
 }

@@ -66,7 +66,7 @@ public class UserService {
         ));
 
         if (user.getRole() == RoleType.RIDER){
-            userEventPublisher.produceCreateUser(user.getId());
+            userEventPublisher.produceCreateUser(user.getId(), user.getSlackId());
         }
     }
 
