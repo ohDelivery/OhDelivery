@@ -1,5 +1,7 @@
 package com.ohdelivery.service.consult.agent.presentation;
 
+import com.ohdelivery.common.passport.RoleCheck;
+import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.consult.agent.application.dto.request.CreateAgentRequest;
@@ -24,6 +26,7 @@ public class AgentController {
 
   private final AgentService agentService;
 
+  @RoleCheck(RoleType.MASTER)
   @PostMapping
   public ResponseEntity<ApiResponse<AgentResponse>> createAgent(
       @RequestBody CreateAgentRequest request) {
@@ -36,6 +39,7 @@ public class AgentController {
     ));
   }
 
+  @RoleCheck({RoleType.MASTER, RoleType.AGENT})
   @PatchMapping("/{agentId}")
   public ResponseEntity<ApiResponse<AgentResponse>> updateAgent(
       @PathVariable Long agentId,
@@ -60,6 +64,7 @@ public class AgentController {
     ));
   }
 
+  @RoleCheck({RoleType.MASTER, RoleType.AGENT})
   @DeleteMapping("/{agentId}")
   public ResponseEntity<ApiResponse<Void>> deleteAgent(@PathVariable Long agentId) {
     agentService.deleteAgent(agentId);
