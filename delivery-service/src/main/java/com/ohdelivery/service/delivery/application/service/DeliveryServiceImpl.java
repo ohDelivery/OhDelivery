@@ -1,6 +1,5 @@
 package com.ohdelivery.service.delivery.application.service;
 
-import com.ohdelivery.common.kafka.dto.CompleteDeliveryEvent;
 import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
@@ -92,7 +91,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
         DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
 
@@ -117,7 +116,17 @@ public class DeliveryServiceImpl implements DeliveryService {
             .orElseThrow(DeliveryNotFoundException::new);
         delivery.updateWaitingForCooking();
 
-        createDeliveryRecord(delivery.getId(), riderId, delivery.getFee());
+        DeliveryRecord deliveryRecord = new DeliveryRecord(delivery.getId(), riderId,
+            delivery.getFee());
+        deliveryRecordRepository.save(deliveryRecord);
+    }
+
+    @Override
+    @Transactional
+    public void cancelMatching(UUID deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryNotFoundException::new);
+        delivery.cancel();
     }
 
     private DeliveryIncentiveDto createCompleteDeliveryEvent(Delivery delivery,

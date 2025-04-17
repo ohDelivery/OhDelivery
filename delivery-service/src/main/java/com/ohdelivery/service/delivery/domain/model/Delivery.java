@@ -76,6 +76,10 @@ public class Delivery extends BaseEntity {
         this.status = DeliveryStatus.WAITING_FOR_COOKING;
     }
 
+    public void cancel() {
+        this.status = DeliveryStatus.CANCELLED;
+    }
+
     public CreateDeliveryEvent toCreateDeliveryEvent(Double storeLongitude, Double storeLatitude) {
         return CreateDeliveryEvent.builder()
             .deliveryId(this.getId())
