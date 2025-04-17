@@ -16,5 +16,5 @@ public interface RiderRepository {
 
   List<Rider> findAllByStatus(RiderStatus status);
 
-  Optional<Rider> findByRiderId(int riderId);
+  Optional<Rider> findByRiderId(long riderId);
 }

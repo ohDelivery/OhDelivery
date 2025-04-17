@@ -4,7 +4,7 @@ import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderReq
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
-import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStatusResponse;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,17 +18,17 @@ public interface RiderService {
 
   void deleteRider(UUID id);
 
-  UpdateRiderStstusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request);
+  UpdateRiderStatusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request);
 
   List<GetRiderResponse> getAllRider();
 
-  void updateSlackId(int userId, String slackId);
+  void updateSlackId(long userId, String slackId);
 
-  void deleteRiderByRiderId(int userId);
+  void deleteRiderByRiderId(long userId);
 
   boolean checkAssignAvailable(UUID riderId);
 
   List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude);
 
-  GetRiderResponse getRiderByuserId(Integer riderId);
+  GetRiderResponse getRiderByuserId(long riderId);
 }

@@ -36,7 +36,7 @@ public class RiderRepositoryImpl implements RiderRepository {
   }
 
   @Override
-  public Optional<Rider> findByRiderId(int riderId) {
+  public Optional<Rider> findByRiderId(long riderId) {
     return jpaRiderRepository.findByRiderIdAndDeletedAtIsNull(riderId);
   }
 }

@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DeleteUserEvent {
 
-  private int userId;
+  private Long userId;
 }

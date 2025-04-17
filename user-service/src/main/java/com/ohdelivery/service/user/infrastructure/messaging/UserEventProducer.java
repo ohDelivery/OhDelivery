@@ -14,18 +14,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserEventProducer implements UserEventPublisher {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void produceUpdateSlackId(Long userId, String slackId){
-        kafkaTemplate.send(Topic.UPDATED_SLACK_ID, new UpdateSlackIdEvent(userId.intValue(), slackId));
-    }
+  public void produceUpdateSlackId(Long userId, String slackId) {
+    kafkaTemplate.send(Topic.UPDATED_SLACK_ID, new UpdateSlackIdEvent(userId, slackId));
+  }
 
-    public void produceDeleteUser(Long userId){
-        kafkaTemplate.send(Topic.UPDATE_DELIVERY, new DeleteUserEvent(userId.intValue()));
-    }
+  public void produceDeleteUser(Long userId) {
+    kafkaTemplate.send(Topic.UPDATE_DELIVERY, new DeleteUserEvent(userId));
+  }
 
-    public void produceCreateUser(Long userId, String slackId){
-        kafkaTemplate.send(Topic.CREATED_USER, new CreateUserEvent(userId, slackId));
-    }
+  public void produceCreateUser(Long userId, String slackId) {
+    kafkaTemplate.send(Topic.CREATED_USER, new CreateUserEvent(userId, slackId));
+  }
 
 }

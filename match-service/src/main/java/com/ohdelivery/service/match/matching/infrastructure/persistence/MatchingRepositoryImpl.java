@@ -2,10 +2,11 @@ package com.ohdelivery.service.match.matching.infrastructure.persistence;
 
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -30,8 +31,12 @@ public class MatchingRepositoryImpl implements MatchingRepository {
   }
 
   @Override
-  public List<Matching> findByRiderId(UUID riderId) {
-    return jpaMatchingRepository.findAllByRiderIdAndDeletedAtIsNull(riderId);
+  public Page<Matching> findByRiderId(UUID riderId, Pageable pageable) {
+    return jpaMatchingRepository.findAllByRiderIdAndDeletedAtIsNull(riderId, pageable);
   }
 
+  @Override
+  public Page<Matching> findAll(Pageable pageable) {
+    return jpaMatchingRepository.findAll(pageable);
+  }
 }
