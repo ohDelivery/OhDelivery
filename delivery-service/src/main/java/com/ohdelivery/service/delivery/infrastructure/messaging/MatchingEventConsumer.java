@@ -2,6 +2,7 @@ package com.ohdelivery.service.delivery.infrastructure.messaging;
 
 import com.ohdelivery.common.kafka.Topic;
 import com.ohdelivery.common.kafka.dto.CompleteMatchingEvent;
+import com.ohdelivery.common.kafka.dto.FailCreateMatchingEvent;
 import com.ohdelivery.service.delivery.application.service.DeliveryService;
 import com.ohdelivery.service.delivery.infrastructure.config.KafkaConfig;
 import lombok.RequiredArgsConstructor;
@@ -10,12 +11,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class MatchingEventConsumer {
 
-  private final DeliveryService deliveryService;
+    private final DeliveryService deliveryService;
 
     @KafkaListener(
         topics = Topic.COMPLETE_MATCHING,
@@ -24,5 +25,14 @@ public class MatchingEventConsumer {
     )
     public void handleCompleteMatchingEvent(@Payload CompleteMatchingEvent event) {
         deliveryService.completeMatching(event.getDeliveryId(), event.getRiderId());
+    }
+
+    @KafkaListener(
+        topics = Topic.FAILED_MATCHING,
+        groupId = KafkaConfig.DELIVERY_GROUP_ID,
+        containerFactory = "failMatchingKafkaListenerContainerFactory"
+    )
+    public void handleFailMatchingEvent(@Payload FailCreateMatchingEvent event) {
+        deliveryService.cancelMatching(event.getDeliveryId());
     }
 }

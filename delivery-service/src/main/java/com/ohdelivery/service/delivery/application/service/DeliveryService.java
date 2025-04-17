@@ -20,4 +20,6 @@ public interface DeliveryService {
     void updateFee(UUID deliveryId, Integer fee);
 
     void completeMatching(UUID deliveryId, UUID riderId);
+
+    void cancelMatching(UUID deliveryId);
 }

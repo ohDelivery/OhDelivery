@@ -1,6 +1,7 @@
 package com.ohdelivery.service.delivery.infrastructure.config;
 
 import com.ohdelivery.common.kafka.dto.CompleteMatchingEvent;
+import com.ohdelivery.common.kafka.dto.FailCreateMatchingEvent;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -63,10 +64,31 @@ public class KafkaConfig {
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> completeMatchingKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, CompleteMatchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(completeMatchingConsumerFactory());
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, FailCreateMatchingEvent> failMatchingConsumerFactory() {
+        JsonDeserializer<FailCreateMatchingEvent> deserializer = new JsonDeserializer<>(
+            FailCreateMatchingEvent.class);
+        deserializer.addTrustedPackages("*");
+
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServerUrl);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, DELIVERY_GROUP_ID);
+
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, FailCreateMatchingEvent> failMatchingKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, FailCreateMatchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(failMatchingConsumerFactory());
         return factory;
     }
 }
