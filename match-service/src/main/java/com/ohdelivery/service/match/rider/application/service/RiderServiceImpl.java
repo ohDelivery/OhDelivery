@@ -4,7 +4,7 @@ import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderReq
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
-import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStatusResponse;
 import com.ohdelivery.service.match.rider.application.exception.AvailableRiderNotFoundException;
 import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStatusException;
 import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
@@ -80,11 +80,11 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   @Transactional
-  public UpdateRiderStstusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request) {
+  public UpdateRiderStatusResponse updateRiderStatus(UUID id, UpdateRiderStatusRequest request) {
     Rider rider = riderRepository.findById(id)
         .orElseThrow(() -> new RiderNotFoundException());
     rider.changeStatus(request.getStatus());
-    return UpdateRiderStstusResponse.from(rider);
+    return UpdateRiderStatusResponse.from(rider);
   }
 
   @Override
