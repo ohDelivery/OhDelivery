@@ -13,7 +13,7 @@
       margin-top: 10px;
       height: 300px;
       overflow-y: scroll;
-      white-space: pre-wrap; /* 줄바꿈 표시 */
+      white-space: pre-wrap;
     }
 
     .message {
@@ -41,6 +41,13 @@
 
 <h1>WebSocket Alarm Test Client</h1>
 
+<!-- 사용자로부터 riderId 입력 받는 필드 -->
+<div>
+  <label for="riderIdInput">Rider ID:</label>
+  <input type="text" id="riderIdInput" placeholder="Enter riderId"/>
+</div>
+
+<!-- 연결 / 연결 해제 버튼 -->
 <div>
   <button id="connectBtn" onclick="connect()">Connect</button>
   <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
@@ -60,29 +67,33 @@
   function setConnected(connected) {
     connectBtn.disabled = connected;
     disconnectBtn.disabled = !connected;
-    if (connected) {
-      statusSpan.textContent = 'Connected';
-      statusSpan.className = 'connect-status connected';
-    } else {
-      statusSpan.textContent = 'Disconnected';
-      statusSpan.className = 'connect-status disconnected';
-      stompClient = null; // 연결 끊김 시 클라이언트 객체 초기화
+    statusSpan.textContent = connected ? 'Connected' : 'Disconnected';
+    statusSpan.className = 'connect-status ' + (connected ? 'connected' : 'disconnected');
+    if (!connected) {
+      stompClient = null;
+      messagesDiv.innerHTML = ''; // 메시지 초기화
     }
-    // 연결 끊김 시 메시지 영역 초기화 (선택 사항)
-    // if (!connected) messagesDiv.innerHTML = '';
   }
 
   function connect() {
-    // WebSocketConfig에서 설정한 엔드포인트('/ws-alarm')로 SockJS 연결 생성
-    var socket = new SockJS('/ws/alarm');
+    const riderId = document.getElementById('riderIdInput').value.trim();
+
+    if (!riderId) {
+      alert('Please enter a riderId.');
+      return;
+    }
+
+    // riderId를 쿼리 파라미터로 전달
+    const url = `/ws/alarm?riderId=${encodeURIComponent(riderId)}`;
+    const socket = new SockJS(url);
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
       setConnected(true);
       console.log('Connected: ' + frame);
 
-      // 서버에서 설정한 토픽('/topic/alarm') 구독
-      stompClient.subscribe('/topic/alarm', function (message) {
+      // 서버에서 설정한 토픽 구독
+      stompClient.subscribe('/topic/alarm/' + riderId, function (message) {
         showMessage(message.body);
       });
     }, function (error) {
@@ -91,7 +102,6 @@
       alert('Connection failed: ' + error);
     });
 
-    // 연결이 예기치 않게 끊어졌을 때 처리
     stompClient.ws.onclose = function () {
       console.log('STOMP connection closed');
       setConnected(false);
@@ -105,20 +115,17 @@
         setConnected(false);
       });
     } else {
-      setConnected(false); // 이미 연결 끊긴 상태 처리
+      setConnected(false);
     }
   }
 
   function showMessage(message) {
     var messageElement = document.createElement('div');
     messageElement.classList.add('message');
-    messageElement.textContent = message; // 텍스트 내용으로 설정
+    messageElement.textContent = message;
     messagesDiv.appendChild(messageElement);
-    // 새 메시지가 오면 스크롤을 맨 아래로 이동
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
-
-  // 페이지 로드 시 자동 연결 방지. 사용자가 버튼을 눌러 연결하도록 함.
 </script>
 
 </body>

@@ -12,10 +12,9 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 @Slf4j
 @Service
@@ -23,9 +22,9 @@ import org.springframework.web.socket.WebSocketSession;
 public class AlarmService {
 
   private final SlackService slackService;
+  private final SimpMessagingTemplate messagingTemplate;
   private final AlarmRepository alarmRepository;
   private final AlarmRiderRepository alarmRiderRepository;
-  private final RiderSessionManager sessionManager;
 
   @Transactional
   public void sendAlarm(AlarmRequest request) {
@@ -51,14 +50,8 @@ public class AlarmService {
 
   private void notifyWebSocket(List<Long> riderIds, String message) {
     for (Long riderId : riderIds) {
-      WebSocketSession session = sessionManager.getSession(riderId.toString());
-      if (session != null && session.isOpen()) {
-        try {
-          session.sendMessage(new TextMessage(message));
-        } catch (IOException e) {
-          log.error(e.getMessage(), e);
-        }
-      }
+      messagingTemplate.convertAndSend("/topic/alarm/" + riderId, message);
+      log.info("WebSocket 메시지 전송 완료: riderId={}", riderId);
     }
   }
 
