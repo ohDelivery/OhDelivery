@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.alarm.infrastructure.messaging;
+package com.ohdelivery.service.match.alarm.application.dto;
 
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import java.util.List;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class AlarmEvent {
+public class AlarmRequest {
 
   List<String> slackIdList;
   List<Long> riderIdList;
@@ -23,8 +23,8 @@ public class AlarmEvent {
   String targetAddress;
   String orderRequest;
 
-  public static AlarmEvent from(CreateMatchingEvent event) {
-    return AlarmEvent.builder()
+  public static AlarmRequest from(CreateMatchingEvent event) {
+    return AlarmRequest.builder()
         .slackIdList(event.getSlackIdList())
         .riderIdList(event.getRiderIdList())
         .matchingId(event.getMatchingId())
