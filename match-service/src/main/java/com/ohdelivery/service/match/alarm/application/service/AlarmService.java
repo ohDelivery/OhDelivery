@@ -28,29 +28,11 @@ public class AlarmService {
 
   @Transactional
   public void sendAlarm(AlarmRequest request) {
-    String message = createMessage(request);
-
-    Alarm alarm = Alarm.toEntity(request.getMatchingId(), message);
+    Alarm alarm = Alarm.toEntity(request.getMatchingId(), request.getMessage());
     alarmRepository.save(alarm);
 
-    notifySlack(request.getSlackIdList(), message);
-    notifyWebSocket(request.getRiderIdList(), message);
-  }
-
-  private String createMessage(AlarmRequest request) {
-    StringBuilder builder = new StringBuilder();
-
-    builder.append("[\uD83D\uDD14 새로운 배달 요청이 도착했습니다! ]\n\n");
-
-    builder.append("\uD83C\uDFE1 <").append(request.getStoreName()).append(">\n")
-        .append("- 가게 주소: ").append(request.getStoreAddress()).append("\n\n");
-
-    builder.append("\uD83C\uDF73 배달 정보\n")
-        .append("- 배달료: ").append(request.getFee()).append("\n")
-        .append("- 배달지 주소: ").append(request.getTargetAddress()).append("\n")
-        .append("- 요청 사항: ").append(request.getOrderRequest());
-
-    return builder.toString();
+    notifySlack(request.getSlackIdList(), request.getMessage());
+    notifyWebSocket(request.getRiderIdList(), request.getMessage());
   }
 
   private void notifySlack(List<String> slackEmails, String message) {

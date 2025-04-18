@@ -17,22 +17,14 @@ public class AlarmRequest {
   List<String> slackIdList;
   List<Long> riderIdList;
   UUID matchingId;
-  Integer fee;
-  String storeName;
-  String storeAddress;
-  String targetAddress;
-  String orderRequest;
+  String message;
 
-  public static AlarmRequest from(CreateMatchingEvent event) {
+  public static AlarmRequest from(CreateMatchingEvent event, String message) {
     return AlarmRequest.builder()
         .slackIdList(event.getSlackIdList())
         .riderIdList(event.getRiderIdList())
         .matchingId(event.getMatchingId())
-        .fee(event.getFee())
-        .storeName(event.getStoreName())
-        .storeAddress(event.getStoreAddress())
-        .targetAddress(event.getTargetAddress())
-        .orderRequest(event.getOrderRequest())
+        .message(message)
         .build();
   }
 }
