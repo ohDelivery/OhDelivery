@@ -1,19 +1,20 @@
 package com.ohdelivery.service.match.alarm.application.service;
 
-import com.ohdelivery.service.match.alarm.application.dto.AlarmCommand;
 import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
 import com.ohdelivery.service.match.alarm.domain.model.Alarm;
 import com.ohdelivery.service.match.alarm.domain.model.AlarmRider;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRepository;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRiderRepository;
+import com.ohdelivery.service.match.alarm.infrastructure.messaging.AlarmEvent;
 import com.slack.api.methods.SlackApiException;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlarmService {
@@ -21,31 +22,31 @@ public class AlarmService {
   private final SlackService slackService;
   private final AlarmRepository alarmRepository;
   private final AlarmRiderRepository alarmRiderRepository;
-  private final SimpMessagingTemplate messagingTemplate;
+  private final RiderSessionManager sessionManager;
 
   @Transactional
-  public void sendAlarm(AlarmCommand command) {
-    String message = createMessage(command);
+  public void sendAlarm(AlarmEvent event) {
+    String message = createMessage(event);
 
-    Alarm alarm = Alarm.toEntity(command.getMatchingId(), message);
+    Alarm alarm = Alarm.toEntity(event.getMatchingId(), message);
     alarmRepository.save(alarm);
 
-    notifySlack(command.getSlackIdList(), message);
-    notifyWebSocket(message);
+    notifySlack(event.getSlackIdList(), message);
+//    notifyWebSocket(event.getRiderIdList(), message);
   }
 
-  private String createMessage(AlarmCommand command) {
+  private String createMessage(AlarmEvent event) {
     StringBuilder builder = new StringBuilder();
 
     builder.append("[\uD83D\uDD14 새로운 배달 요청이 도착했습니다! ]\n\n");
 
-    builder.append("\uD83C\uDFE1 <").append(command.getStoreName()).append(">\n")
-        .append("- 가게 주소: ").append(command.getStoreAddress()).append("\n\n");
+    builder.append("\uD83C\uDFE1 <").append(event.getStoreName()).append(">\n")
+        .append("- 가게 주소: ").append(event.getStoreAddress()).append("\n\n");
 
     builder.append("\uD83C\uDF73 배달 정보\n")
-        .append("- 배달료: ").append(command.getFee()).append("\n")
-        .append("- 배달지 주소: ").append(command.getTargetAddress()).append("\n")
-        .append("- 요청 사항: ").append(command.getOrderRequest());
+        .append("- 배달료: ").append(event.getFee()).append("\n")
+        .append("- 배달지 주소: ").append(event.getTargetAddress()).append("\n")
+        .append("- 요청 사항: ").append(event.getOrderRequest());
 
     return builder.toString();
   }
@@ -58,12 +59,8 @@ public class AlarmService {
             res.getSentAt());
         alarmRiderRepository.save(alarmRider);
       } catch (SlackApiException | IOException e) {
-        // todo: 예외 처리 로직 추가
+        log.error(e.getMessage(), e);
       }
     }
-  }
-
-  private void notifyWebSocket(String message) {
-    messagingTemplate.convertAndSend("/topic/alarm", message);
   }
 }
