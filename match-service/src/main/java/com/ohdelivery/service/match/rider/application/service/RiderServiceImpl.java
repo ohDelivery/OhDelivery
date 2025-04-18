@@ -124,10 +124,19 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public List<String> getRidersByLocation(Double storeLongitude, Double storeLatitude) {
-    List<Rider> availableRiders = getAvailableRiders();
-    List<String> slackIds = getNearByRiders(availableRiders, storeLatitude, storeLongitude);
-    return slackIds;
+  public List<Rider> getRidersByLocation(Double sLat, Double sLon) {
+    List<Rider> riders = riderRepository.findAllByStatus(RiderStatus.AVAILABLE);
+    riders = riders.stream()
+        .filter(rider -> {
+          double dis = calculateDistance(sLat, sLon, rider.getLatitude(), rider.getLongitude());
+          return dis <= 10.0;
+        })
+        .toList();
+
+    if (riders.isEmpty()) {
+      throw new AvailableRiderNotFoundException();
+    }
+    return riders;
   }
 
   @Override
@@ -148,26 +157,6 @@ public class RiderServiceImpl implements RiderService {
     if (status == null) {
       throw new RiderInvalidStatusException("라이더 상태가 지정되지 않았습니다.");
     }
-  }
-
-  private List<Rider> getAvailableRiders() {
-    List<Rider> riders = riderRepository.findAllByStatus(RiderStatus.AVAILABLE);
-    if (riders.isEmpty()) {
-      throw new AvailableRiderNotFoundException();
-    }
-    return riders;
-  }
-
-  private List<String> getNearByRiders(List<Rider> riders, double storeLat, double storeLng) {
-    List<String> slackIds = riders.stream()
-        .filter(rider ->
-            calculateDistance(storeLat, storeLng, rider.getLatitude(), rider.getLongitude()) <= 10)
-        .map(Rider::getSlackId)
-        .toList();
-    if (slackIds.isEmpty()) {
-      throw new AvailableRiderNotFoundException();
-    }
-    return slackIds;
   }
 
   private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

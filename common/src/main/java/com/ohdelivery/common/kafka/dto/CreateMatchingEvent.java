@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class CreateMatchingEvent {
 
   List<String> slackIdList;
+  List<Long> riderIdList;
   UUID matchingId;
   Integer fee;
   String storeName;

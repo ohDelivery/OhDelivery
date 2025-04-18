@@ -10,6 +10,7 @@ import com.ohdelivery.service.match.matching.application.exception.MatchingNotFo
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
+import com.ohdelivery.service.match.rider.domain.model.Rider;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -43,19 +44,19 @@ public class MatchingServiceImpl implements MatchingService {
     Matching matching = Matching.create(deliveryId);
     matchingRepository.save(matching);
 
-    List<String> slackIdList = null;
+    List<Rider> nearbyRiders;
     try {
-      slackIdList = riderService.getRidersByLocation(
-          request.getStoreLongitude(),
-          request.getStoreLatitude()
-      );
+      nearbyRiders = riderService.getRidersByLocation(
+          request.getStoreLatitude(),
+          request.getStoreLongitude());
     } catch (Exception e) {
       matchingEventPublisher.matchingCreateFailedEvent(deliveryId);
       throw new RuntimeException(e);
     }
 
     matchingEventPublisher.matchingCreatedEvent(
-        slackIdList,
+        getRidersSlackIds(nearbyRiders),
+        getRidersIds(nearbyRiders),
         matching.getId(),
         request.getFee(),
         request.getStoreName(),
@@ -146,5 +147,18 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     return matchingRepository.findByRiderId(riderId);
+  }
+
+  private List<String> getRidersSlackIds(List<Rider> riders) {
+    return riders.stream()
+        .map(Rider::getSlackId)
+        .toList();
+  }
+
+  private List<Long> getRidersIds(List<Rider> riders) {
+    return riders.stream()
+        .map(Rider::getRiderId)
+        .map(Long::valueOf)
+        .toList();
   }
 }

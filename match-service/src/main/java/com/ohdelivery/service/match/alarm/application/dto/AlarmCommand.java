@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class AlarmCommand {
 
   List<String> slackIdList;
+  List<Long> riderIdList;
   UUID matchingId;
   Integer fee;
   String storeName;
@@ -25,6 +26,7 @@ public class AlarmCommand {
   public static AlarmCommand from(CreateMatchingEvent event) {
     return AlarmCommand.builder()
         .slackIdList(event.getSlackIdList())
+        .riderIdList(event.getRiderIdList())
         .matchingId(event.getMatchingId())
         .fee(event.getFee())
         .storeName(event.getStoreName())
