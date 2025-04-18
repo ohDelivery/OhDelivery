@@ -7,17 +7,17 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class UpdateRiderStstusResponse {
+public class UpdateRiderStatusResponse {
 
   private final UUID id;
-  private final Integer rider_id;
+  private final long rider_id;
   private final String slack_id;
   private final String status;
   private final Double latitude;
   private final Double longitude;
 
-  public static UpdateRiderStstusResponse from(Rider rider) {
-    return new UpdateRiderStstusResponse(
+  public static UpdateRiderStatusResponse from(Rider rider) {
+    return new UpdateRiderStatusResponse(
         rider.getId(),
         rider.getRiderId(),
         rider.getSlackId(),

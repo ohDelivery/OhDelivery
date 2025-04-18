@@ -8,14 +8,15 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class GetRiderResponse {
+
   private final UUID id;
-  private final Integer rider_id;
+  private final long rider_id;
   private final String slack_id;
   private final String status;
   private final Double latitude;
   private final Double longitude;
 
-  public static GetRiderResponse from(Rider rider){
+  public static GetRiderResponse from(Rider rider) {
     return new GetRiderResponse(
         rider.getId(),
         rider.getRiderId(),

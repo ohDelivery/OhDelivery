@@ -8,7 +8,7 @@ import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderReq
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
-import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStstusResponse;
+import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStatusResponse;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
 import com.ohdelivery.service.match.rider.presentation.resposne.RiderSuccessCode;
 import jakarta.validation.Valid;
@@ -69,10 +69,10 @@ public class RiderController {
 
   @PatchMapping("/{id}/status")
   @RoleCheck({RoleType.MASTER, RoleType.RIDER})
-  public ResponseEntity<ApiResponse<UpdateRiderStstusResponse>> updateRiderStatus(
+  public ResponseEntity<ApiResponse<UpdateRiderStatusResponse>> updateRiderStatus(
       @PathVariable("id") UUID id,
       @RequestBody @Valid UpdateRiderStatusRequest request) {
-    UpdateRiderStstusResponse response = riderService.updateRiderStatus(id, request);
+    UpdateRiderStatusResponse response = riderService.updateRiderStatus(id, request);
     return ResponseEntity.ok(ApiResponse.success(
         RiderSuccessCode.RIDER_STATUS_CHANGE_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage(),

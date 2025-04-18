@@ -27,7 +27,7 @@ public class Rider extends BaseEntity {
   private UUID id;
 
   @Column(name = "rider_id")
-  private Integer riderId;
+  private long riderId;
 
   @Column(name = "slack_id")
   private String slackId;

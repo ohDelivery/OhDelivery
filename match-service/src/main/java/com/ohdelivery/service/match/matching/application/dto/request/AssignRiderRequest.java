@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class AssignRiderRequest {
 
-  private Integer riderId;
+  private long riderId;
 }
