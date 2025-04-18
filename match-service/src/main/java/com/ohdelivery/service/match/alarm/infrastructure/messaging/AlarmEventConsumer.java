@@ -24,24 +24,8 @@ public class AlarmEventConsumer {
       containerFactory = "createMatchingKafkaListenerContainerFactory"
   )
   public void sendAlarm(CreateMatchingEvent event) {
-    String message = createMessage(event);
+    String message = alarmService.createMessage(event);
     AlarmRequest request = AlarmRequest.from(event, message);
     alarmService.sendAlarm(request);
-  }
-
-  private String createMessage(CreateMatchingEvent request) {
-    StringBuilder builder = new StringBuilder();
-
-    builder.append("[\uD83D\uDD14 새로운 배달 요청이 도착했습니다! ]\n\n");
-
-    builder.append("\uD83C\uDFE1 <").append(request.getStoreName()).append(">\n")
-        .append("- 가게 주소: ").append(request.getStoreAddress()).append("\n\n");
-
-    builder.append("\uD83C\uDF73 배달 정보\n")
-        .append("- 배달료: ").append(request.getFee()).append("\n")
-        .append("- 배달지 주소: ").append(request.getTargetAddress()).append("\n")
-        .append("- 요청 사항: ").append(request.getOrderRequest());
-
-    return builder.toString();
   }
 }

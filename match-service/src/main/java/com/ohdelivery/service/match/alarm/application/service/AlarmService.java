@@ -1,5 +1,6 @@
 package com.ohdelivery.service.match.alarm.application.service;
 
+import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import com.ohdelivery.service.match.alarm.application.dto.AlarmRequest;
 import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
 import com.ohdelivery.service.match.alarm.domain.model.Alarm;
@@ -59,5 +60,21 @@ public class AlarmService {
         }
       }
     }
+  }
+
+  public String createMessage(CreateMatchingEvent request) {
+    StringBuilder builder = new StringBuilder();
+
+    builder.append("[\uD83D\uDD14 새로운 배달 요청이 도착했습니다! ]\n\n");
+
+    builder.append("\uD83C\uDFE1 <").append(request.getStoreName()).append(">\n")
+        .append("- 가게 주소: ").append(request.getStoreAddress()).append("\n\n");
+
+    builder.append("\uD83C\uDF73 배달 정보\n")
+        .append("- 배달료: ").append(request.getFee()).append("\n")
+        .append("- 배달지 주소: ").append(request.getTargetAddress()).append("\n")
+        .append("- 요청 사항: ").append(request.getOrderRequest());
+
+    return builder.toString();
   }
 }
