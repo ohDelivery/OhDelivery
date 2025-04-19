@@ -41,10 +41,10 @@
 
 <h1>WebSocket Alarm Test Client</h1>
 
-<!-- 사용자로부터 riderId 입력 받는 필드 -->
+<!-- 사용자로부터 token 입력 받는 필드 -->
 <div>
-  <label for="riderIdInput">Rider ID:</label>
-  <input type="text" id="riderIdInput" placeholder="Enter riderId"/>
+  <label for="tokenInput">JWT Token:</label>
+  <input type="text" id="tokenInput" placeholder="Enter token"/>
 </div>
 
 <!-- 연결 / 연결 해제 버튼 -->
@@ -76,15 +76,15 @@
   }
 
   function connect() {
-    const riderId = document.getElementById('riderIdInput').value.trim();
+    const token = document.getElementById('tokenInput').value.trim();
 
-    if (!riderId) {
-      alert('Please enter a riderId.');
+    if (!token) {
+      alert('Please enter a token.');
       return;
     }
 
-    // riderId를 쿼리 파라미터로 전달
-    const url = `/ws/alarm?riderId=${encodeURIComponent(riderId)}`;
+    // token을 쿼리 파라미터로 전달
+    const url = `/ws/alarm?token=${encodeURIComponent(token)}`;
     const socket = new SockJS(url);
     stompClient = Stomp.over(socket);
 
@@ -92,8 +92,8 @@
       setConnected(true);
       console.log('Connected: ' + frame);
 
-      // 서버에서 설정한 토픽 구독
-      stompClient.subscribe('/topic/alarm/' + riderId, function (message) {
+      // 사용자 개별 큐 구독 (Spring에서 자동 라우팅)
+      stompClient.subscribe('/user/topic/alarm/', function (message) {
         showMessage(message.body);
       });
     }, function (error) {

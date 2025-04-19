@@ -50,8 +50,8 @@ public class AlarmService {
 
   private void notifyWebSocket(List<Long> riderIds, String message) {
     for (Long riderId : riderIds) {
-      messagingTemplate.convertAndSend("/topic/alarm/" + riderId, message);
-      log.info("WebSocket 메시지 전송 완료: riderId={}", riderId);
+      messagingTemplate.convertAndSendToUser(riderId.toString(), "/topic/alarm/", message);
+      log.info("WebSocket 메시지 전송 완료: userId={}", riderId);
     }
   }
 
