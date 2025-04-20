@@ -1,9 +1,6 @@
 package com.ohdelivery.service.consult.matching.domain.repository;
 
 import com.ohdelivery.service.consult.agent.domain.model.AgentStatus;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +14,9 @@ public class RedisAgentRepository {
   private final StringRedisTemplate redisTemplate;
   public static final String AGENT_PREFIX = "agent:";
   private static final String AGENT_STATUS_PREFIX = "agent:status:";
-  private static final String RR_INDEX_KEY_PREFIX = "agent:rr:";      // 라운드 로빈 인덱스
+
+  private static final String RR_INDEX_PREFIX = "agent:rr:";      // 라운드 로빈 인덱스
+  private static final String BUSY_COUNT_PREFIX = "agent:busy";   // 상담원 busy count
 
   public void save(String agentId) {
     String initStatus = AgentStatus.OFFLINE.toString();
@@ -42,41 +41,27 @@ public class RedisAgentRepository {
     redisTemplate.opsForValue().set(key, status);                             // 상담원 상태 업데이트
   }
 
-  // 특정 상태의 상담원 리스트 조회
-  public List<Long> findByStatus(String status) {
-    Set<String> agents = redisTemplate.opsForSet().members(AGENT_PREFIX + status);
-    if (agents == null) {
-      return List.of();
-    }
-    return agents.stream().map(Long::valueOf).toList();
+  public Set<String> findByStatus(String status) {
+    return redisTemplate.opsForSet().members(AGENT_PREFIX + status);
   }
 
-  // 상태별 라운드 로빈 방식으로 상담원 선택
-  public Optional<Long> selectAgent() {
-    String status = AgentStatus.AVAILABLE.toString();
-    String key = AGENT_PREFIX + status;
-    String indexKey = RR_INDEX_KEY_PREFIX + status;
+  public Optional<String> getRRIndex() {
+    String key = RR_INDEX_PREFIX + AgentStatus.AVAILABLE.toString();
+    return Optional.ofNullable(redisTemplate.opsForValue().get(key));
+  }
 
-    // 상담원 리스트 조회
-    Set<String> agents = redisTemplate.opsForSet().members(key);
-    if (agents == null) {
-      return Optional.empty();
-    }
-
-    // list로 변환하여 정렬
-    List<String> sortedAgents = new ArrayList<>(agents);
-    Collections.sort(sortedAgents);
-
-    // 인덱스 조회 및 업데이트
-    int index = 0;
-    String indexValue = redisTemplate.opsForValue().get(indexKey);
-    if (indexValue != null) {
-      index = Integer.parseInt(indexValue);
-      index = (index + 1) % sortedAgents.size();
-    }
+  public void updateRRIndex(String index) {
+    String indexKey = RR_INDEX_PREFIX + AgentStatus.AVAILABLE.toString();
     redisTemplate.opsForValue().set(indexKey, String.valueOf(index));
+  }
 
-    return Optional.of(Long.valueOf(sortedAgents.get(index)));
+  public int getBusyCount(String agentId) {
+    Double count = redisTemplate.opsForZSet().score(BUSY_COUNT_PREFIX, agentId);
+    return count != null ? count.intValue() : 0;
+  }
+
+  public void increaseBusyCount(String agentId) {
+    redisTemplate.opsForZSet().incrementScore(BUSY_COUNT_PREFIX, agentId, 1);
   }
 
   public void delete(String agentId) {
