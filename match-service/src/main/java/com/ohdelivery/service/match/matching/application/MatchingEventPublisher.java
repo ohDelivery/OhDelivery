@@ -9,6 +9,7 @@ public interface MatchingEventPublisher {
 
   void matchingCreatedEvent(
       List<String> slackIdList,
+      List<Long> riderIdList,
       UUID matchingId,
       Integer fee,
       String storeName,

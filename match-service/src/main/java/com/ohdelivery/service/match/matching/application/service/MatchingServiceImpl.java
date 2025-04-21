@@ -13,6 +13,7 @@ import com.ohdelivery.service.match.matching.application.exception.MatchingNotFo
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
+import com.ohdelivery.service.match.rider.domain.model.Rider;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -50,19 +51,19 @@ public class MatchingServiceImpl implements MatchingService {
     Matching matching = Matching.create(deliveryId);
     matchingRepository.save(matching);
 
-    List<String> slackIdList = null;
+    List<Rider> nearbyRiders;
     try {
-      slackIdList = riderService.getRidersByLocation(
-          request.getStoreLongitude(),
-          request.getStoreLatitude()
-      );
+      nearbyRiders = riderService.getRidersByLocation(
+          request.getStoreLatitude(),
+          request.getStoreLongitude());
     } catch (Exception e) {
       matchingEventPublisher.matchingCreateFailedEvent(deliveryId);
       throw new RuntimeException(e);
     }
 
     matchingEventPublisher.matchingCreatedEvent(
-        slackIdList,
+        getRidersSlackIds(nearbyRiders),
+        getRidersIds(nearbyRiders),
         matching.getId(),
         request.getFee(),
         request.getStoreName(),
@@ -73,7 +74,6 @@ public class MatchingServiceImpl implements MatchingService {
 
     return matching.getId();
   }
-
 
   @Override
   public GetMatchingResponse getMatching(UUID matchingId) {
@@ -138,7 +138,6 @@ public class MatchingServiceImpl implements MatchingService {
     }
   }
 
-
   @Override
   public void deleteMatching(UUID deliveryId) {
 //    배달 취소 기능 -> 배달 취소 시 매칭도 없어져야 하는부분
@@ -179,4 +178,15 @@ public class MatchingServiceImpl implements MatchingService {
         .map(SearchMatchingResponse::from);
   }
 
+  private List<String> getRidersSlackIds(List<Rider> riders) {
+    return riders.stream()
+        .map(Rider::getSlackId)
+        .toList();
+  }
+
+  private List<Long> getRidersIds(List<Rider> riders) {
+    return riders.stream()
+        .map(Rider::getRiderId)
+        .toList();
+  }
 }

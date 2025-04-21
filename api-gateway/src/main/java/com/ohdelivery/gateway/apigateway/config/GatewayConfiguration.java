@@ -19,80 +19,87 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class GatewayConfiguration {
 
-    private final ObjectMapper objectMapper;
-    private final WebClient webClient;
+  private final ObjectMapper objectMapper;
+  private final WebClient webClient;
 
-    @Bean
-    public AuthenticationFilter jwtAuthFilter() {
-        return new AuthenticationFilter(objectMapper);
+  @Bean
+  public AuthenticationFilter jwtAuthFilter() {
+    return new AuthenticationFilter(objectMapper);
+  }
+
+  @Bean
+  public TokenFilter tokenFilter() {
+    return new TokenFilter(webClient);
+  }
+
+  @Bean
+  public CsrfFilter csrfFilter() {
+    return new CsrfFilter();
+  }
+
+  @Bean
+  public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
+    Builder builder = routeLocatorBuilder.routes();
+    TokenFilter tokenFilter = tokenFilter();
+    AuthenticationFilter authenticationFilter = jwtAuthFilter();
+
+    for (ServiceConstants serviceConstant : ServiceConstants.values()) {
+      addRoute(
+          builder,
+          serviceConstant.getServiceName(),
+          serviceConstant.getServiceUri(),
+          new GatewayFilter[]{tokenFilter, authenticationFilter},
+          serviceConstant.getApiPaths()
+      );
     }
 
-    @Bean
-    public TokenFilter tokenFilter() {
-        return new TokenFilter(webClient);
-    }
+    addRoute(
+        builder,
+        "user-service",
+        "lb://user-service",
+        new GatewayFilter[]{},
+        new String[]{"/api/users/join"}
+    );
+    addRoute(
+        builder,
+        "auth-server",
+        "lb://auth-server",
+        new GatewayFilter[]{},
+        new String[]{"/auth/login", "/auth/validate"}
+    );
+    addRoute(
+        builder,
+        "delivery-service",
+        "lb://delivery-service",
+        new GatewayFilter[]{},
+        new String[]{"/delivery-service/v3/api-docs", "/ws/delivery/**"}
+    );
+    addRoute(
+        builder,
+        "match-service",
+        "lb://match-service",
+        new GatewayFilter[]{},
+        new String[]{"/ws/alarm/**"}
+    );
 
-    @Bean
-    public CsrfFilter csrfFilter() {
-        return new CsrfFilter();
-    }
+    return builder.build();
+  }
 
-    @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder routeLocatorBuilder) {
-        Builder builder = routeLocatorBuilder.routes();
-        TokenFilter tokenFilter = tokenFilter();
-        AuthenticationFilter authenticationFilter = jwtAuthFilter();
+  private void addRoute(Builder builder, String serviceName, String serviceUri,
+      GatewayFilter[] gatewayFilters,
+      String... apiPaths) {
 
-        for (ServiceConstants serviceConstant : ServiceConstants.values()) {
-            addRoute(
-                builder,
-                serviceConstant.getServiceName(),
-                serviceConstant.getServiceUri(),
-                new GatewayFilter[]{tokenFilter, authenticationFilter},
-                serviceConstant.getApiPaths()
-            );
-        }
+    final GatewayFilter[] filters =
+        gatewayFilters != null ? gatewayFilters : new GatewayFilter[0];
 
-        addRoute(
-            builder,
-            "user-service",
-            "lb://user-service",
-            new GatewayFilter[]{},
-            new String[]{"/api/users/join"}
-        );
-        addRoute(
-            builder,
-            "auth-server",
-            "lb://auth-server",
-            new GatewayFilter[]{},
-            new String[]{"/auth/login", "/auth/validate"}
-        );
-        addRoute(
-            builder,
-            "delivery-service",
-            "lb://delivery-service",
-            new GatewayFilter[]{},
-            new String[]{"/delivery-service/v3/api-docs", "/ws/delivery/**"}
-        );
+    builder.route(serviceName, routeSpec -> routeSpec
+        .path(apiPaths)
+        .filters(filterSpec -> {
+          Arrays.stream(filters).forEach(filterSpec::filter);
+          return filterSpec;
+        })
 
-        return builder.build();
-    }
-
-    private void addRoute(Builder builder, String serviceName, String serviceUri,
-        GatewayFilter[] gatewayFilters,
-        String... apiPaths) {
-
-        final GatewayFilter[] filters =
-            gatewayFilters != null ? gatewayFilters : new GatewayFilter[0];
-
-        builder.route(serviceName, routeSpec -> routeSpec
-            .path(apiPaths)
-            .filters(filterSpec -> {
-                Arrays.stream(filters).forEach(filterSpec::filter);
-                return filterSpec;
-            })
-
-            .uri(serviceUri)
-        );
-    }
+        .uri(serviceUri)
+    );
+  }
 }

@@ -32,6 +32,7 @@ public class MatchingEventProducer implements MatchingEventPublisher {
   @Override
   public void matchingCreatedEvent(
       List<String> slackIdList,
+      List<Long> riderIdList,
       UUID matchingId,
       Integer fee,
       String storeName,
@@ -40,6 +41,7 @@ public class MatchingEventProducer implements MatchingEventPublisher {
       String orderRequest) {
     CreateMatchingEvent event = new CreateMatchingEvent(
         slackIdList,
+        riderIdList,
         matchingId,
         fee,
         storeName,

@@ -4,7 +4,7 @@ import static com.ohdelivery.common.kafka.Topic.CREATED_MATCHING;
 import static com.ohdelivery.service.match.rider.infrastructure.messaging.RiderKafkaConfig.MATCH_GROUP_ID;
 
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
-import com.ohdelivery.service.match.alarm.application.dto.AlarmCommand;
+import com.ohdelivery.service.match.alarm.application.dto.AlarmRequest;
 import com.ohdelivery.service.match.alarm.application.service.AlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,8 @@ public class AlarmEventConsumer {
       containerFactory = "createMatchingKafkaListenerContainerFactory"
   )
   public void sendAlarm(CreateMatchingEvent event) {
-    AlarmCommand alarmCommand = AlarmCommand.from(event);
-    alarmService.sendAlarm(alarmCommand);
+    String message = alarmService.createMessage(event);
+    AlarmRequest request = AlarmRequest.from(event, message);
+    alarmService.sendAlarm(request);
   }
 }
