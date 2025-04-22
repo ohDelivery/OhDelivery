@@ -115,4 +115,15 @@ public class RiderController {
         response
     ));
   }
+
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<ApiResponse<GetRiderResponse>> getRiderByUserId(
+      @PathVariable("userId") long userId) {
+    GetRiderResponse response = riderService.getRiderByUserId(userId);
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
+    ));
+  }
 }

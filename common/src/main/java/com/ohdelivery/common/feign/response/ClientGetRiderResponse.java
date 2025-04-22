@@ -15,4 +15,7 @@ public class ClientGetRiderResponse {
   private final Double latitude;
   private final Double longitude;
 
+  public boolean isAvailable() {
+    return status != null && "AVAILABLE".equalsIgnoreCase(status);
+  }
 }

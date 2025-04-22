@@ -30,5 +30,5 @@ public interface RiderService {
 
   List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon);
 
-  GetRiderResponse getRiderByuserId(long riderId);
+  GetRiderResponse getRiderByUserId(long riderId);
 }

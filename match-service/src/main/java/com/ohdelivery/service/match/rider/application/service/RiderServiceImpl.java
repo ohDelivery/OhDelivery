@@ -142,7 +142,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public GetRiderResponse getRiderByuserId(long riderId) {
+  public GetRiderResponse getRiderByUserId(long riderId) {
     Rider rider = riderRepository.findByRiderId(riderId)
         .orElseThrow(() -> new RiderNotFoundException());
     return new GetRiderResponse(

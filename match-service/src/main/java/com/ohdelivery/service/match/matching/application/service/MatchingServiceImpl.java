@@ -14,6 +14,7 @@ import com.ohdelivery.service.match.matching.application.dto.response.GetMatchin
 import com.ohdelivery.service.match.matching.application.dto.response.SearchMatchingResponse;
 import com.ohdelivery.service.match.matching.application.exception.MatchingCreateException;
 import com.ohdelivery.service.match.matching.application.exception.MatchingNotFoundException;
+import com.ohdelivery.service.match.matching.application.exception.MatchingUpdateException;
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
@@ -21,10 +22,8 @@ import com.ohdelivery.service.match.rider.domain.model.Rider;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -75,52 +74,12 @@ public class MatchingServiceImpl implements MatchingService {
   @Override
   @Transactional
   public void updateMatching(UUID matchingId, AssignRiderRequest request, Passport currentUser) {
-    // 매칭 ID를 기반으로 고유한 락 키 생성
-    String lockKey = "matching:" + matchingId.toString();
-    RLock lock = redissonClient.getLock(lockKey);
-    RoleType role = currentUser.getRoleType();
-    long userId = Long.parseLong(currentUser.getUserId());
-
-    if (role != RoleType.MASTER) {
-      if (userId != request.getRiderId()) {
-        throw new IllegalArgumentException("MASTER가 아니면 본인만 할당 가능합니다.");
-      }
-    }
-
     try {
-      // 락을 획득 시도 (최대 대기 시간: 5초, 락 유지 시간: 10초)
-      boolean isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
-
-      if (!isLocked) {
-        throw new IllegalStateException("매칭에 대한 락 획득 실패: " + matchingId);
-      }
-
-      Matching matching = matchingRepository.findById(matchingId)
-          .orElseThrow(() -> new MatchingNotFoundException());
-
-      if (!matching.isUpdatable()) {
-        throw new IllegalArgumentException("매칭은 수정할 수 없는 상태입니다.");
-      }
-      UUID riderId = riderService.getRiderByuserId(request.getRiderId()).getId();
-
-      if (!riderService.checkAssignAvailable(riderId)) {
-        throw new IllegalArgumentException("라이더는 할당 가능한 상태가 아닙니다.");
-      }
-
-      matching.assignRider(riderId);
-      matchingRepository.save(matching);
-
-      UUID deliveryID = matching.getDeliveryId();
-      matchingEventPublisher.matchingCompletedEvent(deliveryID, riderId);
-
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("락 획득 중 인터럽트 발생", e);
-    } finally {
-      // 항상 락 해제 (finally 블록에서 처리)
-      if (lock.isHeldByCurrentThread()) {
-        lock.unlock();
-      }
+      var command = matchingCommandFactory.updateMatchingCommand(matchingId, request, currentUser);
+      commandInvoker.invoke(command);
+    } catch (Exception e) {
+      log.error("매칭 수정 실패: {}", e.getMessage());
+      throw new MatchingUpdateException("매칭 수정 중 오류 발생: " + e.getMessage());
     }
   }
 
@@ -154,7 +113,7 @@ public class MatchingServiceImpl implements MatchingService {
     long userId = Long.parseLong(currentUser.getUserId());
 
     if (currentUser.getRoleType() == RoleType.RIDER) {
-      UUID riderId = riderService.getRiderByuserId(userId).getId();
+      UUID riderId = riderService.getRiderByUserId(userId).getId();
       return matchingRepository.findByRiderId(riderId, pageable)
           .map(SearchMatchingResponse::from);
     }
