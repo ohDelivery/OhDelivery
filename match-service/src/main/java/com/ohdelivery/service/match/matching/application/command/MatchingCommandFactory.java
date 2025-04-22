@@ -41,4 +41,8 @@ public class MatchingCommandFactory implements CommandFactory {
         redissonClient
     );
   }
+
+  public DeleteMatchingCommand deleteMatchingCommand(UUID deliveryId) {
+    return new DeleteMatchingCommand(deliveryId, matchingRepository);
+  }
 }

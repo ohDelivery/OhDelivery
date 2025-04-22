@@ -57,4 +57,16 @@ public class Matching extends BaseEntity {
       this.delete(now, userName);
     }
   }
+
+  public Matching clone() {
+    Matching copy = new Matching();
+    copy.id = this.getId();
+    copy.deliveryId = this.getDeliveryId();
+    copy.riderId = this.getRiderId();
+    copy.setCreatedAt(this.getCreatedAt());
+    copy.setCreatedBy(this.getCreatedBy());
+    copy.setUpdatedAt(this.getUpdatedAt());
+    copy.setUpdatedBy(this.getUpdatedBy());
+    return copy;
+  }
 }

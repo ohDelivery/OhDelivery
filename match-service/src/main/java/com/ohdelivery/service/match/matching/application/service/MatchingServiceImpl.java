@@ -5,8 +5,8 @@ import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.service.match.common.command.CommandInvoker;
 import com.ohdelivery.service.match.common.feign.DeliveryClientService;
-import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
 import com.ohdelivery.service.match.matching.application.command.CreateMatchingCommand;
+import com.ohdelivery.service.match.matching.application.command.DeleteMatchingCommand;
 import com.ohdelivery.service.match.matching.application.command.MatchingCommandFactory;
 import com.ohdelivery.service.match.matching.application.command.UpdateMatchingCommand;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
@@ -19,13 +19,9 @@ import com.ohdelivery.service.match.matching.application.exception.MatchingUpdat
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
-import com.ohdelivery.service.match.rider.domain.model.Rider;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,10 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MatchingServiceImpl implements MatchingService {
 
   private final MatchingRepository matchingRepository;
-  private final MatchingEventPublisher matchingEventPublisher;
   private final RiderService riderService;
   private final DeliveryClientService deliveryService;
-  private final RedissonClient redissonClient;
 
   private final MatchingCommandFactory matchingCommandFactory;
   private final CommandInvoker commandInvoker;
@@ -87,17 +81,12 @@ public class MatchingServiceImpl implements MatchingService {
 
   @Override
   public void deleteMatching(UUID deliveryId) {
-//    배달 취소 기능 -> 배달 취소 시 매칭도 없어져야 하는부분
-    Matching matching = matchingRepository.findByDeliveryId(deliveryId)
-        .orElseThrow(() -> new MatchingNotFoundException());
-
-    if (matching.isUpdatable()) {
-      LocalDateTime now = LocalDateTime.now();
-      String createdBy = "system";
-      matching.delete(now, createdBy);
-      matchingRepository.save(matching);
-    } else {
-      throw new IllegalArgumentException("Matching is not deletable");
+    try {
+      DeleteMatchingCommand command = matchingCommandFactory.deleteMatchingCommand(deliveryId);
+      commandInvoker.invoke(command);
+    } catch (Exception e) {
+      log.error("매칭 삭제 실패: {}", e.getMessage());
+      throw new MatchingDeleteException("매칭 삭제 중 오류 발생: " + e.getMessage());
     }
   }
 
@@ -123,17 +112,5 @@ public class MatchingServiceImpl implements MatchingService {
     // 마스터라면 전체 매칭 조회
     return matchingRepository.findAll(pageable)
         .map(SearchMatchingResponse::from);
-  }
-
-  private List<String> getRidersSlackIds(List<Rider> riders) {
-    return riders.stream()
-        .map(Rider::getSlackId)
-        .toList();
-  }
-
-  private List<Long> getRidersIds(List<Rider> riders) {
-    return riders.stream()
-        .map(Rider::getRiderId)
-        .toList();
   }
 }
