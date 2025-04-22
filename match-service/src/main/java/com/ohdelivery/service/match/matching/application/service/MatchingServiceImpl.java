@@ -8,6 +8,7 @@ import com.ohdelivery.service.match.common.feign.DeliveryClientService;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
 import com.ohdelivery.service.match.matching.application.command.CreateMatchingCommand;
 import com.ohdelivery.service.match.matching.application.command.MatchingCommandFactory;
+import com.ohdelivery.service.match.matching.application.command.UpdateMatchingCommand;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
@@ -75,7 +76,8 @@ public class MatchingServiceImpl implements MatchingService {
   @Transactional
   public void updateMatching(UUID matchingId, AssignRiderRequest request, Passport currentUser) {
     try {
-      var command = matchingCommandFactory.updateMatchingCommand(matchingId, request, currentUser);
+      UpdateMatchingCommand command = matchingCommandFactory.updateMatchingCommand(matchingId,
+          request, currentUser);
       commandInvoker.invoke(command);
     } catch (Exception e) {
       log.error("매칭 수정 실패: {}", e.getMessage());
