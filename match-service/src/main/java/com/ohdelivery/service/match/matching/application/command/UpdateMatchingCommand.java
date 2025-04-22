@@ -90,9 +90,11 @@ public class UpdateMatchingCommand implements MatchingCommand<Void> {
       Matching matching = matchingRepository.findById(matchingId)
           .orElseThrow(MatchingNotFoundException::new);
 
-      // 이전 상태로 되돌리기
+      // 이전 상태로 되돌리기 TODO : 물어보기
       if (previousRiderId != null) {
         matching.assignRider(previousRiderId); // 원래 있던 rider로 복원
+      } else {
+        matching.assignRider(null);
       }
 
       matchingRepository.save(matching);
