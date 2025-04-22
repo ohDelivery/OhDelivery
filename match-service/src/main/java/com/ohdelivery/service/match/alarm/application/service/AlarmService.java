@@ -4,7 +4,7 @@ import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import com.ohdelivery.service.match.alarm.application.dto.AlarmRequest;
 import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
 import com.ohdelivery.service.match.alarm.domain.model.Alarm;
-import com.ohdelivery.service.match.alarm.domain.model.AlarmRider;
+import com.ohdelivery.service.match.alarm.domain.model.AlarmSlack;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRepository;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRiderRepository;
 import com.slack.api.methods.SlackApiException;
@@ -39,7 +39,7 @@ public class AlarmService {
     for (String slackEmail : slackEmails) {
       try {
         SlackResponse res = slackService.sendSlackMessage(slackEmail, message);
-        AlarmRider alarmRider = AlarmRider.toEntity(res.getSlackId(), res.getChannelId(),
+        AlarmSlack alarmRider = AlarmSlack.toEntity(res.getSlackId(), res.getChannelId(),
             res.getSentAt());
         alarmRiderRepository.save(alarmRider);
       } catch (SlackApiException | IOException e) {

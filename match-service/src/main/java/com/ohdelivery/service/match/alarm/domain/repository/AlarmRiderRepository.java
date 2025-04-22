@@ -1,8 +1,8 @@
 package com.ohdelivery.service.match.alarm.domain.repository;
 
-import com.ohdelivery.service.match.alarm.domain.model.AlarmRider;
+import com.ohdelivery.service.match.alarm.domain.model.AlarmSlack;
 
 public interface AlarmRiderRepository {
 
-  AlarmRider save(AlarmRider alarmRider);
+  AlarmSlack save(AlarmSlack alarmRider);
 }

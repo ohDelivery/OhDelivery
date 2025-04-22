@@ -20,7 +20,7 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "p_alarm_rider")
-public class AlarmRider extends BaseEntity {
+public class AlarmSlack extends BaseEntity {
 
   @Id
   @UuidGenerator
@@ -36,8 +36,8 @@ public class AlarmRider extends BaseEntity {
   @JoinColumn(name = "alarm_id")
   private Alarm alarm;
 
-  public static AlarmRider toEntity(String slackId, String channelId, String sentAt) {
-    return AlarmRider.builder()
+  public static AlarmSlack toEntity(String slackId, String channelId, String sentAt) {
+    return AlarmSlack.builder()
         .slackId(slackId)
         .channelId(channelId)
         .sentAt(sentAt)
