@@ -22,8 +22,7 @@ public class ConsumerWebSocketHandler extends TextWebSocketHandler {
     private final BroadcasterManager broadcasterManager;
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message)
-        throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         String riderId = message.getPayload();
         LocationBroadcaster broadcaster = broadcasterManager.getBroadcaster(riderId);
         WebSocketLocationObserver observer = new WebSocketLocationObserver(session, riderId);
@@ -32,8 +31,7 @@ public class ConsumerWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
-        throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         WebSocketLocationObserver observer = consumerSessions.get(session);
         LocationBroadcaster broadcaster = broadcasterManager.getBroadcaster(observer.getRiderId());
         broadcaster.removeObserver(observer);

@@ -21,8 +21,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @RequiredArgsConstructor
 public class RiderWebSocketHandler extends TextWebSocketHandler {
 
-//    private final Map<String, WebSocketSession> riderSessions = new ConcurrentHashMap<>();
-
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WebSocketEventService webSocketEventService;
     private final BroadcasterManager broadcasterManager;
@@ -46,7 +44,6 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String riderId = getRiderId(session);
-//        riderSessions.put(riderId, session);
         broadcasterManager.addBroadcaster(riderId);
     }
 
@@ -54,7 +51,6 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
         throws Exception {
         String riderId = getRiderId(session);
-//        riderSessions.remove(riderId);
         broadcasterManager.removeBroadcaster(riderId);
     }
 
