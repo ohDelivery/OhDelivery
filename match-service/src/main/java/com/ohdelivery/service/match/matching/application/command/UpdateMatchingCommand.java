@@ -86,7 +86,6 @@ public class UpdateMatchingCommand implements MatchingCommand<Void> {
 
   @Override
   public void undo() {
-    // 필요한 경우 구현 (예: 라이더 배정 취소, 이벤트 발행 등)
     try {
       Matching matching = matchingRepository.findById(matchingId)
           .orElseThrow(MatchingNotFoundException::new);
