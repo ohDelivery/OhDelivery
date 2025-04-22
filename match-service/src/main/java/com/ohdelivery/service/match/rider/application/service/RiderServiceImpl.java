@@ -124,7 +124,7 @@ public class RiderServiceImpl implements RiderService {
   }
 
   @Override
-  public List<Rider> getRidersByLocation(Double sLat, Double sLon) {
+  public List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon) {
     List<Rider> riders = riderRepository.findAllByStatus(RiderStatus.AVAILABLE);
     riders = riders.stream()
         .filter(rider -> {
@@ -136,7 +136,9 @@ public class RiderServiceImpl implements RiderService {
     if (riders.isEmpty()) {
       throw new AvailableRiderNotFoundException();
     }
-    return riders;
+    return riders.stream()
+        .map(GetRiderResponse::from)
+        .collect(Collectors.toList());
   }
 
   @Override

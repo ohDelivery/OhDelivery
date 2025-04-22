@@ -5,7 +5,6 @@ import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderReq
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
 import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStatusResponse;
-import com.ohdelivery.service.match.rider.domain.model.Rider;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ public interface RiderService {
 
   boolean checkAssignAvailable(UUID riderId);
 
-  List<Rider> getRidersByLocation(Double sLat, Double sLon);
+  List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon);
 
   GetRiderResponse getRiderByuserId(long riderId);
 }

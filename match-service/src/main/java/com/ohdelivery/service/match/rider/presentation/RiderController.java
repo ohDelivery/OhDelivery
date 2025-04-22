@@ -5,6 +5,7 @@ import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
+import com.ohdelivery.service.match.rider.application.dto.request.GetNearRidersRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
@@ -99,6 +100,19 @@ public class RiderController {
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage()
+    ));
+  }
+
+  @GetMapping("/nearRiders")
+  @RoleCheck(RoleType.MASTER)
+  public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllNearRider(
+      @RequestBody GetNearRidersRequest request) {
+    List<GetRiderResponse> response = riderService.getRidersByLocation(request.getSLat(),
+        request.getSLon());
+    return ResponseEntity.ok(ApiResponse.success(
+        SuccessCode.COMMON_SUCCESS.getCode().toString(),
+        SuccessCode.COMMON_SUCCESS.getMessage(),
+        response
     ));
   }
 }
