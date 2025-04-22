@@ -39,6 +39,8 @@ public class CreateMatchingCommand implements MatchingCommand<Matching> {
     Matching matching = Matching.create(deliveryId);
     matchingRepository.save(matching);
 
+    matchingId = matching.getId();
+
     // feign - 주변 라이더 조회
     List<ClientGetRiderResponse> nearbyRiders = riderService.getAllNearRider(
         ClientGetNearRidersRequest.of(request.getStoreLatitude(), request.getStoreLongitude())
