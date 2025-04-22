@@ -3,12 +3,16 @@ package com.ohdelivery.service.match.matching.application.service;
 import com.ohdelivery.common.feign.GetDeliveryResponse;
 import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
-import com.ohdelivery.service.match.common.DeliveryClientService;
+import com.ohdelivery.service.match.common.command.CommandInvoker;
+import com.ohdelivery.service.match.common.feign.DeliveryClientService;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
+import com.ohdelivery.service.match.matching.application.command.CreateMatchingCommand;
+import com.ohdelivery.service.match.matching.application.command.MatchingCommandFactory;
 import com.ohdelivery.service.match.matching.application.dto.request.AssignRiderRequest;
 import com.ohdelivery.service.match.matching.application.dto.request.CreateMatchingRequest;
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
 import com.ohdelivery.service.match.matching.application.dto.response.SearchMatchingResponse;
+import com.ohdelivery.service.match.matching.application.exception.MatchingCreateException;
 import com.ohdelivery.service.match.matching.application.exception.MatchingNotFoundException;
 import com.ohdelivery.service.match.matching.domain.Matching;
 import com.ohdelivery.service.match.matching.domain.repository.MatchingRepository;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
@@ -28,6 +33,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
@@ -38,41 +44,21 @@ public class MatchingServiceImpl implements MatchingService {
   private final DeliveryClientService deliveryService;
   private final RedissonClient redissonClient;
 
+  private final MatchingCommandFactory matchingCommandFactory;
+  private final CommandInvoker commandInvoker;
+
   @Override
   @Transactional
   public UUID createMatching(CreateMatchingRequest request) {
-    UUID deliveryId = request.getDeliveryId();
-
-    // 이미 존재하는 매칭 확인 후 예외 처리
-    if (matchingRepository.findByDeliveryId(deliveryId).isPresent()) {
-      throw new IllegalArgumentException("해당 배달에 대한 매칭이 이미 존재합니다.");
-    }
-
-    Matching matching = Matching.create(deliveryId);
-    matchingRepository.save(matching);
-
-    List<Rider> nearbyRiders;
     try {
-      nearbyRiders = riderService.getRidersByLocation(
-          request.getStoreLatitude(),
-          request.getStoreLongitude());
+      CreateMatchingCommand command = matchingCommandFactory.createMatchingCommand(request);
+      Matching matching = commandInvoker.invoke(command);
+      log.info("매칭 생성 성공: 배달Id:{}, 매칭Id{}", matching.getDeliveryId(), matching.getId());
+      return matching.getId();
     } catch (Exception e) {
-      matchingEventPublisher.matchingCreateFailedEvent(deliveryId);
-      throw new RuntimeException(e);
+      log.error("매칭 생성 실패: {}", e.getMessage());
+      throw new MatchingCreateException("매칭 생성 중 오류 발생: " + e.getMessage());
     }
-
-    matchingEventPublisher.matchingCreatedEvent(
-        getRidersSlackIds(nearbyRiders),
-        getRidersIds(nearbyRiders),
-        matching.getId(),
-        request.getFee(),
-        request.getStoreName(),
-        request.getStoreAddress(),
-        request.getTargetAddress(),
-        request.getOrderRequest()
-    );
-
-    return matching.getId();
   }
 
   @Override
