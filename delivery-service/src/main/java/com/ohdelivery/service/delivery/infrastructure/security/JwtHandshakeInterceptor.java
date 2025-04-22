@@ -1,4 +1,4 @@
-package com.ohdelivery.service.delivery.infrastructure.messaging;
+package com.ohdelivery.service.delivery.infrastructure.security;
 
 import com.ohdelivery.common.passport.Passport;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,6 +1,6 @@
 package com.ohdelivery.service.delivery.infrastructure.config;
 
-import com.ohdelivery.service.delivery.infrastructure.messaging.JwtHandshakeInterceptor;
+import com.ohdelivery.service.delivery.infrastructure.security.JwtHandshakeInterceptor;
 import com.ohdelivery.service.delivery.presentation.handler.ConsumerWebSocketHandler;
 import com.ohdelivery.service.delivery.presentation.handler.RiderWebSocketHandler;
 import lombok.RequiredArgsConstructor;

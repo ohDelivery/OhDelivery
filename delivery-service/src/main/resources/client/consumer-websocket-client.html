@@ -27,7 +27,7 @@
     }
 
     socket = new WebSocket(
-        `ws://localhost:8080/ws/delivery/consumer?token=${encodeURIComponent(token)}`);
+        `ws://localhost:19095/ws/delivery/consumer?token=${encodeURIComponent(token)}`);
 
     socket.onopen = () => {
       socket.send(riderId);
