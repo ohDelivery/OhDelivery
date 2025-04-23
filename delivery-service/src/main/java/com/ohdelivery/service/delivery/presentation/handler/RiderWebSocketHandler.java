@@ -5,7 +5,6 @@ import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.service.delivery.application.dto.request.RiderLocationRequest;
 import com.ohdelivery.service.delivery.application.observer.BroadcasterManager;
-import com.ohdelivery.service.delivery.application.observer.LocationBroadcaster;
 import com.ohdelivery.service.delivery.application.service.LocationService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +33,7 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
         log.info("라이더 위치 수신: {}", location.toString());
 
         locationService.saveRiderLocation(location);
-
-        LocationBroadcaster locationBroadcaster = broadcasterManager.getBroadcaster(
-            location.getRiderId());
-
-        locationBroadcaster.notifyObservers(location.toMessage());
+        locationService.sendRiderLocation(location.getRiderId());
     }
 
     @Override
@@ -57,6 +52,7 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
     private String getRiderId(WebSocketSession session) throws IOException {
         Passport passport = (Passport) session.getAttributes().get("passport");
         if (passport.getRoleType() != RoleType.RIDER) {
+            log.error("Invalid role type: {}", passport.getRoleType());
             session.close(CloseStatus.NOT_ACCEPTABLE);
         }
         return passport.getUserId();

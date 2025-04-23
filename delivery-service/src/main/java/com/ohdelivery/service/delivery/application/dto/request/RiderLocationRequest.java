@@ -11,8 +11,4 @@ public class RiderLocationRequest {
     Double longitude;
     Double latitude;
     Long timestamp;
-
-    public String toMessage() {
-        return String.format("{\"latitude\": %.6f, \"longitude\": %.6f}", latitude, longitude);
-    }
 }
