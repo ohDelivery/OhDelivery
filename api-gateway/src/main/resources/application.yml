@@ -70,26 +70,87 @@ url:
   origin:
     origin-url: http://localhost:8080
 
-
 gateway:
   services:
     - serviceName: user-service
       serviceUri: lb://user-service
       routes:
+        - id: user-swagger
+          apiPaths:
+            - /user-service/v3/api-docs
+            - /ws/user/**
         - id: user-join
-          apiPaths: [/api/users/join]
-          filters: []
+          apiPaths: 
+            - /api/users/join
         - id: user-service
-          apiPaths: [/api/users]
+          apiPaths: 
+            - /api/users
           filters:
             - service-default
     - serviceName: auth-server
       serviceUri: lb://auth-server
       routes:
+        - id: auth-swagger
+          apiPaths:
+            - /auth-server/v3/api-docs
+            - /ws/auth/**
         - id: auth-server
-          apiPaths: [/auth/login, /auth/validate]
-          filters: []
-        - id : auth-logout
-          apiPaths: [/auth/logout]
+          apiPaths: 
+            - /auth/login
+            - /auth/validate
+    - serviceName: delivery-service
+      serviceUri: lb://delivery-service
+      routes:
+        - id: delivery-swagger
+          apiPaths:
+            - /delivery-service/v3/api-docs
+            - /ws/delivery/**
+        - id: delivery-service
+          apiPaths:
+            - /deliveries/**
+          filters:
+            - service-default
+    - serviceName: incentive-service
+      serviceUri: lb://incentive-service
+      routes:
+        - id: incentive-swagger
+          apiPaths: 
+            - /incentive-service/v3/api-docs
+            - /ws/incentive/**
+        - id: incentive-service
+          apiPaths:
+            - /incentives/**
+          filters:
+            - service-default
+    - serviceName: match-service
+      serviceUri: lb://match-service
+      routes:
+        - id: match-swagger
+          apiPaths:
+            - /match-service/v3/api-docs
+            - /ws/match/**
+        - id: match-service
+          apiPaths:
+            - /api/matchings/*
+          filters:
+            - service-default
+        - id: rider-service
+          apiPaths:
+            - /api/riders/*
+          filters:
+            - service-default
+        - id: match-alarm
+          apiPaths:
+            - /ws/alarm/**
+    - serviceName: consult-service
+      serviceUri: lb://consult-service
+      routes:
+        - id: consult-swagger
+          apiPaths:
+            - /consult-service/v3/api-docs
+            - /ws/consult/**
+        - id: consult-service
+          apiPaths:
+            - /api/consults/*
           filters:
             - service-default
