@@ -33,20 +33,44 @@ public class PerTimePolicy implements IncentivePolicy {
 			.filter((key, dto) -> {
 				long actualSeconds = Duration.between(dto.getDepartedAt(), dto.getDeliveredAt()).getSeconds();
 				log.info("⏱ riderId={}, actual={}, expected={}", dto.getRiderId(), actualSeconds, dto.getExpectedTime() * 60);
-				return actualSeconds <= dto.getExpectedTime()*60;
+				return actualSeconds <= dto.getExpectedTime() * 60;
 			})
 			.foreach((key, dto) -> {
-				try {
-					log.info("[건당 인센티브 지급] riderId: {}", dto.getRiderId());
-					incentiveService.create(dto.getRiderId(), IncentiveType.PER_DELIVERY_TIME);
-				} catch (Exception e) {
-					try {
-						UUID riderUUID = UUID.fromString(key);
-						dlqProducer.sendToDlq("incentive-dlq", riderUUID, IncentiveType.PER_DELIVERY_TIME, e);
-					} catch (IllegalArgumentException ex) {
-						log.error("❌ key 형식이 UUID가 아님, DLQ 전송 불가: {}", key);
-					}
-				}
+				int maxRetry = 3; //재시도 3회
+				int attempt = 0;
+				boolean success = false;
+
+				processIncentiveRetry(key, dto, attempt, maxRetry, success);
 			});
+	}
+
+	private void processIncentiveRetry(String key, DeliveryIncentiveDto dto, int attempt, int maxRetry, boolean success) {
+		while (attempt < maxRetry && !success) {
+			try {
+				incentiveService.create(dto.getRiderId(), IncentiveType.PER_DELIVERY_TIME);
+				log.info("[건당 인센티브 지급 완료] riderId: {}, attempt: {}", dto.getRiderId(), attempt + 1);
+				success = true;
+			} catch (Exception e) {
+				attempt++;
+				log.warn("❗ 인센티브 지급 실패: riderId={}, attempt={}, error={}", dto.getRiderId(), attempt, e.getMessage());
+
+				if (attempt == maxRetry) {
+					sendToDLQ(key, e);
+				} else {
+					try {
+						Thread.sleep(1000); //재시도 간격
+					} catch (InterruptedException ignored) {}
+				}
+			}
+		}
+	}
+
+	private void sendToDLQ(String key, Exception e) {
+		try {
+			UUID riderUUID = UUID.fromString(key);
+			dlqProducer.sendToDlq("incentive-dlq", riderUUID, IncentiveType.PER_DELIVERY_TIME, e);
+		} catch (IllegalArgumentException ex) {
+			log.error("❌ key 형식이 UUID가 아님, DLQ 전송 불가: {}", key);
+		}
 	}
 }
