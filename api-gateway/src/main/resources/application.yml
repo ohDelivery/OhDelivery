@@ -14,15 +14,6 @@ spring:
         enabled: true
         service-id: config-server
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**
-      #        - id: delivery-service
-      #          uri: lb://delivery-service
-      #          predicates:
-      #            - Path=/deliveries/**, /delivery-service/v3/api-docs, /ws/delivery/**
       discovery:
         locator:
           enabled: true
@@ -37,7 +28,40 @@ springdoc:
     urls[0]:
       name: delivery-service
       url: /delivery-service/v3/api-docs
+    urls[1]:
+      name: user-service
+      url: /user-service/v3/api-docs
+    urls[2]:
+      name: consult-service
+      url: /consult-service/v3/api-docs
+    urls[3]:
+      name: delivery-service
+      url: /delivery-service/v3/api-docs
+    urls[4]:
+      name: incentive-service
+      
+      url: /incentive-service/v3/api-docs
+    urls[5]:
+      name: match-service
+      url: /match-service/v3/api-docs
+    urls[6]:
+      name: auth-server
+      url: /auth-server/v3/api-docs
     use-root-path: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: api-gateway
 
 logging:
   level:
@@ -45,3 +69,27 @@ logging:
 url:
   origin:
     origin-url: http://localhost:8080
+
+
+gateway:
+  services:
+    - serviceName: user-service
+      serviceUri: lb://user-service
+      routes:
+        - id: user-join
+          apiPaths: [/api/users/join]
+          filters: []
+        - id: user-service
+          apiPaths: [/api/users]
+          filters:
+            - service-default
+    - serviceName: auth-server
+      serviceUri: lb://auth-server
+      routes:
+        - id: auth-server
+          apiPaths: [/auth/login, /auth/validate]
+          filters: []
+        - id : auth-logout
+          apiPaths: [/auth/logout]
+          filters:
+            - service-default
