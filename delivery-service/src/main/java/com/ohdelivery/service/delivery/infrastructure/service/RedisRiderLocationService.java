@@ -50,6 +50,6 @@ public class RedisRiderLocationService implements RiderLocationService {
         String key = RedisKey.RIDER_LOCATION_TTL_KEY + ":" + riderId;
 
         riderLocationTemplate.opsForSet().add(key, riderId);
-        riderLocationTemplate.expire(key, 10, TimeUnit.SECONDS);
+        riderLocationTemplate.expire(key, 10, TimeUnit.MINUTES);
     }
 }
