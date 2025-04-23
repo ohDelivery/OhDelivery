@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.alarm.application.dto;
+package com.ohdelivery.service.match.alarm.application.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

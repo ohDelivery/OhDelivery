@@ -2,6 +2,7 @@ package com.ohdelivery.service.match.alarm.infrastructure.config;
 
 import static com.ohdelivery.service.match.rider.infrastructure.messaging.RiderKafkaConfig.MATCH_GROUP_ID;
 
+import com.ohdelivery.common.kafka.dto.CreateAlarmEvent;
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,27 +25,51 @@ public class AlarmKafkaConfig {
 
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServerUrl;
+  
+  public static final String ALARM_SLACK_GROUP_ID = "alarm-slack";
+  public static final String ALARM_WEBSOCKET_GROUP_ID = "alarm-websocket";
 
   @Bean
   public ConsumerFactory<String, CreateMatchingEvent> createMatchingConsumerFactory() {
-    JsonDeserializer<CreateMatchingEvent> deserializer = new JsonDeserializer<>(
-        CreateMatchingEvent.class);
-    deserializer.addTrustedPackages("*");
-    deserializer.setRemoveTypeHeaders(false);
-    deserializer.setUseTypeMapperForKey(true);
+    JsonDeserializer<CreateMatchingEvent> des = new JsonDeserializer<>(CreateMatchingEvent.class);
+    des.addTrustedPackages("*");
+    des.setRemoveTypeHeaders(false);
+    des.setUseTypeMapperForKey(true);
 
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServerUrl);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, MATCH_GROUP_ID);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-    return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), des);
   }
 
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, CreateMatchingEvent> createMatchingKafkaListenerContainerFactory() {
     ConcurrentKafkaListenerContainerFactory<String, CreateMatchingEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(createMatchingConsumerFactory());
+    return factory;
+  }
+
+  @Bean
+  public ConsumerFactory<String, CreateAlarmEvent> createAlarmConsumerFactory() {
+    JsonDeserializer<CreateAlarmEvent> des = new JsonDeserializer<>(CreateAlarmEvent.class);
+    des.addTrustedPackages("*");
+    des.setRemoveTypeHeaders(false);
+    des.setUseTypeMapperForKey(true);
+
+    Map<String, Object> props = new HashMap<>();
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServerUrl);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, MATCH_GROUP_ID);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+
+    return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), des);
+  }
+
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, CreateAlarmEvent> createAlarmKafkaListenerContainerFactory() {
+    ConcurrentKafkaListenerContainerFactory<String, CreateAlarmEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(createAlarmConsumerFactory());
     return factory;
   }
 }

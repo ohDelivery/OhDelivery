@@ -13,4 +13,6 @@ public class Topic {
   public static final String UPDATED_SLACK_ID = "update-slackId";
   public static final String DELETED_USER = "delete-user";
   public static final String CREATED_USER = "create-user";
+
+  public static final String CREATE_ALARM = "create-alarm";
 }

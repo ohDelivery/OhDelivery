@@ -23,7 +23,7 @@ public class AlarmSlack extends BaseEntity {
   @UuidGenerator
   private UUID id;
 
-  private UUID matchingId;
+  private UUID alarmId;
 
   private String slackId;
 
@@ -31,10 +31,10 @@ public class AlarmSlack extends BaseEntity {
 
   private String sentAt;
 
-  public static AlarmSlack toEntity(UUID matchingId, String slackId, String channelId,
+  public static AlarmSlack toEntity(UUID alarmId, String slackId, String channelId,
       String sentAt) {
     return AlarmSlack.builder()
-        .matchingId(matchingId)
+        .alarmId(alarmId)
         .slackId(slackId)
         .channelId(channelId)
         .sentAt(sentAt)
