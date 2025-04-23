@@ -4,7 +4,6 @@ import com.ohdelivery.service.delivery.domain.dto.RiderLocation;
 import com.ohdelivery.service.delivery.domain.service.RiderLocationService;
 import com.ohdelivery.service.delivery.infrastructure.exception.RiderLocationNotFoundException;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,18 +13,19 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RedisRiderLocationService implements RiderLocationService {
 
-    private final RedisTemplate<String, UUID> riderLocationTemplate;
+    private final RedisTemplate<String, String> riderLocationTemplate;
 
     private static final String RIDER_LOCATION_KEY = "rider:locations";
 
     @Override
-    public void saveRiderLocation(UUID riderId, Double longitude, Double latitude, Long timestamp) {
+    public void saveRiderLocation(String riderId, Double longitude, Double latitude,
+        Long timestamp) {
         riderLocationTemplate.opsForGeo()
             .add(RIDER_LOCATION_KEY, new Point(longitude, latitude), riderId);
     }
 
     @Override
-    public RiderLocation getRiderLocation(UUID riderId) {
+    public RiderLocation getRiderLocation(String riderId) {
         List<Point> points = riderLocationTemplate.opsForGeo()
             .position(RIDER_LOCATION_KEY, riderId);
         if (points == null || points.isEmpty()) {
