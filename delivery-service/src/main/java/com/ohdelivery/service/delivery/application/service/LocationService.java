@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class WebSocketEventService {
+public class LocationService {
 
     private final RiderLocationService riderLocationService;
 
