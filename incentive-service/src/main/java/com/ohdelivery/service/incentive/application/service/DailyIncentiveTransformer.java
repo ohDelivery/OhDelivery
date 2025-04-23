@@ -1,4 +1,4 @@
-package com.ohdelivery.service.incentive.infrastructure.messaging.config;
+package com.ohdelivery.service.incentive.application.service;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -14,8 +14,8 @@ import org.apache.kafka.streams.processor.PunctuationType;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-import com.ohdelivery.service.incentive.application.service.IncentiveService;
 import com.ohdelivery.service.incentive.domain.model.IncentiveType;
+import com.ohdelivery.service.incentive.infrastructure.messaging.out.DlqProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ public class DailyIncentiveTransformer implements
 
 	private final IncentiveService incentiveService;
 	private KeyValueStore<String, Boolean> stateStore; //라이더키_날짜, 지급 여부
+	private final DlqProducer dlqProducer;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -57,20 +58,58 @@ public class DailyIncentiveTransformer implements
 		LocalDate date = Instant.ofEpochMilli(key.window().start())
 			.atZone(ZoneId.systemDefault())
 			.toLocalDate();
-		String stateKey = riderId + "_" + date; //키: 라이더ID_날짜
+		String stateKey = riderId + "_" + date; //stateStore 키
 
-		if (Boolean.TRUE.equals(stateStore.get(stateKey))) { //하루 한번만 지급
+		//중복 검사
+		if (Boolean.TRUE.equals(stateStore.get(stateKey))) {
 			log.info("[중복 방지] 이미 지급된 인센티브: {}, 날짜: {}", riderId, date);
 			return null;
 		}
 
-		log.info("[인센티브 지급] riderId={}, date={}, 총거리={}km", riderId, date, totalDistance);
-		incentiveService.create(UUID.fromString(riderId), IncentiveType.DAILY_DISTANCE);
-		stateStore.put(stateKey, true);
+		int maxRetry = 3;
+		int attempt = 0;
+		boolean success = false;
+
+		processDailyIncentiveRetry(totalDistance, attempt, maxRetry, success, riderId, date, stateKey);
 
 		return null;
 	}
 
+	private void processDailyIncentiveRetry(Integer totalDistance, int attempt, int maxRetry, boolean success, String riderId,
+		LocalDate date, String stateKey) {
+		while (attempt < maxRetry && !success) {
+			try {
+				log.info("[인센티브 지급 시도] riderId={}, date={}, 총거리={}km, attempt={}", riderId, date,
+					totalDistance, attempt + 1);
+				incentiveService.create(UUID.fromString(riderId), IncentiveType.DAILY_DISTANCE);
+				stateStore.put(stateKey, true);
+				log.info("✅ 인센티브 지급 성공: riderId={}, date={}", riderId, date);
+				success = true;
+			} catch (Exception e) {
+				attempt++;
+				log.warn("❗ 인센티브 지급 실패: riderId={}, attempt={}, 이유: {}", riderId, attempt, e.getMessage());
+
+				if (attempt == maxRetry) {
+					sendToDLQ(riderId, e);
+				} else {
+					try {
+						Thread.sleep(1000); // 재시도 간격
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt(); // 인터럽트 복원
+					}
+				}
+			}
+		}
+	}
+
+	private void sendToDLQ(String riderId, Exception e) {
+		try {
+			UUID riderUUID = UUID.fromString(riderId);
+			dlqProducer.sendToDlq("incentive-dlq", riderUUID, IncentiveType.DAILY_DISTANCE, e);
+		} catch (IllegalArgumentException ex) {
+			log.error("❌ riderId 형식이 UUID가 아님, DLQ 전송 불가: {}", riderId);
+		}
+	}
 
 	@Override
 	public void close() {}
