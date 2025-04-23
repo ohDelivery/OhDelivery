@@ -6,10 +6,9 @@ import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
 import com.ohdelivery.service.match.alarm.domain.model.Alarm;
 import com.ohdelivery.service.match.alarm.domain.model.AlarmSlack;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRepository;
-import com.ohdelivery.service.match.alarm.domain.repository.AlarmRiderRepository;
+import com.ohdelivery.service.match.alarm.domain.repository.AlarmSlackRepository;
 import com.slack.api.methods.SlackApiException;
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,33 +23,34 @@ public class AlarmService {
   private final SlackService slackService;
   private final SimpMessagingTemplate messagingTemplate;
   private final AlarmRepository alarmRepository;
-  private final AlarmRiderRepository alarmRiderRepository;
+  private final AlarmSlackRepository alarmSlackRepository;
 
   @Transactional
-  public void sendAlarm(AlarmRequest request) {
-    Alarm alarm = Alarm.toEntity(request.getMatchingId(), request.getMessage());
+  public void sendAlarm(AlarmRequest req) {
+    Alarm alarm = Alarm.toEntity(req.getMatchingId(), req.getMessage());
     alarmRepository.save(alarm);
 
-    notifySlack(request.getSlackIdList(), request.getMessage());
-    notifyWebSocket(request.getRiderIdList(), request.getMessage());
+    notifySlack(req);
+    notifyWebSocket(req);
   }
 
-  private void notifySlack(List<String> slackEmails, String message) {
-    for (String slackEmail : slackEmails) {
+  private void notifySlack(AlarmRequest req) {
+    for (String slackEmail : req.getSlackIdList()) {
       try {
-        SlackResponse res = slackService.sendSlackMessage(slackEmail, message);
-        AlarmSlack alarmRider = AlarmSlack.toEntity(res.getSlackId(), res.getChannelId(),
-            res.getSentAt());
-        alarmRiderRepository.save(alarmRider);
+        SlackResponse res = slackService.sendSlackMessage(slackEmail, req.getMessage());
+        AlarmSlack alarmSlack = AlarmSlack.toEntity(req.getMatchingId(), res.getSlackId(),
+            res.getChannelId(), res.getSentAt());
+        alarmSlackRepository.save(alarmSlack);
+        log.info("Slack 메시지 전송 완료: slackEmail={}", slackEmail);
       } catch (SlackApiException | IOException e) {
         log.error(e.getMessage(), e);
       }
     }
   }
 
-  private void notifyWebSocket(List<Long> riderIds, String message) {
-    for (Long riderId : riderIds) {
-      messagingTemplate.convertAndSendToUser(riderId.toString(), "/topic/alarm/", message);
+  private void notifyWebSocket(AlarmRequest req) {
+    for (Long riderId : req.getRiderIdList()) {
+      messagingTemplate.convertAndSendToUser(riderId.toString(), "/topic/alarm/", req.getMessage());
       log.info("WebSocket 메시지 전송 완료: userId={}", riderId);
     }
   }
