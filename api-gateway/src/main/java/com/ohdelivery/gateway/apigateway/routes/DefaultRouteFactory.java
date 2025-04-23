@@ -1,6 +1,5 @@
 package com.ohdelivery.gateway.apigateway.routes;
 
-import com.ohdelivery.gateway.apigateway.routes.model.DefaultRouteConfig;
 import com.ohdelivery.gateway.apigateway.routes.model.RouteConfig;
 import java.util.Arrays;
 import java.util.List;
