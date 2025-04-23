@@ -26,16 +26,20 @@ public class CorsConfig {
 
     public CorsConfigurationSource corsWebFilter() {
         return exchange -> {
+            String upgrade = exchange.getRequest().getHeaders().getUpgrade();
+            if ("websocket".equalsIgnoreCase(upgrade)) {
+                return null;
+            }
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowCredentials(true);
             config.setAllowedOrigins(List.of(originUrl));
             config.setAllowedMethods(
-                    List.of(
-                            HttpMethod.GET.name(),
-                            HttpMethod.POST.name(),
-                            HttpMethod.PUT.name(),
-                            HttpMethod.DELETE.name()
-                    )
+                List.of(
+                    HttpMethod.GET.name(),
+                    HttpMethod.POST.name(),
+                    HttpMethod.PUT.name(),
+                    HttpMethod.DELETE.name()
+                )
             );
             config.setAllowedHeaders(List.of(AUTHORIZATION_HEADER, HttpHeaders.CONTENT_TYPE));
             config.setExposedHeaders(List.of(PASSPORT_HEADER));

@@ -25,7 +25,7 @@
     }
 
     socket = new WebSocket(
-        `ws://localhost:19095/ws/delivery/rider?token=${encodeURIComponent(token)}`);
+        `ws://localhost:8080/ws/delivery/rider?token=${encodeURIComponent(token)}`);
 
     socket.onopen = () => log("✅ 연결됨");
     socket.onmessage = (event) => log("📥 서버 응답: " + event.data);

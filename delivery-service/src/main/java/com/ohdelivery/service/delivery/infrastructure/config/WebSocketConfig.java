@@ -22,9 +22,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(riderWebSocketHandler, "/ws/delivery/rider")
             .addInterceptors(jwtHandshakeInterceptor)
-            .setAllowedOrigins("*"); // CORS 필요시 제한
+            .setAllowedOrigins("*"); // TODO 허용 오리진 설정
         registry.addHandler(consumerWebSocketHandler, "/ws/delivery/consumer")
             .addInterceptors(jwtHandshakeInterceptor)
-            .setAllowedOrigins("*"); // CORS 필요시 제한
+            .setAllowedOrigins("*"); // TODO 허용 오리진 설정
     }
 }
