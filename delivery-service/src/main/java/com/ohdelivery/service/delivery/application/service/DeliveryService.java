@@ -47,7 +47,7 @@ public class DeliveryService {
         log.info("Path: {}", path.getPath());
 
         Delivery saveDelivery = deliveryRepository.save(
-            request.toDelivery(path.getDistance(), path.getDistance()));
+            request.toDelivery(path.getDuration(), path.getDistance()));
 
         deliveryEventProducer.publishCreateDeliveryEvent(
             saveDelivery.toCreateDeliveryEvent(storeX, storeY));
