@@ -16,9 +16,9 @@ public class LocationService {
     private final RiderLocationService riderLocationService;
     private final BroadcasterManager broadcasterManager;
 
-    public void saveRiderLocation(RiderLocationRequest riderLocationRequest) {
+    public void saveRiderLocation(RiderLocationRequest riderLocationRequest, String riderId) {
         riderLocationService.saveRiderLocation(
-            riderLocationRequest.getRiderId(), riderLocationRequest.getLongitude(),
+            riderId, riderLocationRequest.getLongitude(),
             riderLocationRequest.getLatitude(), riderLocationRequest.getTimestamp());
     }
 

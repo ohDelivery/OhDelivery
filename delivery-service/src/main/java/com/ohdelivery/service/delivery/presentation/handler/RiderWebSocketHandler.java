@@ -36,8 +36,10 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
 
         log.info("라이더 위치 수신: {}", location.toString());
 
-        locationService.saveRiderLocation(location);
-        locationService.sendRiderLocation(riderSessions.get(session));
+        String riderId = riderSessions.get(session);
+
+        locationService.saveRiderLocation(location, riderId);
+        locationService.sendRiderLocation(riderId);
     }
 
     @Override
