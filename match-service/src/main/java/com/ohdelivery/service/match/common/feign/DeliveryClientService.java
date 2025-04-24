@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.common;
+package com.ohdelivery.service.match.common.feign;
 
 import com.ohdelivery.common.feign.GetDeliveryResponse;
 import com.ohdelivery.common.response.ApiResponse;

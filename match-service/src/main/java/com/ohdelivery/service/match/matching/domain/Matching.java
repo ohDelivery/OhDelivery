@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,4 +50,23 @@ public class Matching extends BaseEntity {
   }
 
 
+  public void cancel() {
+    if (isUpdatable()) {
+      LocalDateTime now = LocalDateTime.now();
+      String userName = "system";
+      this.delete(now, userName);
+    }
+  }
+
+  public Matching clone() {
+    Matching copy = new Matching();
+    copy.id = this.getId();
+    copy.deliveryId = this.getDeliveryId();
+    copy.riderId = this.getRiderId();
+    copy.setCreatedAt(this.getCreatedAt());
+    copy.setCreatedBy(this.getCreatedBy());
+    copy.setUpdatedAt(this.getUpdatedAt());
+    copy.setUpdatedBy(this.getUpdatedBy());
+    return copy;
+  }
 }
