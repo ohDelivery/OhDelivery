@@ -17,4 +17,7 @@ public class UserContextHolder {
         userContext.remove();
     }
 
+    public static boolean isNull() {
+        return userContext.get() == null;
+    }
 }

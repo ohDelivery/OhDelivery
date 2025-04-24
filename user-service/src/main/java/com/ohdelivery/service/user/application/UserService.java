@@ -39,15 +39,15 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserAuthResponse getUserInfo(Long id) {
-        User user = userRepository.findById(id);
+    public UserAuthResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId);
 
         return UserAuthResponse.create(user.getId(), user.getRole());
     }
 
     @Transactional(readOnly = true)
-    public GetUserResponse getUser(Long id){
-        User user = userRepository.findById(id);
+    public GetUserResponse getUser(Long userId){
+        User user = userRepository.findById(userId);
         return GetUserResponse.create(
                 user.getId(),
                 user.getUsername(),
@@ -70,8 +70,8 @@ public class UserService {
         }
     }
 
-    public void updateSlackId(UpdateSlackIdCommand command) {
-        User user = userRepository.findById(command.getId());
+    public void updateSlackId(UpdateSlackIdCommand command, Long userId) {
+        User user = userRepository.findById(userId);
         user.updateSlackId(command.getSlackId());
 
         if (user.getRole() == RoleType.RIDER) {
@@ -79,12 +79,12 @@ public class UserService {
         }
     }
 
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id);
-        user.delete(LocalDateTime.now(), String.valueOf(id));
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId);
+        user.delete(LocalDateTime.now(), String.valueOf(userId));
 
         if (user.getRole() == RoleType.RIDER) {
-            userEventPublisher.produceDeleteUser(id);
+            userEventPublisher.produceDeleteUser(userId);
         }
     }
 }
