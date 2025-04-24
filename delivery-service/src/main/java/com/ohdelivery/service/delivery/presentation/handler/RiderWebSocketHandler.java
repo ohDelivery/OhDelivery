@@ -5,8 +5,7 @@ import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.service.delivery.application.dto.request.RiderLocationRequest;
 import com.ohdelivery.service.delivery.application.observer.BroadcasterManager;
-import com.ohdelivery.service.delivery.application.observer.LocationBroadcaster;
-import com.ohdelivery.service.delivery.application.service.WebSocketEventService;
+import com.ohdelivery.service.delivery.application.service.LocationService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class RiderWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final WebSocketEventService webSocketEventService;
+    private final LocationService locationService;
     private final BroadcasterManager broadcasterManager;
 
     @Override
@@ -33,12 +32,8 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
 
         log.info("라이더 위치 수신: {}", location.toString());
 
-        webSocketEventService.saveRiderLocation(location);
-
-        LocationBroadcaster locationBroadcaster = broadcasterManager.getBroadcaster(
-            location.getRiderId());
-
-        locationBroadcaster.notifyObservers(location.toMessage());
+        locationService.saveRiderLocation(location);
+        locationService.sendRiderLocation(location.getRiderId());
     }
 
     @Override
@@ -57,6 +52,7 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
     private String getRiderId(WebSocketSession session) throws IOException {
         Passport passport = (Passport) session.getAttributes().get("passport");
         if (passport.getRoleType() != RoleType.RIDER) {
+            log.error("Invalid role type: {}", passport.getRoleType());
             session.close(CloseStatus.NOT_ACCEPTABLE);
         }
         return passport.getUserId();
