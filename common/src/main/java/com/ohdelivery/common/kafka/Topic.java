@@ -15,4 +15,5 @@ public class Topic {
   public static final String CREATED_USER = "create-user";
 
   public static final String CREATE_ALARM = "create-alarm";
+  public static final String CREATE_ALARM_DLT = "create-alarm.DLT";
 }

@@ -34,17 +34,13 @@ public class AlarmService {
   }
 
   @Transactional
-  public void notifySlack(CreateAlarmEvent event) {
+  public void notifySlack(CreateAlarmEvent event) throws IOException, SlackApiException {
     for (String slackEmail : event.getSlackEmails()) {
-      try {
-        SlackResponse res = slackService.sendSlackMessage(slackEmail, event.getMessage());
-        AlarmSlack alarmSlack = AlarmSlack.toEntity(event.getAlarmId(), res.getSlackId(),
-            res.getChannelId(), res.getSentAt());
-        alarmSlackRepository.save(alarmSlack);
-        log.info("Slack 메시지 전송 완료: slackEmail={}", slackEmail);
-      } catch (SlackApiException | IOException e) {
-        log.error(e.getMessage(), e);
-      }
+      SlackResponse res = slackService.sendSlackMessage(slackEmail, event.getMessage());
+      AlarmSlack alarmSlack = AlarmSlack.toEntity(event.getAlarmId(), res.getSlackId(),
+          res.getChannelId(), res.getSentAt());
+      alarmSlackRepository.save(alarmSlack);
+      log.info("Slack 메시지 전송 완료: slackEmail={}", slackEmail);
     }
   }
 
