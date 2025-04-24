@@ -5,10 +5,9 @@ import lombok.Getter;
 
 @Getter
 public class UpdateSlackIdRequest {
-    Long id;
     String slackId;
 
     public UpdateSlackIdCommand toCommand() {
-        return UpdateSlackIdCommand.create(id, slackId);
+        return UpdateSlackIdCommand.create(slackId);
     }
 }
