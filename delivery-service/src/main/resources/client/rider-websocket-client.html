@@ -8,7 +8,6 @@
 <h2>WebSocket Rider 위치 전송</h2>
 
 <label>JWT 토큰: <input type="text" id="tokenInput" size="60"></label><br><br>
-<label>Rider ID: <input type="text" id="riderIdInput" size="50"></label><br><br>
 
 <textarea id="log" cols="60" rows="10" readonly></textarea><br>
 <button onclick="connect()">Connect</button>
@@ -39,14 +38,7 @@
       return;
     }
 
-    const riderId = document.getElementById("riderIdInput").value;
-    if (!riderId) {
-      alert("Rider ID를 입력해주세요.");
-      return;
-    }
-
     const message = {
-      riderId: riderId,
       latitude: 37.5665,
       longitude: 126.9780,
       timestamp: Date.now()

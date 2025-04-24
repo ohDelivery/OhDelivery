@@ -7,6 +7,8 @@ import com.ohdelivery.service.delivery.application.dto.request.RiderLocationRequ
 import com.ohdelivery.service.delivery.application.observer.BroadcasterManager;
 import com.ohdelivery.service.delivery.application.service.LocationService;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 @RequiredArgsConstructor
 public class RiderWebSocketHandler extends TextWebSocketHandler {
+
+    private final Map<WebSocketSession, String> riderSessions = new ConcurrentHashMap<>();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final LocationService locationService;
@@ -33,12 +37,13 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
         log.info("라이더 위치 수신: {}", location.toString());
 
         locationService.saveRiderLocation(location);
-        locationService.sendRiderLocation(location.getRiderId());
+        locationService.sendRiderLocation(riderSessions.get(session));
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String riderId = getRiderId(session);
+        riderSessions.put(session, riderId);
         broadcasterManager.addBroadcaster(riderId);
     }
 
@@ -46,6 +51,7 @@ public class RiderWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
         throws Exception {
         String riderId = getRiderId(session);
+        riderSessions.remove(session);
         broadcasterManager.removeBroadcaster(riderId);
     }
 
