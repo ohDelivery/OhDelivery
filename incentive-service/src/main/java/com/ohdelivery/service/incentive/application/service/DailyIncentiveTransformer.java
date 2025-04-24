@@ -86,10 +86,12 @@ public class DailyIncentiveTransformer implements
 				log.info("✅ 인센티브 지급 성공: riderId={}, date={}", riderId, date);
 				success = true;
 			} catch (Exception e) {
+				//재시도 로직
 				attempt++;
 				log.warn("❗ 인센티브 지급 실패: riderId={}, attempt={}, 이유: {}", riderId, attempt, e.getMessage());
 
 				if (attempt == maxRetry) {
+					//재시도 실패 시 dlq 로 보냄
 					sendToDLQ(riderId, e);
 				} else {
 					try {

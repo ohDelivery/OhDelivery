@@ -51,10 +51,12 @@ public class PerTimePolicy implements IncentivePolicy {
 				log.info("[건당 인센티브 지급 완료] riderId: {}, attempt: {}", dto.getRiderId(), attempt + 1);
 				success = true;
 			} catch (Exception e) {
+				//재시도 로직
 				attempt++;
 				log.warn("❗ 인센티브 지급 실패: riderId={}, attempt={}, error={}", dto.getRiderId(), attempt, e.getMessage());
 
 				if (attempt == maxRetry) {
+					//재시도 실패시 dlq로 보냄
 					sendToDLQ(key, e);
 				} else {
 					try {
