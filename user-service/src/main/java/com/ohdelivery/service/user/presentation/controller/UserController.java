@@ -1,5 +1,7 @@
 package com.ohdelivery.service.user.presentation.controller;
 
+import com.ohdelivery.common.annotations.CurrentUser;
+import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.user.application.UserService;
@@ -34,17 +36,12 @@ public class UserController {
         );
     }
 
-    @GetMapping("/auth")
-    public UserAuthResponse getUserInfo(Long id) {
-        return userService.getUserInfo(id);
-    }
-
     @GetMapping
-    public ApiResponse<GetUserResponse> getUser(Long id) {
+    public ApiResponse<GetUserResponse> getUser(@CurrentUser Passport passport) {
         return ApiResponse.success(
                 SuccessCode.COMMON_SUCCESS.getCode().toString(),
                 SuccessCode.COMMON_SUCCESS.getMessage(),
-                userService.getUser(id)
+                userService.getUser(Long.parseLong(passport.getUserId()))
         );
     }
     @PostMapping("/join")
@@ -58,8 +55,8 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ApiResponse<Void> deleteUser(Long id) {
-        userService.deleteUser(id);
+    public ApiResponse<Void> deleteUser(@CurrentUser Passport passport) {
+        userService.deleteUser(Long.parseLong(passport.getUserId()));
 
         return ApiResponse.success(
             SuccessCode.DELETED_SUCCESS.getCode().toString(),
@@ -68,8 +65,8 @@ public class UserController {
     }
 
     @PatchMapping
-    public ApiResponse<Void> updateSlackId(@RequestBody UpdateSlackIdRequest request){
-        userService.updateSlackId(request.toCommand());
+    public ApiResponse<Void> updateSlackId(@RequestBody UpdateSlackIdRequest request,@CurrentUser Passport passport){
+        userService.updateSlackId(request.toCommand(), Long.parseLong(passport.getUserId()));
         return ApiResponse.success(
                 SuccessCode.UPDATED_SUCCESS.getCode().toString(),
                 SuccessCode.UPDATED_SUCCESS.getMessage()

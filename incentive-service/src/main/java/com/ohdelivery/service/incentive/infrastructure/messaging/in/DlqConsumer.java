@@ -36,7 +36,7 @@ public class DlqConsumer {
 		try {
 			DlqMessage msg = objectMapper.readValue(message, DlqMessage.class);
 
-			//DLQ 메시지 수신 수 증가
+			//DLQ 메시지 수신 수 증가 - 메트릭 수집
 			dlqCounter.increment();
 		} catch (Exception e) {
 			log.error("❌ DLQ 재처리 실패. 메시지 파싱 또는 처리 실패: {}", e.getMessage(), e);

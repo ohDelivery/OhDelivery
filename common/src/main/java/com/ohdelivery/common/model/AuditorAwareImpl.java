@@ -17,9 +17,11 @@ public class AuditorAwareImpl implements AuditorAware<String> {
     @NonNull
     @Override
     public Optional<String> getCurrentAuditor() {
-        Passport passport = UserContextHolder.getPassport();
-        return (passport != null && passport.getUserId() != null && !passport.getUserId().isEmpty())
-            ? Optional.of(passport.getUserId())
-            : Optional.of("system");
+        if (UserContextHolder.isNull())
+            return Optional.empty();
+        String currentUser = UserContextHolder.getPassport().getUserId();
+        return (currentUser != null && !currentUser.isEmpty())
+            ? Optional.of(currentUser)
+            : Optional.of("SYSTEM");
     }
 }

@@ -9,4 +9,9 @@ public class RiderLocationResponse {
 
     Double longitude;
     Double latitude;
+
+
+    public String toMessage() {
+        return String.format("{\"latitude\": %.6f, \"longitude\": %.6f}", latitude, longitude);
+    }
 }
