@@ -38,23 +38,22 @@ public class IncentiveService {
 
 	@Transactional(readOnly = true)
 	public IncentiveResponse.GetIncentiveResponse getIncentive(UUID incentiveId) {
-		Incentive incentive = getIncentive1(incentiveId);
+		Incentive incentive = returnIncentive(incentiveId);
 		return IncentiveResponse.from(incentive);
 	}
 
-	private Incentive getIncentive1(UUID incentiveId) {
-		Incentive incentive = incentiveRepository.getIncentiveById(incentiveId)
+	private Incentive returnIncentive(UUID incentiveId) {
+		return incentiveRepository.getIncentiveById(incentiveId)
 			.orElseThrow(IncentiveException.IncentiveNotFoundException::new);
-		return incentive;
 	}
 
 	public void updateIncentive(UUID incentiveId, IncentiveRequest.updateIncentiveRequest request) {
-		Incentive incentive = getIncentive1(incentiveId);
+		Incentive incentive = returnIncentive(incentiveId);
 		incentive.update(request);
 	}
 
 	public IncentiveResponse.DeleteIncentiveResponse deleteIncentive(UUID incentiveId) {
-		Incentive incentive = getIncentive1(incentiveId);
+		Incentive incentive = returnIncentive(incentiveId);
 		incentiveRepository.delete(incentive);
 		return IncentiveResponse.DeleteIncentiveResponse.builder().deletedIncentiveId(incentive.getId()).build();
 	}

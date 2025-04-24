@@ -1,5 +1,6 @@
 package com.ohdelivery.common.model;
 
+import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
