@@ -5,7 +5,6 @@ import com.ohdelivery.common.passport.RoleType;
 import com.ohdelivery.common.response.ApiResponse;
 import com.ohdelivery.common.response.SuccessCode;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
-import com.ohdelivery.service.match.rider.application.dto.request.GetNearRidersRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
 import com.ohdelivery.service.match.rider.application.dto.response.GetRiderResponse;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -116,9 +116,10 @@ public class RiderController {
   @RoleCheck(RoleType.MASTER)
   @Operation(summary = "해당 좌표 근처 라이더들 전부 조회하기")
   public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllNearRider(
-      @RequestBody GetNearRidersRequest request) {
-    List<GetRiderResponse> response = riderService.getRidersByLocation(request.getSLat(),
-        request.getSLon());
+      @RequestParam("sLat") double sLat,
+      @RequestParam("sLon") double sLon) {
+
+    List<GetRiderResponse> response = riderService.getRidersByLocation(sLat, sLon);
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
         SuccessCode.COMMON_SUCCESS.getMessage(),

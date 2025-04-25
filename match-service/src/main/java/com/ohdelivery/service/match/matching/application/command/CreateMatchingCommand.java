@@ -1,6 +1,5 @@
 package com.ohdelivery.service.match.matching.application.command;
 
-import com.ohdelivery.common.feign.request.ClientGetNearRidersRequest;
 import com.ohdelivery.common.feign.response.ClientGetRiderResponse;
 import com.ohdelivery.service.match.common.command.MatchingCommand;
 import com.ohdelivery.service.match.common.feign.RiderClientService;
@@ -43,7 +42,8 @@ public class CreateMatchingCommand implements MatchingCommand<Matching> {
 
     // feign - 주변 라이더 조회
     List<ClientGetRiderResponse> nearbyRiders = riderService.getAllNearRider(
-        ClientGetNearRidersRequest.of(request.getStoreLatitude(), request.getStoreLongitude())
+        request.getStoreLatitude(),
+        request.getStoreLongitude()
     ).getData();
 
     // 이벤트 발행: 매칭 생성 완료 -> 알람 해당 라이더들에게 보낼때 소비
