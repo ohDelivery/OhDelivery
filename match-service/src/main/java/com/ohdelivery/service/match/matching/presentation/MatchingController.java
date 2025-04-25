@@ -11,6 +11,8 @@ import com.ohdelivery.service.match.matching.application.dto.request.CreateMatch
 import com.ohdelivery.service.match.matching.application.dto.response.GetMatchingResponse;
 import com.ohdelivery.service.match.matching.application.dto.response.SearchMatchingResponse;
 import com.ohdelivery.service.match.matching.application.service.MatchingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,12 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/matchings")
 @RequiredArgsConstructor
+@Tag(name = "Matching", description = "매칭 관련 API")
 public class MatchingController {
 
   private final MatchingService matchingService;
 
   @PostMapping
   @RoleCheck(RoleType.MASTER)
+  @Operation(summary = "매칭 생성하기")
   public ResponseEntity<ApiResponse<UUID>> createMatching(
       @RequestBody CreateMatchingRequest request) {
     UUID id = matchingService.createMatching(request);
@@ -47,6 +51,7 @@ public class MatchingController {
   }
 
   @GetMapping("/{id}")
+  @Operation(summary = "매칭 조회하기")
   public ResponseEntity<ApiResponse<GetMatchingResponse>> getMatching(@PathVariable UUID id) {
     GetMatchingResponse response = matchingService.getMatching(id);
     return ResponseEntity.ok(ApiResponse.success(
@@ -56,9 +61,9 @@ public class MatchingController {
     ));
   }
 
-  //  TODO : 로그인한 사람의 Id가져와서 그 Id로 조회하기
   @PutMapping("/{id}")
   @RoleCheck({RoleType.MASTER, RoleType.RIDER})
+  @Operation(summary = "매칭에 라이더 배정하기")
   public ResponseEntity<ApiResponse<Void>> updateMatching(
       @PathVariable UUID id,
       @CurrentUser Passport currentUser,
@@ -72,6 +77,7 @@ public class MatchingController {
 
   @DeleteMapping("/{id}")
   @RoleCheck(RoleType.MASTER)
+  @Operation(summary = "배달 삭제하기")
   public ResponseEntity<ApiResponse<Void>> deleteMatching(@PathVariable UUID id) {
     matchingService.deleteMatching(id);
     return ResponseEntity.ok(ApiResponse.success(
@@ -83,6 +89,7 @@ public class MatchingController {
 
   @GetMapping
   @RoleCheck({RoleType.MASTER, RoleType.RIDER})
+  @Operation(summary = "배달 검색하기")
   public ResponseEntity<ApiResponse<Page<SearchMatchingResponse>>> searchMatchings(
       @CurrentUser Passport currentUser,
       @RequestParam(defaultValue = "0") int page,
