@@ -19,8 +19,8 @@ public class CommandInvoker implements AutoCloseable {
 
   public <R> R invoke(MatchingCommand<R> command) {
     try {
-      R result = command.execute();
       executedCommands.push(command);
+      R result = command.execute();
       return result;
     } catch (Exception e) {
       rollback();

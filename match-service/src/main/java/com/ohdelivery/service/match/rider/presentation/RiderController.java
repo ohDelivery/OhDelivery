@@ -11,6 +11,8 @@ import com.ohdelivery.service.match.rider.application.dto.response.GetRiderRespo
 import com.ohdelivery.service.match.rider.application.dto.response.UpdateRiderStatusResponse;
 import com.ohdelivery.service.match.rider.application.service.RiderService;
 import com.ohdelivery.service.match.rider.presentation.resposne.RiderSuccessCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -31,12 +33,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/riders")
 @RequiredArgsConstructor
+@Tag(name = "Rider", description = "라이더 관련 API")
 public class RiderController {
 
   private final RiderService riderService;
 
   @RoleCheck(RoleType.MASTER)
   @PostMapping
+  @Operation(summary = "라이더 생성하기")
   public ResponseEntity<ApiResponse<UUID>> create(@RequestBody CreateRiderRequest request) {
     UUID id = riderService.createRider(request);
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -48,6 +52,7 @@ public class RiderController {
   }
 
   @GetMapping("/{id}")
+  @Operation(summary = "라이더 조회하기")
   public ResponseEntity<ApiResponse<GetRiderResponse>> getRider(@PathVariable("id") UUID id) {
     GetRiderResponse response = riderService.getRider(id);
     return ResponseEntity.ok(ApiResponse.success(
@@ -59,6 +64,7 @@ public class RiderController {
 
   @GetMapping("/all")
   @RoleCheck(RoleType.MASTER)
+  @Operation(summary = "모든 라이더 조회하기")
   public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllRider() {
     List<GetRiderResponse> response = riderService.getAllRider();
     return ResponseEntity.ok(ApiResponse.success(
@@ -70,6 +76,7 @@ public class RiderController {
 
   @PatchMapping("/{id}/status")
   @RoleCheck({RoleType.MASTER, RoleType.RIDER})
+  @Operation(summary = "라이더 상태 변경하기")
   public ResponseEntity<ApiResponse<UpdateRiderStatusResponse>> updateRiderStatus(
       @PathVariable("id") UUID id,
       @RequestBody @Valid UpdateRiderStatusRequest request) {
@@ -82,7 +89,8 @@ public class RiderController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<Void>> updateMatching(
+  @Operation(summary = "라이더 정보 변경하기")
+  public ResponseEntity<ApiResponse<Void>> updateRider(
       @PathVariable UUID id,
       @RequestBody UpdateRiderRequest request
   ) {
@@ -95,7 +103,8 @@ public class RiderController {
 
   @DeleteMapping("/{id}")
   @RoleCheck(RoleType.MASTER)
-  public ResponseEntity<ApiResponse<Void>> deleteMatching(@PathVariable UUID id) {
+  @Operation(summary = "라이더 삭제하기")
+  public ResponseEntity<ApiResponse<Void>> deleteRider(@PathVariable UUID id) {
     riderService.deleteRider(id);
     return ResponseEntity.ok(ApiResponse.success(
         SuccessCode.COMMON_SUCCESS.getCode().toString(),
@@ -104,6 +113,8 @@ public class RiderController {
   }
 
   @GetMapping("/nearRiders")
+  @RoleCheck(RoleType.MASTER)
+  @Operation(summary = "해당 좌표 근처 라이더들 전부 조회하기")
   public ResponseEntity<ApiResponse<List<GetRiderResponse>>> getAllNearRider(
       @RequestParam("sLat") double sLat,
       @RequestParam("sLon") double sLon) {
@@ -117,6 +128,7 @@ public class RiderController {
   }
 
   @GetMapping("/user/{userId}")
+  @Operation(summary = "유저 아이디로 라이더 조회하기")
   public ResponseEntity<ApiResponse<GetRiderResponse>> getRiderByUserId(
       @PathVariable("userId") long userId) {
     GetRiderResponse response = riderService.getRiderByUserId(userId);
