@@ -1,15 +1,15 @@
 package com.ohdelivery.service.match.alarm.application.service;
 
+import com.ohdelivery.common.kafka.dto.CreateAlarmEvent;
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
-import com.ohdelivery.service.match.alarm.application.dto.AlarmRequest;
-import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
+import com.ohdelivery.service.match.alarm.application.dto.response.SlackResponse;
 import com.ohdelivery.service.match.alarm.domain.model.Alarm;
-import com.ohdelivery.service.match.alarm.domain.model.AlarmRider;
+import com.ohdelivery.service.match.alarm.domain.model.AlarmSlack;
 import com.ohdelivery.service.match.alarm.domain.repository.AlarmRepository;
-import com.ohdelivery.service.match.alarm.domain.repository.AlarmRiderRepository;
+import com.ohdelivery.service.match.alarm.domain.repository.AlarmSlackRepository;
 import com.slack.api.methods.SlackApiException;
 import java.io.IOException;
-import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,32 +24,29 @@ public class AlarmService {
   private final SlackService slackService;
   private final SimpMessagingTemplate messagingTemplate;
   private final AlarmRepository alarmRepository;
-  private final AlarmRiderRepository alarmRiderRepository;
+  private final AlarmSlackRepository alarmSlackRepository;
 
   @Transactional
-  public void sendAlarm(AlarmRequest request) {
-    Alarm alarm = Alarm.toEntity(request.getMatchingId(), request.getMessage());
-    alarmRepository.save(alarm);
-
-    notifySlack(request.getSlackIdList(), request.getMessage());
-    notifyWebSocket(request.getRiderIdList(), request.getMessage());
+  public UUID saveAlarm(UUID matchingId, String message) {
+    Alarm alarm = Alarm.toEntity(matchingId, message);
+    Alarm saveAlarm = alarmRepository.save(alarm);
+    return saveAlarm.getId();
   }
 
-  private void notifySlack(List<String> slackEmails, String message) {
-    for (String slackEmail : slackEmails) {
-      try {
-        SlackResponse res = slackService.sendSlackMessage(slackEmail, message);
-        AlarmRider alarmRider = AlarmRider.toEntity(res.getSlackId(), res.getChannelId(),
-            res.getSentAt());
-        alarmRiderRepository.save(alarmRider);
-      } catch (SlackApiException | IOException e) {
-        log.error(e.getMessage(), e);
-      }
+  @Transactional
+  public void notifySlack(CreateAlarmEvent event) throws IOException, SlackApiException {
+    for (String slackEmail : event.getSlackEmails()) {
+      SlackResponse res = slackService.sendSlackMessage(slackEmail, event.getMessage());
+      AlarmSlack alarmSlack = AlarmSlack.toEntity(event.getAlarmId(), res.getSlackId(),
+          res.getChannelId(), res.getSentAt());
+      alarmSlackRepository.save(alarmSlack);
+      log.info("Slack 메시지 전송 완료: slackEmail={}", slackEmail);
     }
   }
 
-  private void notifyWebSocket(List<Long> riderIds, String message) {
-    for (Long riderId : riderIds) {
+  public void notifyWebSocket(CreateAlarmEvent event) {
+    String message = event.getMessage();
+    for (Long riderId : event.getRiderIds()) {
       messagingTemplate.convertAndSendToUser(riderId.toString(), "/topic/alarm/", message);
       log.info("WebSocket 메시지 전송 완료: userId={}", riderId);
     }

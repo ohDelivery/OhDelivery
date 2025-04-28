@@ -68,18 +68,6 @@ services:
     ports:
       - "9411:9411"
 
-  rabbitmq:
-    image: rabbitmq:management
-    container_name: ohdelivery-rabbitmq
-    restart: unless-stopped
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
-
-
   prometheus:
     image: prom/prometheus
     ports:
@@ -93,4 +81,3 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
-
