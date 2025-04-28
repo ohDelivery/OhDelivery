@@ -20,8 +20,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
 @Slf4j
@@ -31,6 +34,8 @@ public class MatchKafkaConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String kafkaServerUrl;
 
+
+  // Kafka 프로듀서 설정
   @Bean
   public ProducerFactory<String, Object> producerFactory() {
     Map<String, Object> configProps = new HashMap<>();
@@ -47,9 +52,6 @@ public class MatchKafkaConfig {
     configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
         20000); // 전체 전송 타임아웃 (배치 포함, default: 2분)
 
-//    configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384); // 배치당 최대 바이트 (default: 16KB)
-//    configProps.put(ProducerConfig.LINGER_MS_CONFIG, 5);      // 배치 대기 시간 (ms, default: 0)
-
     configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "lz4");
 
     return new DefaultKafkaProducerFactory<>(configProps);
@@ -60,6 +62,7 @@ public class MatchKafkaConfig {
     return new KafkaTemplate<>(producerFactory());
   }
 
+  // Kafka Consumer 기본 설정
   @Bean
   public Map<String, Object> deliveryConsumerConfigs() {
     Map<String, Object> props = new HashMap<>();
@@ -84,10 +87,28 @@ public class MatchKafkaConfig {
     );
   }
 
+  // Kafka 리스너 팩토리 설정 (리트라이와 DLQ 설정 포함)
   @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, CreateDeliveryEvent> createDeliveryKafkaListenerFactory() {
-    ConcurrentKafkaListenerContainerFactory<String, CreateDeliveryEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+  public ConcurrentKafkaListenerContainerFactory<String, CreateDeliveryEvent> createDeliveryKafkaListenerFactory(
+      KafkaTemplate<String, Object> kafkaTemplate
+  ) {
+    ConcurrentKafkaListenerContainerFactory<String, CreateDeliveryEvent> factory =
+        new ConcurrentKafkaListenerContainerFactory<>();
+
+    // 기본 컨슈머 팩토리 설정
     factory.setConsumerFactory(createDeliveryConsumerFactory());
+
+    // DLQ로 메시지를 보내는 DeadLetterPublishingRecoverer 생성
+    DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
+
+    // 3번 리트라이 후 DLQ로 메시지를 보내는 DefaultErrorHandler 설정
+    DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+        recoverer,
+        new FixedBackOff(0L, 3L) // 3번 재시도, delay 0ms
+    );
+
+    factory.setCommonErrorHandler(errorHandler);
+
     return factory;
   }
 }
