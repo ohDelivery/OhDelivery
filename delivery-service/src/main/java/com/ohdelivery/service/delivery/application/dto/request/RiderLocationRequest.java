@@ -7,7 +7,6 @@ import lombok.ToString;
 @ToString
 public class RiderLocationRequest {
 
-    String riderId;
     Double longitude;
     Double latitude;
     Long timestamp;
