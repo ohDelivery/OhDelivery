@@ -1,6 +1,6 @@
 package com.ohdelivery.service.match.alarm.application.service;
 
-import com.ohdelivery.service.match.alarm.application.dto.SlackResponse;
+import com.ohdelivery.service.match.alarm.application.dto.response.SlackResponse;
 import com.ohdelivery.service.match.alarm.application.exception.AlarmErrorCode;
 import com.ohdelivery.service.match.alarm.application.exception.AlarmException;
 import com.slack.api.Slack;

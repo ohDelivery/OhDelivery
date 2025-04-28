@@ -55,7 +55,7 @@ public class MatchKafkaConfig {
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
-  @Bean
+  @Bean(name = "alarmKafkaTemplate")
   public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
   }

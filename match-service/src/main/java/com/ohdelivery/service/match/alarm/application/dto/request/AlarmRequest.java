@@ -1,4 +1,4 @@
-package com.ohdelivery.service.match.alarm.application.dto;
+package com.ohdelivery.service.match.alarm.application.dto.request;
 
 import com.ohdelivery.common.kafka.dto.CreateMatchingEvent;
 import java.util.List;
