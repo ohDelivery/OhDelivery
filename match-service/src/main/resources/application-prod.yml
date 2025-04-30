@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: match-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+
+eureka:
+  instance:
+    hostname: match.connect.me
+    prefer-ip-address: false
+    non-secure-port: 19092
+    instance-id: match-service
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
+
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    path: /match-service/v3/api-docs
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

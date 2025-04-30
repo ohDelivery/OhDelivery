@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: delivery-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  kafka:
+    url: localhost:9092
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+
+eureka:
+  instance:
+    hostname: delivery.connect.me
+    prefer-ip-address: false
+    non-secure-port: 19095
+    instance-id: delivery-service
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
+
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    path: /delivery-service/v3/api-docs
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

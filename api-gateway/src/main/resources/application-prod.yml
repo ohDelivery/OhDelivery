@@ -1,0 +1,161 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  config:
+    import: optional:configserver:${CONFIG_SERVER_ENDPOINT}
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+eureka:
+  instance:
+    hostname: api-gateway.connect.me
+    prefer-ip-address: false
+    non-secure-port: 8080
+    instance-id: api-gateway
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_SERVER_ENDPOINT}
+
+springdoc:
+  swagger-ui:
+    urls[0]:
+      name: delivery-service
+      url: /delivery-service/v3/api-docs
+    urls[1]:
+      name: user-service
+      url: /user-service/v3/api-docs
+    urls[2]:
+      name: consult-service
+      url: /consult-service/v3/api-docs
+    urls[3]:
+      name: delivery-service
+      url: /delivery-service/v3/api-docs
+    urls[4]:
+      name: incentive-service
+      
+      url: /incentive-service/v3/api-docs
+    urls[5]:
+      name: match-service
+      url: /match-service/v3/api-docs
+    urls[6]:
+      name: auth-server
+      url: /auth-server/v3/api-docs
+    use-root-path: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: api-gateway
+
+logging:
+  level:
+    com.example.gateway: DEBUG
+url:
+  origin:
+    origin-url: http://localhost:8080
+
+gateway:
+  services:
+    - serviceName: user-service
+      serviceUri: lb://user-service
+      routes:
+        - id: user-swagger
+          apiPaths:
+            - /user-service/v3/api-docs
+            - /ws/user/**
+        - id: user-join
+          apiPaths:
+            - /api/users/join
+        - id: user-service
+          apiPaths:
+            - /api/users
+          filters:
+            - service-default
+    - serviceName: auth-server
+      serviceUri: lb://auth-server
+      routes:
+        - id: auth-swagger
+          apiPaths:
+            - /auth-server/v3/api-docs
+            - /ws/auth/**
+        - id: auth-server
+          apiPaths:
+            - /auth/login
+            - /auth/validate
+    - serviceName: delivery-service
+      serviceUri: lb://delivery-service
+      routes:
+        - id: delivery-swagger
+          apiPaths:
+            - /delivery-service/v3/api-docs
+            - /ws/delivery/**
+        - id: delivery-service
+          apiPaths:
+            - /deliveries/**
+          filters:
+            - service-default
+    - serviceName: incentive-service
+      serviceUri: lb://incentive-service
+      routes:
+        - id: incentive-swagger
+          apiPaths:
+            - /incentive-service/v3/api-docs
+            - /ws/incentive/**
+        - id: incentive-service
+          apiPaths:
+            - /incentives/**
+          filters:
+            - service-default
+    - serviceName: match-service
+      serviceUri: lb://match-service
+      routes:
+        - id: match-swagger
+          apiPaths:
+            - /match-service/v3/api-docs
+            - /ws/match/**
+        - id: match-service
+          apiPaths:
+            - /api/matchings/**
+          filters:
+            - service-default
+        - id: rider-service
+          apiPaths:
+            - /api/riders/**
+          filters:
+            - service-default
+        - id: match-alarm
+          apiPaths:
+            - /ws/alarm/**
+    - serviceName: consult-service
+      serviceUri: lb://consult-service
+      routes:
+        - id: consult-swagger
+          apiPaths:
+            - /consult-service/v3/api-docs
+            - /ws/consult/**
+        - id: consult-service
+          apiPaths:
+            - /api/consults/**
+          filters:
+            - service-default
