@@ -1,6 +1,10 @@
 package com.ohdelivery.service.match.matching.application.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.feign.response.ClientGetRiderResponse;
+import com.ohdelivery.common.passport.Passport;
+import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import com.ohdelivery.service.match.common.command.MatchingCommand;
 import com.ohdelivery.service.match.common.feign.RiderClientService;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
@@ -40,8 +44,16 @@ public class CreateMatchingCommand implements MatchingCommand<Matching> {
 
     matchingId = matching.getId();
 
+    Passport passport = UserContextHolder.getPassport();
+    String passportJson;
+    try {
+      passportJson = new ObjectMapper().writeValueAsString(passport);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize passport", e);
+    }
     // feign - 주변 라이더 조회
     List<ClientGetRiderResponse> nearbyRiders = riderService.getAllNearRider(
+        passportJson,
         request.getStoreLatitude(),
         request.getStoreLongitude()
     ).getData();
