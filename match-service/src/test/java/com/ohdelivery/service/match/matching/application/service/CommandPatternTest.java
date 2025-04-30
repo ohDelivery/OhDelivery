@@ -3,6 +3,7 @@ package com.ohdelivery.service.match.matching.application.service;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,7 +90,7 @@ public class CommandPatternTest {
         mockRiders);
 
     // when 설정 추가
-    when(riderService.getAllNearRider(any())).thenReturn(mockResponse);
+    when(riderService.getAllNearRider(anyDouble(), anyDouble())).thenReturn(mockResponse);
 
     CreateMatchingCommand command = new CreateMatchingCommand(
         request,
