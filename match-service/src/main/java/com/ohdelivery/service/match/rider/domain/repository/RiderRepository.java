@@ -17,4 +17,6 @@ public interface RiderRepository {
   List<Rider> findAllByStatus(RiderStatus status);
 
   Optional<Rider> findByRiderId(long riderId);
+
+  List<Rider> findAllByRiderIdIn(List<Long> riderIds);
 }

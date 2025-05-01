@@ -10,12 +10,15 @@ import com.ohdelivery.service.match.rider.application.exception.RiderInvalidStat
 import com.ohdelivery.service.match.rider.application.exception.RiderNotFoundException;
 import com.ohdelivery.service.match.rider.domain.model.Rider;
 import com.ohdelivery.service.match.rider.domain.model.RiderStatus;
+import com.ohdelivery.service.match.rider.domain.repository.RedisRiderLocRepository;
 import com.ohdelivery.service.match.rider.domain.repository.RiderRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RiderServiceImpl implements RiderService {
 
   private final RiderRepository riderRepository;
+  private final RedisRiderLocRepository redisRiderLocRepository;
   private static final double EARTH_RADIUS = 6371.0;
 
   @Override
@@ -63,6 +67,8 @@ public class RiderServiceImpl implements RiderService {
         request.getLatitude(),
         request.getLongitude()
     );
+    redisRiderLocRepository.updateRiderLoc(rider.getRiderId(), request.getLongitude(),
+        request.getLatitude());
 
     riderRepository.save(rider);
   }
@@ -125,6 +131,13 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   public List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon) {
+    List<Rider> riders = getRidersWithDB(sLat, sLon);
+    return riders.stream()
+        .map(GetRiderResponse::from)
+        .collect(Collectors.toList());
+  }
+
+  private List<Rider> getRidersWithDB(Double sLat, Double sLon) {
     List<Rider> riders = riderRepository.findAllByStatus(RiderStatus.AVAILABLE);
     riders = riders.stream()
         .filter(rider -> {
@@ -136,9 +149,22 @@ public class RiderServiceImpl implements RiderService {
     if (riders.isEmpty()) {
       throw new AvailableRiderNotFoundException();
     }
-    return riders.stream()
-        .map(GetRiderResponse::from)
-        .collect(Collectors.toList());
+    return riders;
+  }
+
+  private List<Rider> getRidersWithRedis(Double sLat, Double sLon) {
+    GeoResults<RedisGeoCommands.GeoLocation<String>> results = redisRiderLocRepository
+        .searchByLoc(sLon, sLat);
+    if (results == null) {
+      throw new AvailableRiderNotFoundException();
+    }
+
+    List<Long> riderIds = results.getContent().stream()
+        .map(geoLocation -> geoLocation.getContent().getName())
+        .map(Long::valueOf)
+        .toList();
+
+    return riderRepository.findAllByRiderIdIn(riderIds);
   }
 
   @Override

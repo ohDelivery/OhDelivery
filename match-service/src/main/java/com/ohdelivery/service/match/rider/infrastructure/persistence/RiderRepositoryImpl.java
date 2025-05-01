@@ -39,4 +39,10 @@ public class RiderRepositoryImpl implements RiderRepository {
   public Optional<Rider> findByRiderId(long riderId) {
     return jpaRiderRepository.findByRiderIdAndDeletedAtIsNull(riderId);
   }
+
+  @Override
+  public List<Rider> findAllByRiderIdIn(List<Long> riderIds) {
+    return jpaRiderRepository.findAllByRiderIdInAndDeletedAtIsNullAndStatusIs(riderIds,
+        RiderStatus.AVAILABLE);
+  }
 }

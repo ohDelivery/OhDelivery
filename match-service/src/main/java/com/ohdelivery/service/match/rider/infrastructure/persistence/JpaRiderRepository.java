@@ -16,4 +16,6 @@ public interface JpaRiderRepository extends JpaRepository<Rider, UUID> {
   Optional<Rider> findByRiderIdAndDeletedAtIsNull(long riderId);
 
   List<Rider> findAllByDeletedAtIsNullAndStatusIs(RiderStatus status);
+
+  List<Rider> findAllByRiderIdInAndDeletedAtIsNullAndStatusIs(List<Long> ids, RiderStatus status);
 }
