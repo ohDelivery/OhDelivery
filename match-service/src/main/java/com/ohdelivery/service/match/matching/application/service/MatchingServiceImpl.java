@@ -1,8 +1,11 @@
 package com.ohdelivery.service.match.matching.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.feign.GetDeliveryResponse;
 import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
+import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import com.ohdelivery.service.match.common.command.CommandInvoker;
 import com.ohdelivery.service.match.common.feign.DeliveryClientService;
 import com.ohdelivery.service.match.matching.application.command.CreateMatchingCommand;
@@ -61,7 +64,17 @@ public class MatchingServiceImpl implements MatchingService {
         .orElseThrow(() -> new MatchingNotFoundException());
 
     UUID deliveryId = matching.getDeliveryId();
-    GetDeliveryResponse delivery = deliveryService.getDelivery(deliveryId).getData();
+
+    // 요청에 담긴 역할 정보를 ThreadLocal에서 꺼내 사용
+    Passport passport = UserContextHolder.getPassport();
+    String passportJson;
+    try {
+      passportJson = new ObjectMapper().writeValueAsString(passport);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize passport", e);
+    }
+
+    GetDeliveryResponse delivery = deliveryService.getDelivery(passportJson, deliveryId).getData();
     return new GetMatchingResponse(matching.getId(), matching.getRiderId(),
         matching.getDeliveryId(), delivery);
   }

@@ -2,6 +2,7 @@ package com.ohdelivery.common.kafka.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.ohdelivery.common.passport.Passport;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class CreateDeliveryEvent {
   private Integer fee;
   private String paymentType;
   private Integer paymentAmount;
+  private Passport passport;
 
   // Builder 클래스를 명시적으로 생성
   @JsonPOJOBuilder(withPrefix = "")
