@@ -16,11 +16,10 @@ public class RedisRiderLocRepository {
 
   private final StringRedisTemplate redisTemplate;
 
-  private static final String RIDER_LOC_PREFIX = "rider:location:";
+  private static final String RIDER_LOC_PREFIX = "rider:location:nearby:";
 
   public void updateRiderLoc(Long riderId, Double lon, Double lat) {
-    String key = RIDER_LOC_PREFIX + riderId;
-    redisTemplate.opsForGeo().add(key, new Point(lon, lat), riderId.toString());
+    redisTemplate.opsForGeo().add(RIDER_LOC_PREFIX, new Point(lon, lat), riderId.toString());
   }
 
   public void deleteRiderLoc(Long riderId) {

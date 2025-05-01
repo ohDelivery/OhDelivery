@@ -17,11 +17,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RiderServiceImpl implements RiderService {
@@ -131,7 +133,8 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   public List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon) {
-    List<Rider> riders = getRidersWithDB(sLat, sLon);
+    List<Rider> riders = getRidersWithRedis(sLat, sLon);
+    log.info("Number of found riders : {}", riders.size());
     return riders.stream()
         .map(GetRiderResponse::from)
         .collect(Collectors.toList());
