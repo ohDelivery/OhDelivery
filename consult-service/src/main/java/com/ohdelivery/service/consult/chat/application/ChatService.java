@@ -1,14 +1,13 @@
 package com.ohdelivery.service.consult.chat.application;
 
-import com.ohdelivery.service.consult.chat.domain.model.ChatMessage;
+import com.ohdelivery.service.consult.chat.domain.KafkaConstants;
 import com.ohdelivery.service.consult.chat.domain.model.Chat;
+import com.ohdelivery.service.consult.chat.domain.model.ChatMessage;
 import com.ohdelivery.service.consult.chat.domain.repository.ChatRepository;
 import com.ohdelivery.service.consult.chat.infrastructure.persistence.mongo.MongoChatRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -19,8 +18,6 @@ public class ChatService {
   private final MongoChatRepository mongoChatRepository;
   private final Messenger messenger;
 
-  @Value("${kafka.topic.chat}")
-  private String chatTopic;
 
   public Chat createChatroom(String agentId, String riderId) {
     return chatRepository.save(Chat.create(agentId, riderId));
@@ -32,7 +29,7 @@ public class ChatService {
 
   public void sendMessage(UUID chatId, String sender, String message) {
     ChatMessage chatMessage = ChatMessage.create(chatId, sender, message);
-    messenger.sendMessage(chatTopic, ChatMessage.create(chatId, sender, message));
+    messenger.sendMessage(KafkaConstants.TOPIC_CHAT, ChatMessage.create(chatId, sender, message));
     mongoChatRepository.save(chatMessage);
   }
 
