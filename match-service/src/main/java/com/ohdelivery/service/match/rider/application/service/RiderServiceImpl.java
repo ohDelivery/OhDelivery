@@ -69,10 +69,19 @@ public class RiderServiceImpl implements RiderService {
         request.getLatitude(),
         request.getLongitude()
     );
-    redisRiderLocRepository.updateRiderLoc(rider.getRiderId(), request.getLongitude(),
-        request.getLatitude());
 
+    updateRiderLocInRedis(request);
     riderRepository.save(rider);
+  }
+
+  private void updateRiderLocInRedis(UpdateRiderRequest request) {
+    if (request.getStatus().equals(RiderStatus.AVAILABLE)) {
+      redisRiderLocRepository.updateRiderLoc(
+          request.getRider_id(), request.getLongitude(), request.getLatitude());
+
+    } else if (request.getStatus().equals(RiderStatus.OFFLINE)) {
+      redisRiderLocRepository.deleteRiderLoc(request.getRider_id());
+    }
   }
 
   @Override

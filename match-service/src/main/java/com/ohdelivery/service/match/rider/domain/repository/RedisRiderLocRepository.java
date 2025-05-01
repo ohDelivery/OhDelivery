@@ -18,13 +18,12 @@ public class RedisRiderLocRepository {
 
   private static final String RIDER_LOC_PREFIX = "rider:location:nearby:";
 
-  public void updateRiderLoc(Long riderId, Double lon, Double lat) {
+  public void updateRiderLoc(Integer riderId, Double lon, Double lat) {
     redisTemplate.opsForGeo().add(RIDER_LOC_PREFIX, new Point(lon, lat), riderId.toString());
   }
 
-  public void deleteRiderLoc(Long riderId) {
-    String key = RIDER_LOC_PREFIX + riderId;
-    redisTemplate.opsForGeo().remove(key, riderId.toString());
+  public void deleteRiderLoc(Integer riderId) {
+    redisTemplate.opsForGeo().remove(RIDER_LOC_PREFIX, riderId.toString());
   }
 
   public GeoResults<GeoLocation<String>> searchByLoc(Double lon, Double lat) {
