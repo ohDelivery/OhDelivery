@@ -3,10 +3,10 @@ import http from 'k6/http';
 export default function () {
   for (let i = 0; i < 1000; i++) {
     const payload = JSON.stringify({
-      username: `rider${i}`,
+      username: `consumer${i}`,
       name: 'test',
       password: 'test',
-      role: 'RIDER',
+      role: 'CONSUMER',
       slackId: 'test',
     });
 

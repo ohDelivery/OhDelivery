@@ -1,11 +1,10 @@
-import {check, sleep} from 'k6';
 import ws from 'k6/ws';
 import http from 'k6/http';
+import {check, sleep} from 'k6';
 
 export const options = {
   setupTimeout: '180s',
-  vus: 1000, // 100명 동시
-  // duration: '1m', // 1분 동안
+  vus: 1000,
   stages: [
     {duration: "3s", target: 100},  // 10초 동안 100명 Ramp-Up
     {duration: "3s", target: 200},  // 10초 동안 200명 Ramp-Up
@@ -17,21 +16,21 @@ export const options = {
     {duration: "3s", target: 800},  // 10초 동안 500명 Ramp-Up
     {duration: "3s", target: 900},  // 10초 동안 500명 Ramp-Up
     {duration: "3s", target: 1000},  // 10초 동안 500명 Ramp-Up
-    {duration: "3m", target: 1000},   // 1분 동안 500명 유지
+    {duration: "5m", target: 1000},   // 1분 동안 500명 유지
     {duration: "30s", target: 0},    // 10초 동안 0명으로 Ramp-Down
   ],
 };
 
 const BASE_URL = 'http://localhost:8080';
 const LOGIN_ENDPOINT = '/auth/login';
-const WEBSOCKET_URL = 'ws://localhost:8080/ws/delivery/rider';
+const WEBSOCKET_URL = 'ws://localhost:8080/ws/delivery/consumer';
 
 export function setup() {
   const tokens = [];
 
   for (let i = 0; i < 1000; i++) {
     const loginPayload = JSON.stringify({
-      username: `rider${i}`,
+      username: `consumer${i}`,
       password: 'test',
     });
 
@@ -48,9 +47,9 @@ export function setup() {
 
     const token = loginRes.json('data').accessToken;
     if (!token) {
-      console.error(`rider${i} 로그인 실패: 토큰 없음`);
+      console.error(`consumer${i} 로그인 실패: 토큰 없음`);
     } else {
-      console.log(`rider${i} 로그인 성공`);
+      console.log(`consumer${i} 로그인 성공`);
       tokens.push(token);
     }
   }
@@ -65,46 +64,32 @@ export default function (data) {
     return;
   }
 
+  const riderId = __VU;
   const url = `${WEBSOCKET_URL}?token=${token}`;
 
-  const params = {
-    headers: {Authorization: `Bearer ${token}`}
-  };
+  const res = ws.connect(url, {}, function (socket) {
+    console.log(`클라이언트 ${__VU} WebSocket 연결됨`);
 
-  const res = ws.connect(url, params, function (socket) {
-    console.log(`VU ${__VU} WebSocket 연결됨`);
+    socket.on('open', () => {
+      // 서버에 riderId 등록
+      socket.send(JSON.stringify({riderId}));
 
-    // 초기 위치 (서울 시청 좌표 기준)
-    let longitude = 126.9780;
-    let latitude = 37.5665;
-
-    socket.on('open', function () {
-      socket.setInterval(function () {
-        // 위치를 무작위로 약간 이동
-        longitude += (Math.random() - 0.5) * 0.001; // 이동폭 증가
-        latitude += (Math.random() - 0.5) * 0.001;
-
-        const payload = {
-          longitude: parseFloat(longitude.toFixed(6)), // 소수점 6자리
-          latitude: parseFloat(latitude.toFixed(6)),
-          timestamp: Date.now(),
-        };
-
-        socket.send(JSON.stringify(payload));
-        console.log(`VU ${__VU} 위치 전송:`, payload);
-      }, 1000);
-
-      socket.setTimeout(function () {
-        console.log(`VU ${__VU} WebSocket 닫기`);
+      socket.setTimeout(() => {
+        console.log(`클라이언트 ${__VU} WebSocket 닫기`);
         socket.close();
-      }, 180000); // 1분 후 닫기
+      }, 300000); // 3분 유지
     });
 
-    socket.on('close', () => console.log(`VU ${__VU} WebSocket 연결 종료`));
-    socket.on('error', (e) => console.error(`VU ${__VU} 에러:`, e.error()));
+    socket.on('message', (msg) => {
+      const data = JSON.parse(msg);
+      console.log(`클라이언트 ${__VU} 위치 수신:`, data);
+    });
+
+    socket.on('close', () => console.log(`클라이언트 ${__VU} 연결 종료`));
+    socket.on('error', (e) => console.error(`클라이언트 ${__VU} 에러:`, e.error()));
   });
 
-  check(res, {'WebSocket 연결 101 상태': (r) => r && r.status === 101});
+  check(res, {'클라이언트 WebSocket 연결 성공': (r) => r && r.status === 101});
 
-  sleep(1); // 1초 쉬어주기
+  sleep(1); // 계속 유지되도록
 }
