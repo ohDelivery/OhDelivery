@@ -98,6 +98,7 @@ gateway:
           apiPaths: 
             - /auth/login
             - /auth/validate
+            - /auth/logout
     - serviceName: delivery-service
       serviceUri: lb://delivery-service
       routes:
@@ -131,12 +132,12 @@ gateway:
             - /ws/match/**
         - id: match-service
           apiPaths:
-            - /api/matchings/*
+            - /api/matchings/**
           filters:
             - service-default
         - id: rider-service
           apiPaths:
-            - /api/riders/*
+            - /api/riders/**
           filters:
             - service-default
         - id: match-alarm
@@ -151,6 +152,6 @@ gateway:
             - /ws/consult/**
         - id: consult-service
           apiPaths:
-            - /api/consults/*
+            - /api/consults/**
           filters:
             - service-default
