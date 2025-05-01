@@ -1,8 +1,11 @@
 package com.ohdelivery.service.match.matching.application.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.common.feign.response.ClientGetRiderResponse;
 import com.ohdelivery.common.passport.Passport;
 import com.ohdelivery.common.passport.RoleType;
+import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import com.ohdelivery.service.match.common.command.MatchingCommand;
 import com.ohdelivery.service.match.common.feign.RiderClientService;
 import com.ohdelivery.service.match.matching.application.MatchingEventPublisher;
@@ -57,7 +60,16 @@ public class UpdateMatchingCommand implements MatchingCommand<Void> {
         throw new IllegalArgumentException("매칭은 수정할 수 없는 상태입니다.");
       }
 
-      ClientGetRiderResponse rider = riderService.getRiderByUserId(request.getRiderId()).getData();
+      Passport passport = UserContextHolder.getPassport();
+      String passportJson;
+      try {
+        passportJson = new ObjectMapper().writeValueAsString(passport);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException("Failed to serialize passport", e);
+      }
+
+      ClientGetRiderResponse rider = riderService.getRiderByUserId(passportJson,
+          request.getRiderId()).getData();
       UUID riderId = rider.getId();
       boolean status = rider.isAvailable();
       if (!status) {

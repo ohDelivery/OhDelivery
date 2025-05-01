@@ -2,6 +2,8 @@ package com.ohdelivery.service.delivery.application.service;
 
 import com.ohdelivery.common.kafka.dto.DeliveryIncentiveDto;
 import com.ohdelivery.common.kafka.dto.UpdateDeliveryEvent;
+import com.ohdelivery.common.passport.Passport;
+import com.ohdelivery.common.passport.usercontext.UserContextHolder;
 import com.ohdelivery.service.delivery.application.dto.request.CreateDeliveryRequest;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryRecordResponse;
 import com.ohdelivery.service.delivery.application.dto.response.DeliveryResponse;
@@ -25,109 +27,111 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeliveryService {
 
-    private final DeliveryRepository deliveryRepository;
-    private final DeliveryRecordRepository deliveryRecordRepository;
-    private final ShortedPathService shortedPathService;
-    private final DeliveryEventProducer deliveryEventProducer;
+  private final DeliveryRepository deliveryRepository;
+  private final DeliveryRecordRepository deliveryRecordRepository;
+  private final ShortedPathService shortedPathService;
+  private final DeliveryEventProducer deliveryEventProducer;
 
-    @Transactional
-    public DeliveryResponse createDelivery(CreateDeliveryRequest request) {
-        LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
-        LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
+  @Transactional
+  public DeliveryResponse createDelivery(CreateDeliveryRequest request) {
+    LocationInfo storeLocation = shortedPathService.getLocation(request.getStoreAddress());
+    LocationInfo targetLocation = shortedPathService.getLocation(request.getTargetAddress());
 
-        Double storeX = storeLocation.getLongitude();
-        Double storeY = storeLocation.getLatitude();
-        log.info("Store location: longitude = {}, latitude = {}", storeX, storeY);
+    Double storeX = storeLocation.getLongitude();
+    Double storeY = storeLocation.getLatitude();
+    log.info("Store location: longitude = {}, latitude = {}", storeX, storeY);
 
-        Double targetX = targetLocation.getLongitude();
-        Double targetY = targetLocation.getLatitude();
-        log.info("Target location: longitude = {}, latitude = {}", targetX, targetY);
+    Double targetX = targetLocation.getLongitude();
+    Double targetY = targetLocation.getLatitude();
+    log.info("Target location: longitude = {}, latitude = {}", targetX, targetY);
 
-        PathInfo path = shortedPathService.getPath(storeLocation, targetLocation);
-        log.info("Path: {}", path.getPath());
+    PathInfo path = shortedPathService.getPath(storeLocation, targetLocation);
+    log.info("Path: {}", path.getPath());
 
-        Delivery saveDelivery = deliveryRepository.save(
-            request.toDelivery(path.getDuration(), path.getDistance()));
+    Delivery saveDelivery = deliveryRepository.save(
+        request.toDelivery(path.getDuration(), path.getDistance()));
 
-        deliveryEventProducer.publishCreateDeliveryEvent(
-            saveDelivery.toCreateDeliveryEvent(storeX, storeY));
+    Passport passport = UserContextHolder.getPassport();
 
-        return DeliveryResponse.from(saveDelivery);
-    }
+    deliveryEventProducer.publishCreateDeliveryEvent(
+        saveDelivery.toCreateDeliveryEvent(storeX, storeY, passport));
 
-    @Transactional(readOnly = true)
-    public DeliveryResponse getDelivery(UUID deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        return DeliveryResponse.from(delivery);
-    }
+    return DeliveryResponse.from(saveDelivery);
+  }
 
-    @Transactional
-    public void completeDelivery(UUID deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        delivery.complete();
+  @Transactional(readOnly = true)
+  public DeliveryResponse getDelivery(UUID deliveryId) {
+    Delivery delivery = deliveryRepository.findById(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    return DeliveryResponse.from(delivery);
+  }
 
-        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        deliveryRecord.complete();
+  @Transactional
+  public void completeDelivery(UUID deliveryId) {
+    Delivery delivery = deliveryRepository.findById(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    delivery.complete();
 
-        DeliveryIncentiveDto completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
-            deliveryRecord);
-        deliveryEventProducer.publishCompleteDeliveryEvent(completeDeliveryEvent);
-    }
+    DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    deliveryRecord.complete();
 
-    @Transactional(readOnly = true)
-    public DeliveryRecordResponse getDeliveryRecord(UUID deliveryId) {
-        DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        return DeliveryRecordResponse.from(deliveryRecord);
-    }
+    DeliveryIncentiveDto completeDeliveryEvent = createCompleteDeliveryEvent(delivery,
+        deliveryRecord);
+    deliveryEventProducer.publishCompleteDeliveryEvent(completeDeliveryEvent);
+  }
 
-    @Transactional
-    public DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
-        DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
+  @Transactional(readOnly = true)
+  public DeliveryRecordResponse getDeliveryRecord(UUID deliveryId) {
+    DeliveryRecord deliveryRecord = deliveryRecordRepository.findByDeliveryId(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    return DeliveryRecordResponse.from(deliveryRecord);
+  }
 
-        return DeliveryRecordResponse.from(deliveryRecordRepository.save(deliveryRecord));
-    }
+  @Transactional
+  public DeliveryRecordResponse createDeliveryRecord(UUID deliveryId, UUID riderId, Integer fee) {
+    DeliveryRecord deliveryRecord = new DeliveryRecord(deliveryId, riderId, fee);
 
-    @Transactional
-    public void updateFee(UUID deliveryId, Integer fee) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        delivery.updateFee(fee);
+    return DeliveryRecordResponse.from(deliveryRecordRepository.save(deliveryRecord));
+  }
 
-        deliveryEventProducer.publishUpdateDeliveryEvent(
-            new UpdateDeliveryEvent(delivery.getId(), delivery.getFee()));
-    }
+  @Transactional
+  public void updateFee(UUID deliveryId, Integer fee) {
+    Delivery delivery = deliveryRepository.findById(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    delivery.updateFee(fee);
 
-    @Transactional
-    public void completeMatching(UUID deliveryId, UUID riderId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        delivery.updateWaitingForCooking();
+    deliveryEventProducer.publishUpdateDeliveryEvent(
+        new UpdateDeliveryEvent(delivery.getId(), delivery.getFee()));
+  }
 
-        DeliveryRecord deliveryRecord = new DeliveryRecord(delivery.getId(), riderId,
-            delivery.getFee());
-        deliveryRecordRepository.save(deliveryRecord);
-    }
+  @Transactional
+  public void completeMatching(UUID deliveryId, UUID riderId) {
+    Delivery delivery = deliveryRepository.findById(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    delivery.updateWaitingForCooking();
 
-    @Transactional
-    public void cancelMatching(UUID deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryNotFoundException::new);
-        delivery.cancel();
-    }
+    DeliveryRecord deliveryRecord = new DeliveryRecord(delivery.getId(), riderId,
+        delivery.getFee());
+    deliveryRecordRepository.save(deliveryRecord);
+  }
 
-    private DeliveryIncentiveDto createCompleteDeliveryEvent(Delivery delivery,
-        DeliveryRecord deliveryRecord) {
-        return DeliveryIncentiveDto.builder()
-            .expectedTime(delivery.getPathInfo().getExpectedTime())
-            .shortedDistance(delivery.getPathInfo().getShortedDistance())
-            .departedAt(deliveryRecord.getDepartedAt())
-            .deliveredAt(deliveryRecord.getDeliveredAt())
-            .riderId(deliveryRecord.getRiderId())
-            .build();
-    }
+  @Transactional
+  public void cancelMatching(UUID deliveryId) {
+    Delivery delivery = deliveryRepository.findById(deliveryId)
+        .orElseThrow(DeliveryNotFoundException::new);
+    delivery.cancel();
+  }
+
+  private DeliveryIncentiveDto createCompleteDeliveryEvent(Delivery delivery,
+      DeliveryRecord deliveryRecord) {
+    return DeliveryIncentiveDto.builder()
+        .expectedTime(delivery.getPathInfo().getExpectedTime())
+        .shortedDistance(delivery.getPathInfo().getShortedDistance())
+        .departedAt(deliveryRecord.getDepartedAt())
+        .deliveredAt(deliveryRecord.getDeliveredAt())
+        .riderId(deliveryRecord.getRiderId())
+        .build();
+  }
 
 }
