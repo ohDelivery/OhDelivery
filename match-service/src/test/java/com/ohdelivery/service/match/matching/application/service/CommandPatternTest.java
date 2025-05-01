@@ -90,7 +90,7 @@ public class CommandPatternTest {
         mockRiders);
 
     // when 설정 추가
-    when(riderService.getAllNearRider(anyDouble(), anyDouble())).thenReturn(mockResponse);
+//    when(riderService.getAllNearRider(any())).thenReturn(mockResponse);
 
     CreateMatchingCommand command = new CreateMatchingCommand(
         request,
