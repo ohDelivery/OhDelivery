@@ -1,7 +1,3 @@
-# 리드미
-
----
-
 # 🚚 오배송 (Oh Delivery)
 
 **오배송**은 배달 라이더를 위한 **주문 매칭, 실시간 알림, 인센티브 지급 및 상담 지원 서비스**입니다.
@@ -40,31 +36,16 @@
 
 ## 👥 팀원 및 역할
 
-| 이름 | 역할 |
-| --- | --- |
-| 박태훈 | 팀장
-- 매칭,라이더 서비스 도메인 설계 및 구현
-- Kafka 기반 이벤트 시스템 설계 및 적용
-- Command 패턴, CQRS 구조 적용을 통한 비지니스 로직 분리
-- aws ECS기반 배 |
-| 김형찬 | - 테크 리더
-- 프로젝트 구성 및 개발 환경 구축 
-- Naver Maps API를 이용한 라이더 최단 경로
-- Redis GEO/WebSocket을 이용한 라이더 실시간 위치 추적. |
-| 박보현 | - 인증/인가 서비스 구현
-- Api Gateway 구현
-- 회원가입, 로그인, 로그아웃 기능 구현
-- WebSocket +STOMP + Kafka + MongoDB 구조로 상담원 채팅 서비스 구현 |
-| 박경린 | - 인센티브
-- Kafka Stream을 활용한 인센티브 로직 구현 및 파티션을 이용한 병렬처리
-- 인센티브 중복 지급 방지를 위한 StateStore 이용 및 데이터 과부하 방지를 위해 하루 기준 StateStore 데이터 제거
-- Prometheus+Grafana를 이용한 모니터링 
-- DLQ 를 이용한 재처리 실패 처리
-- DLQ 전송시 Prometheus+Grafana 를 이용한 에러 이벤트 Slack 알림 전송- |
-| 김지현 | - 라이더 매칭 알림 서비스 구현
-- 음식점 주소(위,경도) 기준으로 주변의 라이더 조회 후 Slack, WebSocket으로 비동기 알림 전송
-- 알림 전송 실패시 3회 재시도 후 DLT로 전송, Slack 알림 전송 처리
-- Redis/LeastBusy으로 상담원 매칭 서비스 구현 |
+🧑‍💻 팀원 역할 정리
+
+| 이름     | 역할 |
+|----------|------|
+| **박태훈** | 팀장 <br> - 매칭, 라이더 서비스 도메인 설계 및 구현 <br> - Kafka 기반 이벤트 시스템 설계 및 적용 <br> - Command 패턴, CQRS 구조 적용을 통한 비즈니스 로직 분리 <br> - AWS ECS 기반 배포 |
+| **김형찬** | 테크 리더 <br> - 프로젝트 구성 및 개발 환경 구축 <br> - Naver Maps API를 이용한 라이더 최단 경로 탐색 <br> - Redis GEO / WebSocket을 이용한 라이더 실시간 위치 추적 |
+| **박보현** | 인증/인가 서비스 구현 <br> - API Gateway 구현 <br> - 회원가입, 로그인, 로그아웃 기능 구현 <br> - WebSocket + STOMP + Kafka + MongoDB 기반의 상담원 채팅 서비스 구현 |
+| **박경린** | 인센티브 처리 담당 <br> - Kafka Streams 기반 인센티브 로직 구현 및 파티션을 이용한 병렬 처리 <br> - StateStore를 활용한 인센티브 중복 지급 방지 및 하루 단위 데이터 삭제 <br> - Prometheus + Grafana를 이용한 모니터링 <br> - DLQ 기반 재처리 실패 대응 및 Slack 알림 전송 |
+| **김지현** | 알림 및 상담원 매칭 서비스 구현 <br> - 음식점 주소(위/경도) 기준 주변 라이더 조회 후 Slack / WebSocket으로 비동기 알림 전송 <br> - 알림 실패 시 3회 재시도 후 DLT 전송 및 Slack 알림 <br> - Redis + LeastBusy 방식 상담원 매칭 서비스 구현 |
+
 
 ---
 
@@ -104,13 +85,15 @@
 
 ## 🗂️ ERD
 
-![image.png](attachment:31b4c22c-fdf5-48ba-bb7e-10d9a3acd034:image.png)
+![image](https://github.com/user-attachments/assets/30b1fc83-b584-48ff-8fe0-2979caaa00b2)
+
 
 ---
 
 ## 🏗️ System Architecture
 
-![image.png](attachment:aae80cd3-9c6d-446e-83bc-fc9244839be6:image.png)
+![image](https://github.com/user-attachments/assets/ede12299-37a0-439f-a61d-9ab32207cd24)
+
 
 ---
 
