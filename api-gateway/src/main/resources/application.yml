@@ -98,6 +98,7 @@ gateway:
           apiPaths:
             - /auth/login
             - /auth/validate
+            - /auth/logout
     - serviceName: delivery-service
       serviceUri: lb://delivery-service
       routes:
