@@ -2,8 +2,9 @@ package com.ohdelivery.common.kafka.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Getter @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateSlackIdEvent {
 
