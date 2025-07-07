@@ -1,5 +1,6 @@
 package com.ohdelivery.service.match.rider.application.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ohdelivery.service.match.rider.application.dto.request.CreateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderRequest;
 import com.ohdelivery.service.match.rider.application.dto.request.UpdateRiderStatusRequest;
@@ -31,6 +32,7 @@ public class RiderServiceImpl implements RiderService {
   private final RiderRepository riderRepository;
   private final RedisRiderLocRepository redisRiderLocRepository;
   private static final double EARTH_RADIUS = 6371.0;
+  private final ObjectMapper objectMapper;
 
   @Override
   @Transactional
@@ -71,6 +73,7 @@ public class RiderServiceImpl implements RiderService {
     );
 
     updateRiderLocInRedis(request);
+    redisRiderLocRepository.saveRiderInfo(rider);
     riderRepository.save(rider);
   }
 
@@ -142,8 +145,10 @@ public class RiderServiceImpl implements RiderService {
 
   @Override
   public List<GetRiderResponse> getRidersByLocation(Double sLat, Double sLon) {
+    long start = System.currentTimeMillis();
     List<Rider> riders = getRidersWithRedis(sLat, sLon);
-    log.info("Number of found riders : {}", riders.size());
+    long end = System.currentTimeMillis();
+
     return riders.stream()
         .map(GetRiderResponse::from)
         .collect(Collectors.toList());
@@ -171,12 +176,11 @@ public class RiderServiceImpl implements RiderService {
       throw new AvailableRiderNotFoundException();
     }
 
-    List<Long> riderIds = results.getContent().stream()
+    List<String> riderIds = results.getContent().stream()
         .map(geoLocation -> geoLocation.getContent().getName())
-        .map(Long::valueOf)
         .toList();
 
-    return riderRepository.findAllByRiderIdIn(riderIds);
+    return redisRiderLocRepository.getRidersInfo(riderIds);
   }
 
   @Override
